@@ -152,9 +152,9 @@ const Dashboard = () => {
 
     const UserManagementView = () => (
         <div className="view-container">
-            <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', gap: '15px' }}>
-                <button onClick={() => setView('home')} className="nav-item" style={{ width: 'auto', background: 'white' }}>
-                    <i className="fas fa-arrow-left"></i> Quay lại Home
+            <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <button onClick={() => setView('home')} className="btn-back" style={{ padding: '8px 15px', borderRadius: '10px', border: '1px solid var(--sky-200)', background: 'white', fontSize: '12px', cursor: 'pointer' }}>
+                    <i className="fas fa-arrow-left"></i> Quay lại
                 </button>
                 <button
                     onClick={() => {
@@ -162,10 +162,10 @@ const Dashboard = () => {
                         setIsEditing(false);
                         setShowUserModal(true);
                     }}
-                    className="nav-item"
-                    style={{ width: 'auto', background: 'var(--coffee-dark)', color: 'white' }}
+                    className="btn-add-user"
+                    style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                    <i className="fas fa-plus"></i> Thêm người dùng
+                    <i className="fas fa-user-plus"></i> THÊM NHÂN VIÊN MỚI
                 </button>
             </div>
 
