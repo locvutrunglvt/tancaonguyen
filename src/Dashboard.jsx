@@ -14,7 +14,7 @@ const Dashboard = () => {
         setLoading(true);
         try {
             const { data, error } = await supabase
-                .from('profiles')
+                .from('users') // Updated from profiles to users
                 .select('*')
                 .order('created_at', { ascending: false });
 
@@ -92,7 +92,10 @@ const Dashboard = () => {
                                     <div>
                                         <p className="text-sm font-bold text-slate-900 uppercase">{p.full_name}</p>
                                         <p className="tech-label-pro text-[9px] mt-0.5">
-                                            {p.organization} | <span className="font-mono text-slate-400">#{p.id.slice(0, 8).toUpperCase()}</span>
+                                            {p.organization} | {p.phone} | {p.email}
+                                        </p>
+                                        <p className="tech-label-pro text-[8px] font-mono text-slate-400">
+                                            NODE_ID: #{p.id.slice(0, 8).toUpperCase()}
                                         </p>
                                     </div>
                                 </div>
