@@ -199,7 +199,7 @@ const Login = () => {
                 </div>
 
                 <header>
-                    <h1>{t.title}</h1>
+                    <p className="auth-title">{t.title}</p>
                 </header>
 
                 {view === 'login' && (
