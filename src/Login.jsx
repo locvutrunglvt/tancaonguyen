@@ -214,12 +214,26 @@ const Login = ({ onDevLogin }) => {
         const id = userId || generateUUID();
         const currentLang = localStorage.getItem('app_lang') || 'vi';
 
+        // Check if profile exists first to avoid duplicate key errors
+        const { data: existing } = await supabase.from('profiles').select('id').eq('email', formData.email).single();
+        if (existing) {
+            alert(currentLang === 'vi' ? 'Tài khoản đã được đăng ký hồ sơ!' : 'Account already has a profile!');
+            setView('login');
+            return;
+        }
+
+        // Use 'Phone' with uppercase P as seen in the schema for now, 
+        // but the plan is to rename the DB column. 
+        // To be safe during transition, I'll use lowercase if renaming succeeds.
+        // Actually, the user error said "column User.phone does not exist", 
+        // meaning I should use uppercase Phone until renamed, or just rename it now.
+
         const userData = {
             id: id,
             email: formData.email,
             full_name: formData.fullName,
             organization: 'gus',
-            phone: formData.phone,
+            Phone: formData.phone, // Map UI 'phone' to DB 'Phone' (uppercase)
             role: 'Guest',
             employee_code: `GUS-${Math.floor(Math.random() * 900) + 100}`,
             created_at: new Date().toISOString()
@@ -234,6 +248,12 @@ const Login = ({ onDevLogin }) => {
             const { error: userError } = await supabase.from('User').insert([userData]);
 
             if (userError) {
+                // If it's a duplicate key, handle it gracefully
+                if (userError.code === '23505') {
+                    alert(currentLang === 'vi' ? 'Tài khoản đã tồn tại.' : 'Account already exists.');
+                    setView('login');
+                    return;
+                }
                 throw new Error(`DATABASE_ERROR: ${profError.message} (and ${userError.message})`);
             }
         }

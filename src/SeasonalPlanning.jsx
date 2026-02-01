@@ -31,10 +31,10 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
             if (error) throw error;
             const mapped = (data || []).map(d => ({
                 id: d.id,
-                category: d.category,
-                item: d.item_name,
-                cost: d.amount,
-                date: d.record_date
+                category: d.category || 'Cost',
+                item: d.item_name || 'Unnamed',
+                cost: d.amount || 0,
+                date: d.record_date || ''
             }));
             setEntries(mapped);
         } catch (err) {
@@ -49,6 +49,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
     const profit = totalRevenue - totalCost;
 
     const formatCurrency = (val) => {
+        if (isNaN(val) || val === undefined) return '0 ₫';
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
     };
 
@@ -126,26 +127,28 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
                     <table className="pro-table">
                         <thead>
                             <tr>
-                                <th>{t.plan_date}</th>
-                                <th>{t.plan_cat}</th>
-                                <th>{t.act_detail}</th>
-                                <th>{t.plan_amount}</th>
-                                <th>{t.actions}</th>
+                                <th>{t.plan_date || 'Date'}</th>
+                                <th>{t.plan_cat || 'Category'}</th>
+                                <th>{t.act_detail || 'Detail'}</th>
+                                <th>{t.plan_amount || 'Amount'}</th>
+                                <th>{t.actions || 'Actions'}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {entries.length === 0 ? (
+                            {isLoading ? (
                                 <tr><td colSpan="5" style={{ textAlign: 'center', opacity: 0.5 }}>{t.loading}</td></tr>
+                            ) : entries.length === 0 ? (
+                                <tr><td colSpan="5" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data || 'No records found'}</td></tr>
                             ) : (
                                 entries.map(e => (
                                     <tr key={e.id}>
                                         <td>{e.date}</td>
                                         <td>
                                             <span className="badge" style={{
-                                                background: e.category === 'Doanh thu' ? '#ecfdf5' : '#f8fafc',
-                                                color: e.category === 'Doanh thu' ? '#059669' : '#64748b'
+                                                background: (e.category === 'Doanh thu' || e.category === 'Revenue') ? '#ecfdf5' : '#f8fafc',
+                                                color: (e.category === 'Doanh thu' || e.category === 'Revenue') ? '#059669' : '#64748b'
                                             }}>
-                                                {e.category === 'Doanh thu' ? t.plan_cats.revenue : t.plan_cats.cost}
+                                                {(e.category === 'Doanh thu' || e.category === 'Revenue') ? (t.plan_cats?.revenue || 'Revenue') : (t.plan_cats?.cost || 'Cost')}
                                             </span>
                                         </td>
                                         <td style={{ fontWeight: 600 }}>{e.item}</td>

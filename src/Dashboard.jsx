@@ -220,7 +220,7 @@ const Dashboard = ({ devUser, onLogout }) => {
         try {
             const { data, error } = await supabase
                 .from('User')
-                .select('id, email, full_name, organization, role, employee_code, phone') // Strict field selection
+                .select('id, email, full_name, organization, role, employee_code, Phone') // Use uppercase Phone matching DB
                 .order('created_at', { ascending: false });
             if (error) throw error;
             setUsers(data || []);
@@ -256,7 +256,7 @@ const Dashboard = ({ devUser, onLogout }) => {
                         organization: userForm.organization,
                         role: userForm.role,
                         employee_code: finalCode,
-                        phone: userForm.phone
+                        Phone: userForm.phone, // Map UI 'phone' to DB 'Phone'
                     })
                     .eq('id', userForm.id);
                 if (error) throw error;
