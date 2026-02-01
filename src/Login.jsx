@@ -85,7 +85,7 @@ const Login = () => {
         setIsFetchingUsers(true);
         try {
             const { data, error } = await supabase
-                .from('users') // Updated from profiles to users
+                .from('User') // Matches Supabase table 'User'
                 .select('email, full_name')
                 .eq('organization', orgId)
                 .order('full_name');
@@ -134,8 +134,8 @@ const Login = () => {
 
             if (authError) throw authError;
 
-            // Insert into our 'users' table
-            const { error: dbError } = await supabase.from('users').insert({
+            // Insert into our 'User' table
+            const { error: dbError } = await supabase.from('User').insert({
                 id: data.user.id,
                 email: formData.email,
                 full_name: formData.fullName,
