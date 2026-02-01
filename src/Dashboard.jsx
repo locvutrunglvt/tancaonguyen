@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import './Dashboard.css';
+import { translations } from './translations';
+import ModelManagement from './ModelManagement';
+import FarmerManagement from './FarmerManagement';
+import AnnualActivities from './AnnualActivities';
+import TrainingCenter from './TrainingCenter';
+import FarmProfiles from './FarmProfiles';
+import SeasonalPlanning from './SeasonalPlanning';
 
-const Dashboard = () => {
-    const [view, setView] = useState('home'); // 'home' or 'users'
+const Dashboard = ({ devUser, onLogout }) => {
+    const [view, setView] = useState('home'); // 'home', 'users', 'model', 'farmers'
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState(devUser || null);
 
     // Form state for adding/editing users
     const [userForm, setUserForm] = useState({ id: '', email: '', full_name: '', organization: 'tcn', role: 'Viewer', employee_code: '', phone: '' });
     const [isEditing, setIsEditing] = useState(false);
     const [showUserModal, setShowUserModal] = useState(false);
+    const [appLang, setAppLang] = useState(localStorage.getItem('app_lang') || 'vi');
+    const t = translations[appLang];
 
     useEffect(() => {
-        checkUser();
-    }, []);
+        if (!devUser) {
+            checkUser();
+        }
+    }, [devUser]);
 
     useEffect(() => {
-        if (view === 'users') {
+        if (view === 'users' || view === 'farmers') {
             fetchUsersList();
         }
     }, [view]);
@@ -94,59 +105,86 @@ const Dashboard = () => {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
+        if (onLogout) {
+            await onLogout();
+        } else {
+            await supabase.auth.signOut();
+        }
     };
 
     const menuItems = [
         {
+            id: 'farmers',
+            title: t.farmers,
+            desc: t.farmers_desc,
+            icon: 'fas fa-id-card',
+            action: () => setView('farmers')
+        },
+        {
+            id: 'farms',
+            title: t.farms,
+            desc: t.farms_desc,
+            icon: 'fas fa-map-marked-alt',
+            action: () => setView('farms')
+        },
+        {
+            id: 'activities',
+            title: t.activities,
+            desc: t.activities_desc,
+            icon: 'fas fa-calendar-check',
+            action: () => setView('activities')
+        },
+        {
+            id: 'planning',
+            title: t.planning,
+            desc: t.planning_desc,
+            icon: 'fas fa-clipboard-list',
+            action: () => setView('planning')
+        },
+        {
+            id: 'training',
+            title: t.training,
+            desc: t.training_desc,
+            icon: 'fas fa-graduation-cap',
+            action: () => setView('training')
+        },
+        {
             id: 'model',
-            title: 'Quản lý mô hình',
-            desc: 'Quản lý các nông hộ hình mẫu và kịch bản thích ứng biến đổi khí hậu.',
-            icon: 'fas fa-seedling'
-        },
-        {
-            id: 'assets',
-            title: 'Quản lý tài sản',
-            desc: 'Theo dõi thiết bị, quỹ đất và tài nguyên hệ thống nông hộ.',
-            icon: 'fas fa-boxes'
-        },
-        {
-            id: 'users',
-            title: 'Quản lý người dùng',
-            desc: 'Quản lý tài khoản nhân viên, phân quyền và lịch sử truy cập.',
-            icon: 'fas fa-users-cog',
-            action: () => setView('users')
-        },
-        {
-            id: 'trading',
-            title: 'Mua bán',
-            desc: 'Hệ thống giao dịch nông sản, quản lý kho và chuỗi cung ứng.',
-            icon: 'fas fa-shopping-cart'
-        },
-        {
-            id: 'settings',
-            title: 'Thiết lập',
-            desc: 'Cấu hình hệ thống, thông số kỹ thuật và tùy chỉnh giao diện.',
-            icon: 'fas fa-sliders-h'
+            title: t.model,
+            desc: t.model_desc,
+            icon: 'fas fa-seedling',
+            action: () => setView('model')
         }
     ];
 
     const HomeView = () => (
-        <div className="home-menu-grid">
-            {menuItems.map(item => (
-                <div key={item.id} className="menu-card" onClick={item.action || (() => alert('Tính năng đang phát triển'))}>
-                    <div className="card-icon">
-                        <i className={item.icon}></i>
+        <div className="home-container">
+            <div className="home-logo-bar">
+                <img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" />
+                <img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" />
+                <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" className="logo-nkg" />
+            </div>
+
+            <h1 className="project-main-title">
+                {t.project_title}
+            </h1>
+
+            <div className="home-menu-grid">
+                {menuItems.map(item => (
+                    <div key={item.id} className="menu-card" onClick={item.action || (() => alert('Feature coming soon'))}>
+                        <div className="card-icon">
+                            <i className={item.icon}></i>
+                        </div>
+                        <div className="card-info">
+                            <h3>{item.title}</h3>
+                            <p>{item.desc}</p>
+                        </div>
+                        <div className="card-action">
+                            {t.action_access} <i className="fas fa-arrow-right"></i>
+                        </div>
                     </div>
-                    <div className="card-info">
-                        <h3>{item.title}</h3>
-                        <p>{item.desc}</p>
-                    </div>
-                    <div className="card-action">
-                        Truy cập ngay <i className="fas fa-arrow-right"></i>
-                    </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 
@@ -289,26 +327,42 @@ const Dashboard = () => {
                 <nav className="nav-menu">
                     <a className={`nav-item ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
                         <i className="fas fa-home"></i>
-                        <span>Tổng quát</span>
+                        <span>{t.home}</span>
+                    </a>
+                    <a className={`nav-item ${view === 'farmers' ? 'active' : ''}`} onClick={() => setView('farmers')}>
+                        <i className="fas fa-id-card"></i>
+                        <span>{t.farmers}</span>
+                    </a>
+                    <a className={`nav-item ${view === 'farms' ? 'active' : ''}`} onClick={() => setView('farms')}>
+                        <i className="fas fa-map-marked-alt"></i>
+                        <span>{t.farms}</span>
+                    </a>
+                    <a className={`nav-item ${view === 'activities' ? 'active' : ''}`} onClick={() => setView('activities')}>
+                        <i className="fas fa-calendar-check"></i>
+                        <span>{t.activities}</span>
+                    </a>
+                    <a className={`nav-item ${view === 'planning' ? 'active' : ''}`} onClick={() => setView('planning')}>
+                        <i className="fas fa-clipboard-list"></i>
+                        <span>{t.planning}</span>
+                    </a>
+                    <a className={`nav-item ${view === 'training' ? 'active' : ''}`} onClick={() => setView('training')}>
+                        <i className="fas fa-graduation-cap"></i>
+                        <span>{t.training}</span>
+                    </a>
+                    <a className={`nav-item ${view === 'model' ? 'active' : ''}`} onClick={() => setView('model')}>
+                        <i className="fas fa-seedling"></i>
+                        <span>{t.model}</span>
                     </a>
                     <a className={`nav-item ${view === 'users' ? 'active' : ''}`} onClick={() => setView('users')}>
                         <i className="fas fa-users-cog"></i>
-                        <span>Người dùng</span>
-                    </a>
-                    <a className="nav-item">
-                        <i className="fas fa-chart-line"></i>
-                        <span>Báo cáo</span>
-                    </a>
-                    <a className="nav-item">
-                        <i className="fas fa-map-marked-alt"></i>
-                        <span>Bản đồ</span>
+                        <span>{t.users}</span>
                     </a>
                 </nav>
 
                 <div className="sidebar-footer">
                     <div onClick={handleLogout} className="logout-btn">
                         <i className="fas fa-sign-out-alt"></i>
-                        <span>Đăng xuất</span>
+                        <span>{t.logout}</span>
                     </div>
                 </div>
             </aside>
@@ -320,13 +374,20 @@ const Dashboard = () => {
                         <i className="fas fa-sign-out-alt" style={{ color: '#ef4444', fontSize: '20px' }}></i>
                     </div>
                     <div className="welcome-section">
-                        <p>Tân Cao Nguyên xin chào,</p>
-                        <h2>{currentUser?.email?.split('@')[0] || 'Quản trị viên'}</h2>
+                        <p>{t.welcome}</p>
+                        <h2>{currentUser?.email?.split('@')[0] || t.admin}</h2>
                     </div>
                 </header>
 
                 {/* Conditional Rendering of Views */}
-                {view === 'home' ? <HomeView /> : <UserManagementView />}
+                {view === 'home' && <HomeView />}
+                {view === 'users' && <UserManagementView />}
+                {view === 'model' && <ModelManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
+                {view === 'activities' && <AnnualActivities onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
+                {view === 'training' && <TrainingCenter onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
+                {view === 'farms' && <FarmProfiles onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
+                {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
+                {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
             </main>
         </div>
     );

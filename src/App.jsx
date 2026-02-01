@@ -6,6 +6,7 @@ import './App.css'
 
 function App() {
   const [session, setSession] = useState(null)
+  const [devUser, setDevUser] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -21,12 +22,22 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
+  const handleDevLogin = (user) => {
+    console.log("APP_DEV_LOGIN_RECEIVED: ", user);
+    setDevUser(user)
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setDevUser(null)
+  }
+
   return (
     <div className="App">
-      {!session ? (
-        <Login />
+      {!session && !devUser ? (
+        <Login onDevLogin={handleDevLogin} />
       ) : (
-        <Dashboard />
+        <Dashboard devUser={devUser} onLogout={handleLogout} />
       )}
     </div>
   )

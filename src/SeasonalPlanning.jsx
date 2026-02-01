@@ -1,0 +1,214 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
+import './Dashboard.css';
+
+const SeasonalPlanning = ({ onBack, devUser }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+    const [entries, setEntries] = useState([]);
+    const [formData, setFormData] = useState({
+        type: 'Chi phí Vật tư (Phân, thuốc...)',
+        date: new Date().toISOString().split('T')[0],
+        item: '',
+        amount: '',
+        notes: ''
+    });
+
+    useEffect(() => {
+        fetchEntries();
+    }, []);
+
+    const fetchEntries = async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('financial_records')
+                .select('*')
+                .order('record_date', { ascending: false });
+
+            if (error) throw error;
+            const mapped = (data || []).map(d => ({
+                id: d.id,
+                category: d.category,
+                item: d.item_name,
+                cost: d.amount,
+                date: d.record_date
+            }));
+            setEntries(mapped);
+        } catch (err) {
+            console.error('Error fetching financial records:', err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const totalCost = entries.filter(e => e.cost > 0).reduce((sum, e) => sum + e.cost, 0);
+    const totalRevenue = Math.abs(entries.filter(e => e.cost < 0).reduce((sum, e) => sum + e.cost, 0));
+    const profit = totalRevenue - totalCost;
+
+    const formatCurrency = (val) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+    };
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id || devUser?.id;
+
+        let amountVal = parseInt(formData.amount) || 0;
+        if (formData.type.includes('Doanh thu')) {
+            amountVal = -Math.abs(amountVal);
+        } else {
+            amountVal = Math.abs(amountVal);
+        }
+
+        const payload = {
+            user_id: userId,
+            record_date: formData.date,
+            category: formData.type.includes('Doanh thu') ? 'Doanh thu' : 'Chi phí',
+            item_name: formData.item,
+            amount: amountVal,
+            notes: formData.notes
+        };
+
+        const { error } = await supabase
+            .from('financial_records')
+            .insert([payload]);
+
+        if (error) {
+            alert('Lỗi lưu tài chính: ' + error.message);
+        } else {
+            alert('Đã lưu giao dịch.');
+            setShowForm(false);
+            fetchEntries();
+        }
+        setIsLoading(false);
+    };
+
+    return (
+        <div className="view-container animate-in">
+            <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', gap: '15px' }}>
+                <button onClick={onBack} className="btn-back" style={{ padding: '8px 15px', borderRadius: '10px', border: '1px solid var(--sky-200)', background: 'white', fontSize: '12px', cursor: 'pointer' }}>
+                    <i className="fas fa-arrow-left"></i> Quay lại
+                </button>
+                <div style={{ flex: 1 }}></div>
+                <button onClick={() => setShowForm(true)} className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>
+                    <i className="fas fa-file-invoice-dollar"></i> GHI NHẬN CHI PHÍ / DOANH THU
+                </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '25px' }}>
+                <div className="kpi-card" style={{ background: 'white', padding: '20px', borderRadius: '20px', borderLeft: '5px solid #ef4444' }}>
+                    <p style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Tổng chi phí</p>
+                    <h3 style={{ color: '#b91c1c' }}>{formatCurrency(totalCost)}</h3>
+                </div>
+                <div className="kpi-card" style={{ background: 'white', padding: '20px', borderRadius: '20px', borderLeft: '5px solid #22c55e' }}>
+                    <p style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Tổng doanh thu</p>
+                    <h3 style={{ color: '#15803d' }}>{formatCurrency(totalRevenue)}</h3>
+                </div>
+                <div className="kpi-card" style={{ background: 'white', padding: '20px', borderRadius: '20px', borderLeft: '5px solid #3b82f6', boxShadow: '0 10px 25px rgba(59, 130, 246, 0.1)' }}>
+                    <p style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Lợi nhuận dự kiến</p>
+                    <h3 style={{ color: '#1d4ed8' }}>{formatCurrency(profit)}</h3>
+                </div>
+            </div>
+
+            {!showForm ? (
+                <div className="data-table-container">
+                    <div className="table-header">
+                        <h3>Quản lý Tài chính & Kế hoạch mùa vụ</h3>
+                        <div className="badge">Nhóm C: Hiệu quả kinh tế</div>
+                    </div>
+
+                    <table className="pro-table">
+                        <thead>
+                            <tr>
+                                <th>Ngày ghi chép</th>
+                                <th>Danh mục</th>
+                                <th>Nội dung chi tiết</th>
+                                <th>Số tiền</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {entries.length === 0 ? (
+                                <tr><td colSpan="5" style={{ textAlign: 'center', opacity: 0.5 }}>Chưa có bản ghi tài chính.</td></tr>
+                            ) : (
+                                entries.map(e => (
+                                    <tr key={e.id}>
+                                        <td>{e.date}</td>
+                                        <td>
+                                            <span className="badge" style={{
+                                                background: e.category === 'Doanh thu' ? '#ecfdf5' : '#f8fafc',
+                                                color: e.category === 'Doanh thu' ? '#059669' : '#64748b'
+                                            }}>
+                                                {e.category}
+                                            </span>
+                                        </td>
+                                        <td style={{ fontWeight: 600 }}>{e.item}</td>
+                                        <td style={{ color: e.cost < 0 ? '#059669' : '#b91c1c', fontWeight: 700 }}>
+                                            {e.cost < 0 ? '+' : '-'}{formatCurrency(Math.abs(e.cost))}
+                                        </td>
+                                        <td>
+                                            <button style={{ background: 'none', border: 'none', color: '#64748b' }}><i className="fas fa-trash-alt"></i></button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="form-container" style={{ background: 'white', padding: '30px', borderRadius: '24px' }}>
+                    <h2 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '2px solid var(--tcn-light)', paddingBottom: '10px' }}>
+                        <i className="fas fa-plus-circle"></i> Thêm giao dịch tài chính mới
+                    </h2>
+
+                    <form onSubmit={handleSave}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div className="form-group">
+                                <label>Loại giao dịch</label>
+                                <select className="input-pro" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}>
+                                    <option>Chi phí Vật tư (Phân, thuốc...)</option>
+                                    <option>Chi phí Nhân công (Thuê ngoài)</option>
+                                    <option>Chi phí Vận hành (Xăng dầu, điện...)</option>
+                                    <option>Doanh thu bán Cà phê</option>
+                                    <option>Doanh thu bán Sản phẩm xen canh</option>
+                                    <option>Khoản vay / Khác</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Ngày thực hiện</label>
+                                <input type="date" className="input-pro" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                            </div>
+                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                <label>Nội dung chi tiết</label>
+                                <input className="input-pro" required value={formData.item} onChange={e => setFormData({ ...formData, item: e.target.value })} placeholder="VD: Mua 10 bao phân NPK, Thuê 5 công phát cỏ..." />
+                            </div>
+                            <div className="form-group">
+                                <label>Số tiền (VNĐ)</label>
+                                <input type="number" className="input-pro" required value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} placeholder="0" />
+                            </div>
+                            <div className="form-group">
+                                <label>Ghi chú thêm</label>
+                                <input className="input-pro" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="..." />
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
+                            <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
+                                <i className="fas fa-save"></i> {isLoading ? 'ĐANG LƯU...' : 'LƯU GIAO DỊCH'}
+                            </button>
+                            <button type="button" className="btn-primary" onClick={() => setShowForm(false)} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
+                                HỦY
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default SeasonalPlanning;

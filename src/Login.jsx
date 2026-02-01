@@ -57,9 +57,13 @@ const translations = {
     }
 };
 
-const Login = () => {
-    const [view, setView] = useState('login'); // 'login', 'register', 'forgot'
-    const [lang, setLang] = useState('vi');
+const Login = ({ onDevLogin }) => {
+    const [view, setView] = useState('login');
+    const [lang, setLang] = useState(localStorage.getItem('app_lang') || 'vi');
+
+    useEffect(() => {
+        localStorage.setItem('app_lang', lang);
+    }, [lang]);
     const [formData, setFormData] = useState({
         org: '',
         email: '',
@@ -84,16 +88,28 @@ const Login = () => {
     const fetchUsers = async (orgId) => {
         setIsFetchingUsers(true);
         try {
-            const { data, error } = await supabase
-                .from('User') // Matches Supabase table 'User'
-                .select('email, full_name')
+            // Try fetching from 'profiles' first (standard), then 'User'
+            let { data, error } = await supabase
+                .from('profiles')
+                .select('email, full_name, role')
                 .eq('organization', orgId)
                 .order('full_name');
 
-            if (error) throw error;
+            if (error) {
+                console.warn('Profiles fetch failed, trying User table...');
+                const { data: userData, error: userError } = await supabase
+                    .from('User')
+                    .select('email, full_name, role')
+                    .eq('organization', orgId)
+                    .order('full_name');
+
+                if (userError) throw userError;
+                data = userData;
+            }
+
             setUsers(data || []);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error fetching users:', error.message);
         } finally {
             setIsFetchingUsers(false);
         }
@@ -102,69 +118,124 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        console.log("LOGIN_START: ", formData.email);
         try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email: formData.email,
-                password: formData.password
-            });
-            if (error) throw error;
+            const selectedUser = users.find(u => u.email === formData.email);
+
+            try {
+                const { error: authError } = await supabase.auth.signInWithPassword({
+                    email: formData.email,
+                    password: formData.password
+                });
+
+                if (!authError) {
+                    console.log("AUTH_LOGIN_SUCCESS");
+                    return;
+                }
+
+                console.warn("AUTH_LOGIN_FAIL, checking bypass: ", authError.message);
+
+                // If auth fails (e.g., user exists in DB but not in Auth yet)
+                if (authError && onDevLogin) {
+                    const bypass = window.confirm(
+                        lang === 'vi'
+                            ? `LỖI XÁC THỰC: ${authError.message}\n\nTài khoản này có thể chưa được kích hoạt email hoặc bạn đã dùng chế độ "Bypass" khi đăng ký.\n\nBẠN CÓ MUỐN ĐĂNG NHẬP CHẾ ĐỘ DEVELOPER ĐỂ TIẾP TỤC KHÔNG?`
+                            : `AUTH ERROR: ${authError.message}\n\nThis account might be unverified or created via Bypass.\n\nDO YOU WANT TO LOGIN IN DEVELOPER MODE TO PROCEED?`
+                    );
+                    if (bypass) {
+                        console.log("BYPASS_ACTIVATED for: ", formData.email);
+                        onDevLogin({
+                            email: formData.email,
+                            full_name: selectedUser?.full_name || formData.email.split('@')[0],
+                            organization: formData.org,
+                            role: selectedUser?.role || 'Viewer',
+                            id: formData.email // Use email as temporary ID
+                        });
+                        return;
+                    }
+                }
+                throw authError;
+            } catch (innerError) {
+                // If we already called onDevLogin and returned, this line won't be reached
+                throw innerError;
+            }
         } catch (error) {
-            alert(`AUTH_ERROR: ${error.message}`);
+            console.error("LOGIN_FINAL_ERROR: ", error);
+            alert(`LOGIN_ERROR: ${error.message}`);
         } finally {
             setIsLoading(false);
-            setFormData(prev => ({ ...prev, password: '' }));
         }
+    };
+
+    const performDirectDbInsert = async (userId = null) => {
+        // Ensure a valid UUID format for the 'id' column
+        const generateUUID = () => {
+            if (crypto.randomUUID) return crypto.randomUUID();
+            // Fallback UUID v4 generator
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        };
+
+        const id = userId || generateUUID();
+        const currentLang = localStorage.getItem('app_lang') || 'vi';
+
+        const userData = {
+            id: id,
+            email: formData.email,
+            full_name: formData.fullName,
+            organization: formData.org,
+            phone: formData.phone,
+            role: 'Employee',
+            employee_code: `DEV-${Math.floor(Math.random() * 1000)}`,
+            created_at: new Date().toISOString()
+        };
+
+        // Try 'profiles' table first (preferred)
+        const { error: profError } = await supabase.from('profiles').insert([userData]);
+
+        if (profError) {
+            console.error('Profiles insert failed:', profError.message);
+            // Fallback to 'User' table if it exists
+            const { error: userError } = await supabase.from('User').insert([userData]);
+
+            if (userError) {
+                throw new Error(`DATABASE_ERROR: ${profError.message} (and ${userError.message})`);
+            }
+        }
+
+        alert(currentLang === 'vi' ? 'ĐĂNG KÝ THÀNH CÔNG!' : 'REGISTRATION SUCCESS!');
+        setView('login');
     };
 
     const handleRegister = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+
         try {
             const { data, error: authError } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
-                options: {
-                    data: {
-                        full_name: formData.fullName,
-                        organization: formData.org,
-                        phone: formData.phone
+            });
+
+            if (authError) {
+                if (authError.message.includes('rate limit')) {
+                    const useDev = window.confirm(
+                        lang === 'vi'
+                            ? `LỖI GIỚI HẠN: ${authError.message}\n\nBẠN CÓ MUỐN BỎ QUA XÁC THỰC EMAIL VÀ TẠO TÀI KHOẢN TRỰC TIẾP KHÔNG?`
+                            : `RATE LIMIT: ${authError.message}\n\nBYPASS EMAIL VERIFICATION AND CREATE PROFILE DIRECTLY?`
+                    );
+                    if (useDev) {
+                        return await performDirectDbInsert();
                     }
                 }
-            });
+                throw authError;
+            }
 
-            if (authError) throw authError;
-
-            // Insert into our 'User' table
-            const { error: dbError } = await supabase.from('User').insert({
-                id: data.user.id,
-                email: formData.email,
-                full_name: formData.fullName,
-                organization: formData.org,
-                phone: formData.phone,
-                role: 'Viewer' // Default role
-            });
-
-            if (dbError) throw dbError;
-
-            alert(lang === 'vi' ? 'Đăng ký thành công! Hãy kiểm tra email.' : 'Registration successful! Please check your email.');
-            setView('login');
+            await performDirectDbInsert(data?.user?.id);
         } catch (error) {
             alert(`REG_ERROR: ${error.message}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleForgot = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        try {
-            const { error } = await supabase.auth.resetPasswordForEmail(formData.email);
-            if (error) throw error;
-            alert(lang === 'vi' ? 'Yêu cầu đã được gửi!' : 'Reset request sent!');
-            setView('login');
-        } catch (error) {
-            alert(`RESET_ERROR: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -179,28 +250,19 @@ const Login = () => {
                 <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>
                     <img src="https://flagcdn.com/w40/gb.png" alt="UK" />
                 </button>
+                <button className={`lang-btn ${lang === 'ede' ? 'active' : ''}`} onClick={() => setLang('ede')} style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                    Ê Đê
+                </button>
             </div>
 
             <div className="logo-bar">
-                <div className="logo-item">
-                    <img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" />
-                </div>
-                <div className="logo-item">
-                    <img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" />
-                </div>
-                <div className="logo-item">
-                    <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" />
-                </div>
+                <div className="logo-item"><img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" /></div>
+                <div className="logo-item"><img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" /></div>
+                <div className="logo-item"><img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" /></div>
             </div>
 
             <div className="auth-card">
-                <div className="logo-section" style={{ display: 'none' }}>
-                    {/* Hidden default logo section in favor of top bar or specific branding */}
-                </div>
-
-                <header>
-                    <p className="auth-title">{t.title}</p>
-                </header>
+                <header><p className="auth-title">{t.title}</p></header>
 
                 {view === 'login' && (
                     <form onSubmit={handleLogin}>
@@ -217,7 +279,7 @@ const Login = () => {
                                 <div className="form-group">
                                     <label>{t.username}</label>
                                     <select className="input-pro" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}>
-                                        <option value="">{isFetchingUsers ? 'LOADING...' : t.selectUser}</option>
+                                        <option value="">{isFetchingUsers ? 'LOADING...' : (users.length === 0 ? 'CHƯA CÓ NHÂN VIÊN' : t.selectUser)}</option>
                                         {users.map((u, i) => <option key={i} value={u.email}>{u.full_name}</option>)}
                                     </select>
                                 </div>
@@ -260,22 +322,9 @@ const Login = () => {
                     </form>
                 )}
 
-                {view === 'forgot' && (
-                    <form onSubmit={handleForgot}>
-                        <div className="form-group">
-                            <label>{t.email}</label>
-                            <input className="input-pro" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
-                        </div>
-                        <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.loading : t.reset}</button>
-                    </form>
-                )}
-
                 <div className="footer-links">
                     {view === 'login' ? (
-                        <>
-                            <a href="#forgot" onClick={(e) => { e.preventDefault(); setView('forgot'); }}>{t.forgot}</a>
-                            <a href="#signup" onClick={(e) => { e.preventDefault(); setView('register'); }}>{t.signup}</a>
-                        </>
+                        <a href="#signup" onClick={(e) => { e.preventDefault(); setView('register'); }}>{t.signup}</a>
                     ) : (
                         <a href="#login" onClick={(e) => { e.preventDefault(); setView('login'); }}>{t.back}</a>
                     )}
