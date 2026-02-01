@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
+import { translations } from './translations';
 import './Dashboard.css';
 
-const ModelManagement = ({ onBack, devUser }) => {
+const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
+    const t = translations[appLang] || translations.vi;
     const [models, setModels] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -45,7 +47,7 @@ const ModelManagement = ({ onBack, devUser }) => {
 
         if (error) alert(error.message);
         else {
-            alert('Đã thêm mô hình mới.');
+            alert(t.save_success || 'Saved successfully.');
             setShowModal(false);
             fetchModels();
         }
@@ -56,38 +58,38 @@ const ModelManagement = ({ onBack, devUser }) => {
         <div className="view-container animate-in">
             <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <button onClick={onBack} className="btn-back" style={{ padding: '8px 15px', borderRadius: '10px', border: '1px solid var(--sky-200)', background: 'white', fontSize: '12px', cursor: 'pointer' }}>
-                    <i className="fas fa-arrow-left"></i> Quay lại
+                    <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
                 <button
                     onClick={() => setShowModal(true)}
                     className="btn-add-user"
                     style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                    <i className="fas fa-plus"></i> THÊM MÔ HÌNH MỚI
+                    <i className="fas fa-plus"></i> {t.model_add_btn}
                 </button>
             </div>
 
             <div className="data-table-container">
                 <div className="table-header">
-                    <h3>Danh sách Mô hình trình diễn</h3>
-                    <div className="badge">{models.length} mô hình</div>
+                    <h3>{t.model_title}</h3>
+                    <div className="badge">{models.length} {t.model?.toLowerCase() || 'models'}</div>
                 </div>
                 <table className="pro-table">
                     <thead>
                         <tr>
-                            <th>Tên mô hình</th>
-                            <th>Địa điểm</th>
-                            <th>Loại cà phê</th>
-                            <th>Diện tích</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <th>{t.model_name}</th>
+                            <th>{t.model_loc}</th>
+                            <th>{t.model_coffee_type}</th>
+                            <th>{t.model_area}</th>
+                            <th>{t.model_status}</th>
+                            <th>{t.actions}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading && models.length === 0 ? (
-                            <tr><td colSpan="6" style={{ textAlign: 'center' }}>Đang tải...</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center' }}>{t.loading}</td></tr>
                         ) : models.length === 0 ? (
-                            <tr><td colSpan="6" style={{ textAlign: 'center', opacity: 0.5 }}>Chưa có mô hình nào.</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', opacity: 0.5 }}>{t.loading}</td></tr>
                         ) : (
                             models.map(m => (
                                 <tr key={m.id}>
@@ -116,33 +118,33 @@ const ModelManagement = ({ onBack, devUser }) => {
             {showModal && (
                 <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
                     <div className="modal-content" style={{ background: 'white', padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '600px' }}>
-                        <h3 style={{ marginBottom: '25px', color: 'var(--tcn-dark)' }}>Thiết lập Mô hình mới</h3>
+                        <h3 style={{ marginBottom: '25px', color: 'var(--tcn-dark)' }}>{t.model_setup_title}</h3>
                         <form onSubmit={handleSave}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 <div className="form-group">
-                                    <label>Tên mô hình</label>
-                                    <input className="input-pro" required value={currentModel.name} onChange={e => setCurrentModel({ ...currentModel, name: e.target.value })} placeholder="VD: Mô hình trình diễn thích ứng 01" />
+                                    <label>{t.model_name}</label>
+                                    <input className="input-pro" required value={currentModel.name} onChange={e => setCurrentModel({ ...currentModel, name: e.target.value })} placeholder="VD: Model 01..." />
                                 </div>
                                 <div className="form-group">
-                                    <label>Địa điểm triển khai</label>
+                                    <label>{t.model_loc}</label>
                                     <input className="input-pro" value={currentModel.location} onChange={e => setCurrentModel({ ...currentModel, location: e.target.value })} placeholder="Xã, Huyện, Tỉnh" />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                     <div className="form-group">
-                                        <label>Loại cà phê</label>
+                                        <label>{t.model_coffee_type}</label>
                                         <select className="input-pro" value={currentModel.coffee_type} onChange={e => setCurrentModel({ ...currentModel, coffee_type: e.target.value })}>
                                             <option>Robusta</option>
                                             <option>Arabica</option>
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label>Diện tích (ha)</label>
+                                        <label>{t.model_area} (ha)</label>
                                         <input className="input-pro" type="number" step="0.1" value={currentModel.area} onChange={e => setCurrentModel({ ...currentModel, area: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                    <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>{loading ? 'ĐANG LƯU...' : 'LƯU DỮ LIỆU'}</button>
-                                    <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={() => setShowModal(false)}>Hủy bỏ</button>
+                                    <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>{loading ? t.loading : t.save}</button>
+                                    <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={() => setShowModal(false)}>{t.cancel}</button>
                                 </div>
                             </div>
                         </form>

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { getPHRecommendation } from './agronomyUtils';
-import './Dashboard.css';
 import { translations } from './translations';
+import './Dashboard.css';
 
 const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
+    const t = translations[appLang] || translations.vi;
     const [isLoading, setIsLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [baselines, setBaselines] = useState([]);
-    const t = translations[appLang];
 
     const [formData, setFormData] = useState({
         farmer_name: '',
@@ -95,9 +95,9 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
             .insert([payload]);
 
         if (error) {
-            alert(appLang === 'vi' ? 'Lỗi lưu dữ liệu: ' : 'Error saving data: ' + error.message);
+            alert((appLang === 'vi' ? 'Lỗi lưu dữ liệu: ' : 'Error saving data: ') + error.message);
         } else {
-            alert(appLang === 'vi' ? 'Đã lưu thông tin trang trại thành công!' : 'Successfully saved farm information!');
+            alert(t.save_success || 'Saved successfully.');
             setShowForm(false);
             fetchBaselines();
         }
@@ -128,19 +128,19 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
                     <table className="pro-table">
                         <thead>
                             <tr>
-                                <th>{appLang === 'vi' ? 'Ngày khảo sát' : 'Survey Date'}</th>
-                                <th>{appLang === 'vi' ? 'Chủ hộ' : 'Owner'}</th>
+                                <th>{t.farm_date || 'Survey Date'}</th>
+                                <th>{t.farm_owner || 'Owner'}</th>
                                 <th>{t.farm_village}</th>
-                                <th>{appLang === 'vi' ? 'Tổng DT (ha)' : 'Total Area (ha)'}</th>
+                                <th>{t.farm_total_area || 'Total Area (ha)'}</th>
                                 <th>{t.farm_soil_ph}</th>
-                                <th>{t.farmer_actions}</th>
+                                <th>{t.actions}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {baselines.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" style={{ textAlign: 'center', padding: '30px', opacity: 0.5 }}>
-                                        {appLang === 'vi' ? 'Chưa có dữ liệu khảo sát. Nhấn nút để bắt đầu.' : 'No survey data. Press button to start.'}
+                                        {t.no_data || 'No survey data.'}
                                     </td>
                                 </tr>
                             ) : (
@@ -170,13 +170,13 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
             ) : (
                 <div className="form-container" style={{ background: 'white', padding: '30px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
                     <h2 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '2px solid var(--tcn-light)', paddingBottom: '10px' }}>
-                        <i className="fas fa-clipboard-check"></i> {appLang === 'vi' ? 'Phiếu thu thập thông tin Nền (Baseline)' : 'Baseline Information Collection Form'}
+                        <i className="fas fa-clipboard-check"></i> {t.farm_form_title || 'Baseline Information'}
                     </h2>
 
                     <form onSubmit={handleSave}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
                             <div className="form-section">
-                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>{appLang === 'vi' ? 'A. Thông tin định danh' : 'A. Identification Info'}</h4>
+                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>{t.farm_section_a || 'A. Identification'}</h4>
                                 <div className="form-group">
                                     <label>{t.farmer_name}</label>
                                     <input className="input-pro" required value={formData.farmer_name} onChange={e => setFormData({ ...formData, farmer_name: e.target.value })} placeholder="Nguyễn Văn A" />
@@ -187,21 +187,21 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                     <div className="form-group">
-                                        <label>{appLang === 'vi' ? 'Vĩ độ (GPS Lat)' : 'GPS Latitude'}</label>
+                                        <label>{t.farm_gps_lat || 'GPS Lat'}</label>
                                         <input className="input-pro" type="number" step="0.000001" value={formData.gps_lat} onChange={e => setFormData({ ...formData, gps_lat: e.target.value })} placeholder="12.6..." />
                                     </div>
                                     <div className="form-group">
-                                        <label>{appLang === 'vi' ? 'Kinh độ (GPS Long)' : 'GPS Longitude'}</label>
+                                        <label>{t.farm_gps_long || 'GPS Long'}</label>
                                         <input className="input-pro" type="number" step="0.000001" value={formData.gps_long} onChange={e => setFormData({ ...formData, gps_long: e.target.value })} placeholder="108.0..." />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="form-section">
-                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>{appLang === 'vi' ? 'B. Hiện trạng canh tác' : 'B. Cultivation Status'}</h4>
+                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>{t.farm_section_b || 'B. Cultivation'}</h4>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                     <div className="form-group">
-                                        <label>{appLang === 'vi' ? 'Tổng diện tích (ha)' : 'Total Area (ha)'}</label>
+                                        <label>{t.farm_total_area || 'Total Area (ha)'}</label>
                                         <input className="input-pro" type="number" step="0.1" value={formData.total_area} onChange={e => setFormData({ ...formData, total_area: e.target.value })} />
                                     </div>
                                     <div className="form-group">
@@ -211,27 +211,27 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                     <div className="form-group">
-                                        <label>{appLang === 'vi' ? 'DT cây trồng xen (ha)' : 'Intercrop Area (ha)'}</label>
+                                        <label>{t.farm_intercrop_area || 'Intercrop Area (ha)'}</label>
                                         <input className="input-pro" type="number" step="0.1" value={formData.intercrop_area} onChange={e => setFormData({ ...formData, intercrop_area: e.target.value })} />
                                     </div>
                                     <div className="form-group">
-                                        <label>{appLang === 'vi' ? 'Nguồn nước chính' : 'Main Water Source'}</label>
+                                        <label>{t.farm_water_source || 'Water Source'}</label>
                                         <select className="input-pro" value={formData.water_source} onChange={e => setFormData({ ...formData, water_source: e.target.value })}>
-                                            <option value="Giếng đào">{appLang === 'vi' ? 'Giếng đào' : 'Dug Well'}</option>
-                                            <option value="Giếng khoan">{appLang === 'vi' ? 'Giếng khoan' : 'Drilled Well'}</option>
-                                            <option value="Hồ/Suối">{appLang === 'vi' ? 'Hồ/Suối' : 'Lake/Stream'}</option>
+                                            <option value="Giếng đào">{t.water_gieng_dao || 'Dug Well'}</option>
+                                            <option value="Giếng khoan">{t.water_gieng_khoan || 'Drilled Well'}</option>
+                                            <option value="Hồ/Suối">{t.water_ho_suoi || 'Lake/Stream'}</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div className="form-group">
-                                    <label>{appLang === 'vi' ? 'Chi tiết cây trồng xen (Sầu riêng, Mắc ca...)' : 'Intercrop Details (Durian, Macadamia...)'}</label>
+                                    <label>{t.farm_intercrop_details || 'Intercrop Details'}</label>
                                     <input className="input-pro" value={formData.intercrop_details} onChange={e => setFormData({ ...formData, intercrop_details: e.target.value })} />
                                 </div>
                             </div>
                         </div>
 
                         <div style={{ marginTop: '25px', padding: '20px', background: 'var(--tcn-light)', borderRadius: '15px' }}>
-                            <h4 style={{ color: 'var(--tcn-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>{appLang === 'vi' ? 'C. Chỉ số Môi trường & Đất' : 'C. Environmental & Soil Indicators'}</h4>
+                            <h4 style={{ color: 'var(--tcn-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>{t.farm_section_c || 'C. Soil Indicators'}</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '20px', alignItems: 'start' }}>
                                 <div className="form-group">
                                     <label>{t.farm_soil_ph}</label>
@@ -241,36 +241,36 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
                                         step="0.01"
                                         value={formData.soil_ph}
                                         onChange={handlePHChange}
-                                        style={{ borderColor: phFeedback?.includes('CẢNH BÁO') || phFeedback?.includes('WARNING') ? '#ef4444' : '' }}
+                                        style={{ borderColor: phFeedback?.includes('CẢNH BÁO') || phFeedback?.includes('WARNING') || phFeedback?.includes('DLÊÑ') ? '#ef4444' : '' }}
                                     />
                                 </div>
                                 {phFeedback && (
                                     <div style={{
                                         padding: '15px',
                                         borderRadius: '12px',
-                                        background: phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') ? '#fee2e2' : '#ecfdf5',
-                                        color: phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') ? '#991b1b' : '#065f46',
+                                        background: phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') || phFeedback.includes('DLÊÑ') ? '#fee2e2' : '#ecfdf5',
+                                        color: phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') || phFeedback.includes('DLÊÑ') ? '#991b1b' : '#065f46',
                                         fontSize: '13px',
                                         fontWeight: 500,
-                                        border: `1px solid ${phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') ? '#fca5a5' : '#a7f3d0'}`
+                                        border: `1px solid ${phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') || phFeedback.includes('DLÊÑ') ? '#fca5a5' : '#a7f3d0'}`
                                     }}>
-                                        <i className={phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') ? "fas fa-exclamation-triangle" : "fas fa-check-circle"}></i> {phFeedback}
+                                        <i className={phFeedback.includes('CẢNH BÁO') || phFeedback.includes('WARNING') || phFeedback.includes('DLÊÑ') ? "fas fa-exclamation-triangle" : "fas fa-check-circle"}></i> {phFeedback}
                                     </div>
                                 )}
                             </div>
                             <div className="form-group" style={{ marginTop: '15px' }}>
-                                <label>{appLang === 'vi' ? 'Độ che phủ cỏ' : 'Grass Cover'}</label>
+                                <label>{t.farm_grass_cover || 'Grass Cover'}</label>
                                 <select className="input-pro" value={formData.grass_cover} onChange={e => setFormData({ ...formData, grass_cover: e.target.value })}>
-                                    <option value="Low">{appLang === 'vi' ? 'Thấp (< 30%)' : 'Low (< 30%)'}</option>
-                                    <option value="Medium">{appLang === 'vi' ? 'Trung bình (30 - 60%)' : 'Medium (30 - 60%)'}</option>
-                                    <option value="High">{appLang === 'vi' ? 'Tốt (> 60%)' : 'Good (> 60%)'}</option>
+                                    <option value="Low">{t.grass_low || 'Low (< 30%)'}</option>
+                                    <option value="Medium">{t.grass_medium || 'Medium (30 - 60%)'}</option>
+                                    <option value="High">{t.grass_high || 'High (> 60%)'}</option>
                                 </select>
                             </div>
                         </div>
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
-                                <i className="fas fa-save"></i> {isLoading ? (appLang === 'vi' ? 'ĐANG LƯU...' : 'SAVING...') : (appLang === 'vi' ? 'LƯU THÔNG TIN NỀN' : 'SAVE BASELINE INFO')}
+                                <i className="fas fa-save"></i> {isLoading ? t.loading : (t.farm_save_btn || 'SAVE BASELINE')}
                             </button>
                             <button type="button" className="btn-primary" onClick={() => setShowForm(false)} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
                                 {t.cancel.toUpperCase()}

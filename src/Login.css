@@ -20,6 +20,10 @@
 body {
   font-family: var(--font-soft);
   overflow-x: hidden;
+  /* Lock layout on mobile */
+  overscroll-behavior: none;
+  touch-action: pan-y;
+  -webkit-text-size-adjust: 100%;
 }
 
 .login-container {
@@ -201,9 +205,8 @@ body {
   gap: 25px;
 }
 
-.footer-links button {
-  background: none;
-  border: none;
+.footer-links a {
+  text-decoration: none;
   font-size: 9px;
   color: #10b981;
   font-weight: 700;
@@ -213,7 +216,7 @@ body {
   letter-spacing: 0.5px;
 }
 
-.footer-links button:hover {
+.footer-links a:hover {
   opacity: 1;
   color: var(--primary);
   text-decoration: underline;
@@ -292,7 +295,7 @@ body {
     flex-wrap: wrap;
   }
 
-  .footer-links button {
+  .footer-links a {
     font-size: 8px;
   }
 
@@ -344,4 +347,30 @@ body {
   .auth-title {
     font-size: 20px !important;
   }
+}
+
+/* Ede Language High Contrast Refinements */
+.lang-ede .auth-title {
+  color: #2b1d0e !important;
+  /* Deep Roasted Coffee */
+  font-weight: 900 !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.8px;
+}
+
+.lang-ede .form-group label {
+  color: #042f24 !important;
+  /* Darker green */
+  font-weight: 900 !important;
+  text-shadow: 0 0.5px 1px rgba(255, 255, 255, 0.5);
+}
+
+.lang-ede .input-pro::placeholder {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.lang-ede .btn-primary {
+  background: #042f24 !important;
+  box-shadow: 0 8px 15px rgba(4, 47, 36, 0.3);
 }

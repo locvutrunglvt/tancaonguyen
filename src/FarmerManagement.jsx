@@ -4,10 +4,10 @@ import './Dashboard.css';
 import { translations } from './translations';
 
 const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
+    const t = translations[appLang] || translations.vi;
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const t = translations[appLang];
 
     // Form state
     const [formData, setFormData] = useState({
@@ -75,9 +75,9 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
         }
 
         if (error) {
-            alert(appLang === 'vi' ? 'Lỗi lưu hộ dân: ' : 'Error saving farmer: ' + error.message);
+            alert((appLang === 'vi' ? 'Lỗi lưu hộ dân: ' : 'Error saving farmer: ') + error.message);
         } else {
-            alert(appLang === 'vi' ? 'Đã đăng ký hộ dân mới thành công!' : 'Successfully registered new farmer!');
+            alert(t.save_success || 'Farmer registered successfully.');
             setShowModal(false);
             setFormData({ full_name: '', phone: '', area: '', members: '' });
             fetchFarmers();
@@ -110,17 +110,17 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                         <tr>
                             <th>{t.farmer_name}</th>
                             <th>{t.farmer_phone}</th>
-                            <th>{t.farms_desc.split(',')[2] || 'Area'}</th>
+                            <th>{t.farm_total_area || 'Area'}</th>
                             <th>{t.farmer_members}</th>
-                            <th>{appLang === 'vi' ? 'Ngày đăng ký' : 'Registration Date'}</th>
-                            <th>{t.farmer_actions}</th>
+                            <th>{t.reg_date || 'Reg Date'}</th>
+                            <th>{t.actions}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading && farmers.length === 0 ? (
-                            <tr><td colSpan="6" style={{ textAlign: 'center' }}>{appLang === 'vi' ? 'Đang tải...' : 'Loading...'}</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center' }}>{t.loading}</td></tr>
                         ) : farmers.length === 0 ? (
-                            <tr><td colSpan="6" style={{ textAlign: 'center', opacity: 0.5 }}>{appLang === 'vi' ? 'Chưa có hộ dân nào được đăng ký.' : 'No farmers registered yet.'}</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data}</td></tr>
                         ) : (
                             farmers.map(f => (
                                 <tr key={f.id}>
@@ -150,7 +150,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 <div className="form-group">
                                     <label>{t.farmer_name}</label>
-                                    <input className="input-pro" required value={formData.full_name} onChange={e => setFormData({ ...formData, full_name: e.target.value })} placeholder={appLang === 'vi' ? "Nhập tên đầy đủ" : "Enter full name"} />
+                                    <input className="input-pro" required value={formData.full_name} onChange={e => setFormData({ ...formData, full_name: e.target.value })} placeholder={t.enter_full_name || "Nhập tên đầy đủ"} />
                                 </div>
                                 <div className="form-group">
                                     <label>{t.farmer_phone}</label>
@@ -167,7 +167,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                                     </div>
                                 </div>
                                 <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                    <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>{loading ? (appLang === 'vi' ? 'ĐANG LƯU...' : 'SAVING...') : (appLang === 'vi' ? 'LƯU HỒ SƠ' : 'SAVE PROFILE')}</button>
+                                    <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>{loading ? t.loading : (t.save_btn || 'SAVE PROFILE')}</button>
                                     <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={() => setShowModal(false)}>{t.cancel}</button>
                                 </div>
                             </div>
