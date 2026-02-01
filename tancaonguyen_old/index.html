@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no text-size-adjust: none">
+    <title>Sustainable Coffee Farming &amp; Climate Adaptation Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Public+Sans:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46'
+                        },
+                        slate: {
+                            900: '#0f172a',
+                            950: '#020617'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Public Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .hidden {
+            display: none !important;
+        }
+
+        .bg-hitech {
+            background-color: #ffffff;
+            background-image:
+                linear-gradient(rgba(226, 232, 240, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(226, 232, 240, 0.5) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* INDUSTRIAL PRO THEME (CONCEPT 04) */
+        :root {
+            --slate-950: #020617;
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --emerald-600: #059669;
+            --emerald-500: #10b981;
+        }
+
+        .bg-industrial {
+            background-color: #f1f5f9;
+            background-image:
+                linear-gradient(rgba(226, 232, 240, 0.8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(226, 232, 240, 0.8) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .pro-card {
+            background: #ffffff;
+            border: 2px solid var(--slate-900);
+            box-shadow: 8px 8px 0px rgba(15, 23, 42, 0.1);
+        }
+
+        .tech-border {
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-pro {
+            background: var(--slate-900);
+            color: white;
+            padding: 1rem 2rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid var(--slate-900);
+        }
+
+        .btn-pro:hover {
+            background: transparent;
+            color: var(--slate-900);
+            box-shadow: 4px 4px 0px var(--emerald-500);
+        }
+
+        .input-pro {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 1rem;
+        }
+
+        .input-pro:focus {
+            border-color: var(--slate-900);
+            border-left: 4px solid var(--emerald-500);
+            outline: none;
+        }
+
+        .tech-label-pro {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .coffee-accent {
+            color: #92400e;
+            /* Brownish coffee accent */
+        }
+
+        .pulse-active {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* High-tech Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--slate-900);
+        }
+
+        #toast-box {
+            font-family: 'JetBrains Mono', monospace;
+            border: 2px solid var(--slate-900);
+            background: #ffffff;
+            box-shadow: 4px 4px 0px rgba(15, 23, 42, 1);
+        }
+
+        /* Unified Logo Sizing */
+        .logo-item {
+            height: 3.5rem;
+            /* ~56px */
+            max-width: 100px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 640px) {
+            .logo-item {
+                height: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-full bg-industrial flex items-center justify-center p-4 sm:p-8 font-sans">
+
+    <div class="w-full max-w-4xl pro-card p-8 sm:p-12 relative overflow-hidden transition-all duration-500">
+        <!-- Technical Badge -->
+        <div
+            class="absolute -top-1 -left-1 px-4 py-1 bg-slate-900 text-white font-mono text-[9px] uppercase tracking-widest z-10">
+            Node_Status: <span class="pulse-active ml-2"></span> Active
+        </div>
+
+        <!-- Language Button - Industrial style -->
+        <button id="lang-toggle" type="button" aria-label="Toggle language"
+            class="absolute top-0 right-0 p-4 border-l-2 border-b-2 border-slate-900 bg-white hover:bg-slate-50 transition-all z-20">
+            <img id="flag-img" src="https://flagcdn.com/w40/gb.png" alt="UK"
+                class="w-6 h-4 object-cover filter grayscale hover:grayscale-0 transition-all">
+        </button>
+
+        <!-- Header Logos - Technical divider -->
+        <div id="header-logos" class="flex flex-row items-center justify-between mb-12 pb-6 border-b border-slate-100">
+            <div class="flex items-center gap-6">
+                <img src="./TCN logo.jpg" class="h-10 object-contain" alt="TCN">
+                <img src="https://logos-world.net/wp-content/uploads/2023/04/Tchibo-Logo.png"
+                    class="h-10 object-contain" alt="Tchibo">
+                <img src="https://nkgvietnam.com/wp-content/uploads/2021/05/N_Logo_4c-cookie-1.png"
+                    class="h-10 object-contain" alt="NKG">
+            </div>
+            <div class="hidden sm:block text-[8px] font-mono text-slate-400 uppercase tracking-[0.2em] text-right">
+                System Ver. 2.4.0<br>Secure Production
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH ĐĂNG NHẬP -->
+        <div id="login-view" class="fade-up space-y-10">
+            <div class="space-y-2">
+                <p class="tech-label">[ SYSTEM AUTHORIZATION ]</p>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 uppercase leading-none tracking-tighter">
+                    <span class="vi">Quản lý nông hộ &amp; Thích ứng biến đổi khí hậu</span>
+                    <span class="en hidden">Farming Management &amp; Climate Adaptation</span>
+                </h1>
+            </div>
+
+            <form id="login-form" class="space-y-6">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="tech-label-pro mb-3">
+                            <i class="fas fa-coffee coffee-accent"></i> 01_ORGANIZATION_IDENTITY
+                        </label>
+                        <select id="login-org" onchange="fetchUsersByOrg()"
+                            class="block w-full input-pro text-slate-900 font-bold appearance-none cursor-pointer">
+                            <option value="">-- [ SELECT_ORGANIZATION ] --</option>
+                            <option value="tcn">TAN_CAO_NGUYEN</option>
+                            <option value="tchibo">TCHIBO_VIETNAM</option>
+                            <option value="nkg">NKG_GROUP</option>
+                            <option value="farmer">MODEL_FARMER</option>
+                        </select>
+                    </div>
+
+                    <div id="user-selection-container" class="space-y-6 hidden animate-in fade-in duration-300">
+                        <div>
+                            <label class="tech-label-pro mb-3">
+                                <i class="fas fa-user coffee-accent"></i> 02_USER_CREDENTIAL
+                            </label>
+                            <select id="login-email-select"
+                                class="block w-full input-pro text-slate-900 font-bold appearance-none">
+                                <option value="">-- [ SELECT_AUTHORIZED_STAFF ] --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="tech-label-pro mb-3">
+                                <i class="fas fa-key coffee-accent"></i> 03_ACCESS_KEY
+                            </label>
+                            <input id="login-password" type="password" required placeholder="ENC_PROTOCOL_••••"
+                                class="block w-full input-pro font-bold text-slate-900">
+                        </div>
+
+                        <div class="flex items-center justify-between bg-slate-50 p-4 border border-slate-100">
+                            <button type="button" onclick="showView('forgot-view')"
+                                class="text-[9px] font-mono font-bold text-slate-500 hover:text-emerald-600 transition-colors uppercase">
+                                [ RECOVER_LOST_KEY ]
+                            </button>
+                        </div>
+
+                        <button type="submit" id="login-btn" class="w-full btn-pro shadow-[4px_4px_0px_#10b981]">
+                            <span class="vi">XÁC THỰC TRUY CẬP</span>
+                            <span class="en hidden">AUTHORIZE_SYSTEM_ACCESS</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex justify-center">
+                    <button type="button" onclick="showView('register-view')"
+                        class="tech-label hover:text-emerald-600 transition-all font-bold">
+                        [ NO_ACCOUNT?_REQUEST_ENTRY ]
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MÀN HÌNH ĐĂNG KÝ (SELF-REGISTER) -->
+        <div id="register-view" class="hidden fade-up space-y-8">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold text-coffee-950 uppercase tracking-tight">
+                    <span class="vi">Tạo Tài Khoản</span>
+                    <span class="en hidden">Create Account</span>
+                </h2>
+                <div class="h-1 w-12 bg-emerald-600 mx-auto mt-2"></div>
+            </div>
+
+            <form id="register-form" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-emerald-800 uppercase mb-1 ml-1">
+                            <span class="vi">Họ và Tên</span><span class="en hidden">Full Name</span>
+                        </label>
+                        <input id="reg-name" type="text" required placeholder="Nguyen Van A"
+                            class="block w-full input-square px-4 py-3 font-medium text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-emerald-800 uppercase mb-1 ml-1">
+                            <span class="vi">Số điện thoại</span><span class="en hidden">Phone Number</span>
+                        </label>
+                        <input id="reg-phone" type="tel" required placeholder="090..."
+                            class="block w-full input-square px-4 py-3 font-medium text-sm outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-emerald-800 uppercase mb-1 ml-1">
+                        <span class="vi">Tổ chức</span><span class="en hidden">Organization</span>
+                    </label>
+                    <select id="reg-org" class="block w-full input-square px-4 py-3 font-medium text-sm outline-none">
+                        <option value="tcn">Tan Cao Nguyen</option>
+                        <option value="tchibo">Tchibo</option>
+                        <option value="nkg">NKG</option>
+                        <option value="farmer">Nông hộ / Farmer</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-emerald-800 uppercase mb-1 ml-1">
+                        <span class="vi">Email đăng ký</span><span class="en hidden">Email Address</span>
+                    </label>
+                    <input id="reg-email" type="email" required placeholder="email@example.com"
+                        class="block w-full input-square px-4 py-3 font-medium text-sm outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-emerald-800 uppercase mb-1 ml-1">
+                        <span class="vi">Mật khẩu</span><span class="en hidden">Password</span>
+                    </label>
+                    <input id="reg-password" type="password" required minlength="6" placeholder="••••••••"
+                        class="block w-full input-square px-4 py-3 font-medium text-sm outline-none">
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" id="reg-btn"
+                        class="w-full py-4 btn-square bg-emerald-700 text-white font-bold text-sm hover:bg-emerald-800 shadow-md">
+                        <span class="vi">XÁC NHẬN ĐĂNG KÝ</span>
+                        <span class="en hidden">CONFIRM REGISTRATION</span>
+                    </button>
+                    <button type="button" onclick="showView('login-view')"
+                        class="w-full text-[10px] font-bold text-gray-400 uppercase text-center py-4 hover:text-emerald-700">
+                        <span class="vi">Quay lại đăng nhập</span>
+                        <span class="en hidden">Back to login</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MÀN HÌNH ADMIN -->
+        <div id="admin-view" class="hidden fade-up space-y-6">
+            <div class="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+                <div class="space-y-1">
+                    <p class="tech-label-pro"><i class="fas fa-user-shield coffee-accent"></i> [ AUTH_LEVEL:
+                        MASTER_ADMIN ]</p>
+                    <h2 class="text-xl font-bold text-slate-900 uppercase tracking-tighter">
+                        <span class="vi">Điều hành Hệ thống</span>
+                        <span class="en hidden">System Operations</span>
+                    </h2>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="showAdminSection('list')" aria-label="View User List"
+                        class="w-12 h-12 flex items-center justify-center bg-white text-slate-900 border-2 border-slate-900 hover:bg-slate-900 hover:text-white transition-all"><i
+                            class="fas fa-database text-sm"></i></button>
+                    <button type="button" onclick="showAdminSection('add')" aria-label="Add New User"
+                        class="w-12 h-12 flex items-center justify-center bg-slate-900 text-white border-2 border-slate-900 hover:bg-white hover:text-slate-900 transition-all"><i
+                            class="fas fa-plus-square text-sm"></i></button>
+                    <button type="button" onclick="logout()" aria-label="Secure Logout"
+                        class="w-12 h-12 flex items-center justify-center bg-white text-red-600 border-2 border-red-200 hover:bg-red-600 hover:text-white transition-all"><i
+                            class="fas fa-power-off text-sm"></i></button>
+                </div>
+            </div>
+
+            <div id="admin-list-section" class="space-y-6">
+                <!-- Stat Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div id="stat-total-users-container" class="p-6 bg-white border-2 border-slate-900 relative">
+                        <p class="tech-label-pro mb-2"><i class="fas fa-users coffee-accent"></i> DATA_01:
+                            TOTAL_CREDENTIALS</p>
+                        <h3 id="stat-total-users" class="text-5xl font-bold text-slate-900 tracking-tighter">--</h3>
+                    </div>
+                    <div class="p-6 bg-white border-2 border-slate-900 relative">
+                        <p class="tech-label-pro mb-2"><i class="fas fa-microchip coffee-accent"></i> DATA_02:
+                            CORE_UPTIME</p>
+                        <h3 class="text-5xl font-bold text-slate-900 tracking-tighter">99.9%</h3>
+                    </div>
+                </div>
+
+                <div class="pro-card p-0 overflow-hidden">
+                    <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                        <p class="tech-label-pro text-slate-300"><i class="fas fa-stream text-emerald-500"></i> [
+                            LIVE_STORAGE_NODES ]</p>
+                        <span class="text-[9px] font-mono animate-pulse">● SYNC_ACTIVE</span>
+                    </div>
+                    <div id="admin-user-list"
+                        class="divide-y-2 divide-slate-100 max-h-[500px] overflow-y-auto custom-scrollbar">
+                        <div class="text-center py-20 tech-label-pro italic justify-center">INITIALIZING_CORE_DATA...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form: Thêm nhân viên -->
+            <div id="admin-add-section" class="hidden space-y-8">
+                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-6 flex items-start gap-4">
+                    <i class="fas fa-shield-alt text-emerald-600 text-xl mt-1"></i>
+                    <p class="tech-label-pro text-emerald-800 font-bold leading-relaxed">
+                        CRITICAL_WARNING: CREATING_NEW_AUTHENTICATION_NODE_TRIGGERS_EMAIL_VERIFICATION_PROTOCOL
+                    </p>
+                </div>
+                <form id="admin-add-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="tech-label-pro mb-3">USER_FULL_NAME</label>
+                            <input id="add-name" type="text" required placeholder="Ex: Nguyen Van A"
+                                class="block w-full input-pro h-14">
+                        </div>
+                        <div>
+                            <label class="tech-label-pro mb-3">VERIFIED_PHONE</label>
+                            <input id="add-phone" type="text" required placeholder="+84 ..."
+                                class="block w-full input-pro h-14">
+                        </div>
+                        <div>
+                            <label class="tech-label-pro mb-3">ORGANIZATION_NODE</label>
+                            <select id="add-org" class="block w-full input-pro h-14 cursor-pointer">
+                                <option value="tcn">TAN_CAO_NGUYEN</option>
+                                <option value="tchibo">TCHIBO_VIETNAM</option>
+                                <option value="nkg">NKG_GROUP</option>
+                                <option value="farmer">MODEL_FARMER</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="tech-label-pro mb-3">AUTH_ROLE_LEVEL</label>
+                            <select id="add-role" class="block w-full input-pro h-14 cursor-pointer">
+                                <option value="Farmer">ROLE: FARMER</option>
+                                <option value="Expert">ROLE: EXPERT</option>
+                                <option value="Admin">ROLE: ADMIN</option>
+                                <option value="Viewer">ROLE: VIEWER</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="tech-label-pro mb-3">AUTH_EMAIL_ID</label>
+                            <input id="add-email" type="email" required placeholder="auth_node@domain.com"
+                                class="block w-full input-pro h-14">
+                        </div>
+                        <div>
+                            <label class="tech-label-pro mb-3">DEFAULT_PASS_KEY</label>
+                            <input id="add-password" type="text" required value="Coffee12345!"
+                                class="block w-full input-pro h-14">
+                        </div>
+                    </div>
+
+                    <div class="pt-8 border-t-2 border-slate-900 flex flex-col gap-4">
+                        <button type="submit" id="add-btn" class="w-full btn-pro shadow-[4px_4px_0px_#10b981]">
+                            <span class="vi">LƯU &amp; GỬI THÔNG BÁO</span>
+                            <span class="en hidden">SAVE &amp; BROADCAST_AUTH</span>
+                        </button>
+                        <button type="button" onclick="showAdminSection('list')"
+                            class="tech-label-pro w-full text-center hover:text-slate-900 font-bold py-4 justify-center">
+                            [ ABORT_CREATION_PROCESS ]
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH QUÊN MẬT KHẨU -->
+        <div id="forgot-view" class="hidden fade-up space-y-10">
+            <div class="space-y-4">
+                <p class="tech-label-pro"><i class="fas fa-undo coffee-accent"></i> [ KEY_RECOVERY_PROTOCOL ]</p>
+                <h2 class="text-2xl font-bold text-slate-900 uppercase tracking-tighter">
+                    <span class="vi">Khôi phục Truy cập</span>
+                    <span class="en hidden">Reset Access Key</span>
+                </h2>
+            </div>
+
+            <form id="forgot-form" class="space-y-6">
+                <div>
+                    <label class="tech-label-pro mb-3">REGISTERED_AUTH_EMAIL</label>
+                    <input id="forgot-email" type="email" required placeholder="email@example.com"
+                        class="block w-full input-pro h-14">
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <button type="submit" id="forgot-btn" class="w-full btn-pro shadow-[4px_4px_0px_#10b981]">
+                        <span class="vi">GỬI YÊU CẦU</span>
+                        <span class="en hidden">INITIATE_RECOVERY</span>
+                    </button>
+                    <button type="button" onclick="showView('login-view')"
+                        class="tech-label-pro hover:text-emerald-600 transition-all font-bold text-center justify-center py-4">
+                        [ ABORT_AND_BACK ]
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST BOX -->
+    <div id="toast-box"
+        class="hidden fixed top-8 left-1/2 -translate-x-1/2 px-8 py-4 bg-white border border-slate-900 z-[100] transition-all duration-300 text-sm font-bold uppercase tracking-tight">
+    </div>
+
+    <script type="module">
+        const SUPABASE_URL = 'https://whyyfnbldwesqnjkykbv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeXlmbmJsZHdlc3Fuamt5a2J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NDM4MDMsImV4cCI6MjA4NTQxOTgwM30.V2vSsAN39pN-OFwTgeGT6itPoT57jrs6bxcA1mkPlvY';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentLang = 'vi';
+        let currentUserProfile = null;
+
+        function showView(viewId) {
+            ['login-view', 'register-view', 'forgot-view', 'admin-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            if (viewId === 'admin-view') loadAdminData();
+        }
+
+        function showAdminSection(id) {
+            document.getElementById('admin-list-section').classList.add('hidden');
+            document.getElementById('admin-add-section').classList.add('hidden');
+            document.getElementById(`admin-${id}-section`).classList.remove('hidden');
+        }
+
+        async function fetchUsersByOrg() {
+            const org = document.getElementById('login-org').value;
+            const container = document.getElementById('user-selection-container');
+            const selectEl = document.getElementById('login-email-select');
+            if (!org) { container.classList.add('hidden'); return; }
+            selectEl.innerHTML = '<option value="">Đang tải...</option>';
+            container.classList.remove('hidden');
+            const { data, error } = await sb.from('profiles').select('email, full_name').eq('organization', org).order('full_name');
+            if (error || !data || data.length === 0) selectEl.innerHTML = '<option value="">-- Trống --</option>';
+            else selectEl.innerHTML = '<option value="">-- Chọn Tên --</option>' + data.map(u => `<option value="${u.email}">${u.full_name.toUpperCase()}</option>`).join('');
+        }
+
+        async function loadAdminData() {
+            const listEl = document.getElementById('admin-user-list');
+            listEl.innerHTML = '<div class="text-center py-10 tech-label-pro italic justify-center">REQUESTING_DATA_NODES...</div>';
+            const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+            if (error) return;
+            document.getElementById('stat-total-users').textContent = data.length;
+            listEl.innerHTML = data.map(p => `
+                <div class="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 flex items-center justify-center bg-slate-100 border border-slate-200 text-slate-900 font-bold text-sm">
+                            ${p.full_name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 uppercase">${p.full_name}</p>
+                            <p class="tech-label-pro text-[9px] mt-0.5">${p.organization} | <span class="font-mono text-slate-400">#${p.id.slice(0, 8).toUpperCase()}</span></p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="tech-label-pro text-[9px] bg-slate-900 text-white px-2 py-0.5 mb-1 inline-block">${p.role}</span>
+                        <p class="text-[8px] font-mono text-emerald-600 font-bold">NODE_ACTIVE</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showToast(msg, isError = true) {
+            const toast = document.getElementById('toast-box');
+            toast.style.display = 'block';
+            toast.style.borderLeft = isError ? '8px solid #ef4444' : '8px solid #10b981';
+            toast.innerHTML = `
+                <div class="px-6 py-4 flex items-center gap-3">
+                    <i class="fas ${isError ? 'fa-exclamation-triangle text-red-500' : 'fa-check-circle text-emerald-500'}"></i>
+                    <span class="tech-label-pro text-slate-900 font-bold">${msg}</span>
+                </div>
+            `;
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); }, 4000);
+        }
+
+        function logout() { sb.auth.signOut(); currentUserProfile = null; showView('login-view'); }
+
+        // Login Logic - Always Clear Password
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email-select').value;
+            const passInput = document.getElementById('login-password');
+            const password = passInput.value;
+            const btn = document.getElementById('login-btn');
+
+            if (!email) { showToast('CORE_ERROR: Vui lòng chọn nhân viên'); return; }
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-atom fa-spin mr-3"></i> VERIFYING_AUTH_NODE...';
+
+            const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password });
+
+            // Xóa bộ nhớ mật khẩu ngay lập tức
+            passInput.value = '';
+
+            if (authError) {
+                showToast(authError.message); btn.disabled = false; btn.innerHTML = 'Hợp lệ lại';
+            } else {
+                const { data: p } = await sb.from('profiles').select('*').eq('id', authData.user.id).single();
+                currentUserProfile = p;
+                if (p?.role === 'Admin') showView('admin-view');
+                else showToast(`Chào mừng ${p?.full_name}!`, false);
+            }
+        };
+
+        // UK Flag Toggle
+        document.getElementById('lang-toggle').onclick = () => {
+            currentLang = currentLang === 'vi' ? 'en' : 'vi';
+            document.querySelectorAll('.vi').forEach(el => el.classList.toggle('hidden', currentLang !== 'vi'));
+            document.querySelectorAll('.en').forEach(el => el.classList.toggle('hidden', currentLang === 'vi'));
+            document.getElementById('flag-img').src = currentLang === 'vi' ? 'https://flagcdn.com/w40/gb.png' : 'https://flagcdn.com/w40/vn.png';
+
+            // Update placeholders if needed
+            if (currentLang === 'en') {
+                document.getElementById('login-password').placeholder = '••••••••';
+            } else {
+                document.getElementById('login-password').placeholder = '••••••••';
+            }
+        };
+
+        // Self Register
+        document.getElementById('register-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const phone = document.getElementById('reg-phone').value;
+            const password = document.getElementById('reg-password').value;
+            const org = document.getElementById('reg-org').value;
+            const btn = document.getElementById('reg-btn');
+            btn.disabled = true;
+            try {
+                const { data, error } = await sb.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: name, organization: org, phone: phone },
+                        emailRedirectTo: window.location.origin // Dynamic redirect to current origin
+                    }
+                });
+                if (error) throw error;
+                await sb.from('profiles').insert({
+                    id: data.user.id,
+                    email,
+                    full_name: name,
+                    organization: org,
+                    role: org === 'farmer' ? 'Farmer' : 'Viewer',
+                    phone: phone
+                });
+                const msg = currentLang === 'vi'
+                    ? 'Đăng ký thành công! Hãy kiểm tra email để kích hoạt.'
+                    : 'Registration successful! Please check your email to activate.';
+                showToast(msg, false);
+                showView('login-view');
+            } catch (err) { showToast(err.message); }
+            finally { btn.disabled = false; btn.innerHTML = currentLang === 'vi' ? 'XÁC NHẬN ĐĂNG KÝ' : 'CONFIRM REGISTRATION'; }
+        };
+
+        // Admin Add Employee - Robust Flow
+        document.getElementById('admin-add-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('add-name').value;
+            const org = document.getElementById('add-org').value;
+            const email = document.getElementById('add-email').value;
+            const role = document.getElementById('add-role').value;
+            const phone = document.getElementById('add-phone').value;
+            const password = document.getElementById('add-password').value;
+            const btn = document.getElementById('add-btn');
+
+            btn.disabled = true;
+            btn.innerHTML = currentLang === 'vi' ? 'ĐANG LƯU...' : 'SAVING...';
+
+            try {
+                // 1. Tạo Auth user
+                const { data: auth, error: authE } = await sb.auth.signUp({
+                    email, password, options: {
+                        data: { full_name: name, organization: org, phone: phone },
+                        emailRedirectTo: window.location.origin
+                    }
+                });
+                if (authE) throw authE;
+
+                // 2. Chèn profile
+                const { error: pE } = await sb.from('profiles').insert({
+                    id: auth.user.id, email, full_name: name, organization: org, role: role, phone: phone
+                });
+
+                if (pE) throw pE;
+
+                const successMsg = currentLang === 'vi'
+                    ? `Đã tạo thành công hồ sơ ${name}. Email kích hoạt đã được gửi.`
+                    : `Profile for ${name} created. Activation email sent.`;
+                showToast(successMsg, false);
+                e.target.reset();
+                showAdminSection('list');
+                loadAdminData();
+            } catch (err) {
+                showToast(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = currentLang === 'vi' ? 'LƯU &amp; GỬI THÔNG BÁO' : 'SAVE &amp; NOTIFY';
+            }
+        };
+    </script>
+</body>
+
+</html>
