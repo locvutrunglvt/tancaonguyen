@@ -34,7 +34,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 120px 20px 60px 20px;
+  /* Increased top padding to avoid overlap */
   background-color: var(--sky-50);
   position: relative;
   overflow-x: hidden;
@@ -231,10 +232,12 @@ select.input-pro {
 
 .lang-selector {
   position: absolute;
-  top: 30px;
-  right: 30px;
+  top: 25px;
+  right: 25px;
   display: flex;
-  gap: 12px;
+  gap: 15px;
+  z-index: 100;
+  /* Ensure flags are above everything */
 }
 
 .lang-btn {
