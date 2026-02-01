@@ -1,4 +1,4 @@
-/* DASHBOARD & HOME MENU STYLES - TCN GREEN THEME */
+/* DASHBOARD & HOME MENU STYLES - TCN GREEN THEME - CLEAN PRO */
 :root {
     --tcn-primary: #10b981;
     --tcn-dark: #064e3b;
@@ -16,13 +16,14 @@
     background-color: #ffffff;
 }
 
-/* Sidebar - Desktop Only */
+/* Sidebar */
 .sidebar {
-    width: 260px;
+    width: 240px;
+    /* narrowed slightly */
     background: var(--tcn-dark);
     display: flex;
     flex-direction: column;
-    padding: 30px 20px;
+    padding: 25px 20px;
     position: sticky;
     top: 0;
     height: 100vh;
@@ -34,36 +35,35 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 40px;
-}
-
-.sidebar-logo img {
-    height: 28px;
-    filter: brightness(0) invert(1);
+    margin-bottom: 35px;
 }
 
 .sidebar-logo span {
-    font-size: 18px;
+    font-size: 15px;
+    /* smaller balanced */
     font-weight: 800;
     letter-spacing: 1px;
+    text-transform: uppercase;
+    color: white;
 }
 
 .nav-menu {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 18px;
-    border-radius: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
+    /* scaled down */
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -77,11 +77,10 @@
 .nav-item.active {
     background: var(--tcn-primary);
     color: white;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .sidebar-footer {
-    padding-top: 20px;
+    padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -89,17 +88,19 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 18px;
-    border-radius: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
     color: #fca5a5;
     cursor: pointer;
     font-weight: 600;
+    font-size: 13px;
 }
 
 /* Main Content */
 .main-content {
     flex: 1;
-    padding: 40px;
+    padding: 25px 35px;
+    /* compact */
     background: #fcfdfc;
     display: flex;
     flex-direction: column;
@@ -108,10 +109,9 @@
 .header-top {
     display: flex;
     justify-content: flex-end;
-    /* User info on the right */
     align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--sky-100);
 }
 
@@ -120,14 +120,16 @@
 }
 
 .welcome-section p {
-    font-size: 12px;
+    font-size: 11px;
+    /* tiny pro label */
     color: var(--slate-700);
     opacity: 0.6;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .welcome-section h2 {
-    font-size: 16px;
+    font-size: 14px;
+    /* balanced name */
     font-weight: 700;
     color: var(--tcn-dark);
 }
@@ -135,63 +137,66 @@
 /* Home Menu Grid */
 .home-menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    /* narrowed */
+    gap: 15px;
 }
 
 .menu-card {
     background: white;
-    padding: 24px;
-    border-radius: 20px;
+    padding: 20px;
+    border-radius: 18px;
     border: 1px solid var(--sky-200);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 15px;
+    gap: 12px;
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .menu-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     border-color: var(--tcn-primary);
-    box-shadow: 0 10px 20px rgba(6, 78, 59, 0.05);
 }
 
 .card-icon {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     background: var(--tcn-light);
-    border-radius: 16px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .card-icon i {
-    font-size: 24px;
+    font-size: 18px;
+    /* smaller icons */
     color: var(--tcn-deep);
 }
 
 .card-info h3 {
-    font-size: 15px;
+    font-size: 13px;
+    /* balanced menu name */
     font-weight: 700;
     color: var(--tcn-dark);
 }
 
 .card-info p {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--slate-700);
     opacity: 0.6;
+    line-height: 1.3;
 }
 
 /* Table */
 .data-table-container {
     background: white;
-    border-radius: 20px;
+    border-radius: 16px;
     border: 1px solid var(--sky-200);
-    margin-top: 20px;
+    margin-top: 15px;
     overflow: hidden;
 }
 
@@ -202,35 +207,38 @@
 
 .pro-table th {
     text-align: left;
-    padding: 15px 20px;
+    padding: 12px 15px;
     background: var(--sky-50);
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--tcn-deep);
 }
 
 .pro-table td {
-    padding: 15px 20px;
+    padding: 12px 15px;
     border-top: 1px solid var(--sky-100);
-    font-size: 13px;
+    font-size: 12px;
 }
 
-/* Mobile Optimizations */
+/* No footer logs styles - removed as requested */
+
+/* Mobile */
 @media (max-width: 768px) {
     .dashboard-layout {
         flex-direction: column;
-        padding-bottom: 70px;
+        padding-bottom: 60px;
     }
 
     .sidebar {
         width: 100%;
-        height: 65px;
+        height: 55px;
         position: fixed;
         bottom: 0;
         top: auto;
         flex-direction: row;
-        padding: 0 10px;
+        padding: 0 5px;
         justify-content: space-around;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.05);
     }
 
     .sidebar-logo,
@@ -246,45 +254,44 @@
     }
 
     .nav-item {
-        padding: 10px;
+        padding: 5px;
         flex-direction: column;
         gap: 0;
     }
 
     .nav-item i {
-        font-size: 22px;
+        font-size: 20px;
     }
 
     .main-content {
-        padding: 20px 15px;
-    }
-
-    .header-top {
-        padding-bottom: 10px;
-        margin-bottom: 20px;
+        padding: 15px 12px;
     }
 
     .welcome-section h2 {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .home-menu-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 10px;
     }
 
     .menu-card {
-        padding: 20px 10px;
-        border-radius: 16px;
+        padding: 15px 8px;
+        border-radius: 14px;
     }
 
     .card-icon {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .card-icon i {
+        font-size: 16px;
     }
 
     .card-info h3 {
-        font-size: 13px;
+        font-size: 12px;
     }
 
     .card-info p {

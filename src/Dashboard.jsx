@@ -327,16 +327,6 @@ const Dashboard = () => {
 
                 {/* Conditional Rendering of Views */}
                 {view === 'home' ? <HomeView /> : <UserManagementView />}
-
-                <footer className="dashboard-footer">
-                    <div className="footer-logos">
-                        <img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" />
-                        <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" />
-                    </div>
-                    <p className="copyright">
-                        &copy; 2026 TAN CAO NGUYEN // ECOSYSTEM PLATFORM
-                    </p>
-                </footer>
             </main>
         </div>
     );
