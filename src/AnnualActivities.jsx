@@ -103,7 +103,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi' }) => {
             {!showForm ? (
                 <div className="data-table-container">
                     <div className="table-header">
-                        <h3>{t.act_title}</h3>
+                        <h3><i className="fas fa-calendar-alt" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.act_title}</h3>
                         <div className="badge">{t.act_group}</div>
                     </div>
 

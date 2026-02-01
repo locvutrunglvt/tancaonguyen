@@ -102,7 +102,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
 
             <div className="data-table-container">
                 <div className="table-header">
-                    <h3>{t.farmer_list_title}</h3>
+                    <h3><i className="fas fa-users" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.farmer_list_title}</h3>
                     <div className="badge">{farmers.length} {t.farmer_count}</div>
                 </div>
                 <table className="pro-table">

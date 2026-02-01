@@ -71,7 +71,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
 
             <div className="data-table-container">
                 <div className="table-header">
-                    <h3>{t.model_title}</h3>
+                    <h3><i className="fas fa-project-diagram" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.model_title}</h3>
                     <div className="badge">{models.length} {t.model?.toLowerCase() || 'models'}</div>
                 </div>
                 <table className="pro-table">

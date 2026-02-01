@@ -162,15 +162,12 @@ const Dashboard = ({ devUser, onLogout }) => {
             <div className="home-menu-grid">
                 {menuItems.map(item => (
                     <div key={item.id} className="menu-card" onClick={item.action || (() => alert('Feature coming soon'))}>
-                        <div className="card-icon">
+                        <div className="card-icon" style={{ background: 'var(--coffee-medium)', color: 'white' }}>
                             <i className={item.icon}></i>
                         </div>
                         <div className="card-info">
                             <h3>{item.title}</h3>
                             <p>{item.desc}</p>
-                        </div>
-                        <div className="card-action">
-                            {t.action_access} <i className="fas fa-arrow-right"></i>
                         </div>
                     </div>
                 ))}
@@ -383,7 +380,7 @@ const Dashboard = ({ devUser, onLogout }) => {
                 <div className="home-logo-bar persistent-branding">
                     <img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" />
                     <img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" />
-                    <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" className="logo-nkg" />
+                    <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" style={{ height: '31px' }} />
                 </div>
 
                 <h1 className="project-main-title persistent-title">
@@ -426,6 +423,21 @@ const Dashboard = ({ devUser, onLogout }) => {
                 {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
                 {view === 'farmers' && <div className="view-container"><h2>{t.farmers}</h2><button onClick={() => setView('home')} className="btn-back"><i className="fas fa-arrow-left"></i> {t.back}</button></div>}
             </main>
+
+            <nav className="mobile-bottom-nav">
+                <button className={`nav-item-mobile ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
+                    <i className="fas fa-home"></i>
+                    <span>HOME</span>
+                </button>
+                <button className={`nav-item-mobile ${view === 'activities' ? 'active' : ''}`} onClick={() => setView('activities')}>
+                    <i className="fas fa-calendar-alt"></i>
+                    <span>TĂNG TRƯỞNG</span>
+                </button>
+                <button className={`nav-item-mobile ${view === 'users' ? 'active' : ''}`} onClick={() => setView('users')}>
+                    <i className="fas fa-user-cog"></i>
+                    <span>ADMIN</span>
+                </button>
+            </nav>
         </div>
     );
 };

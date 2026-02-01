@@ -139,7 +139,10 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi' }) => {
             {!showForm ? (
                 <div className="data-table-container">
                     <div className="table-header">
-                        <h3>{activeTab === 'training' ? t.train_history_title : t.train_tree_title}</h3>
+                        <h3>
+                            <i className={activeTab === 'training' ? "fas fa-chalkboard-teacher" : "fas fa-tree"} style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>
+                            {activeTab === 'training' ? t.train_history_title : t.train_tree_title}
+                        </h3>
                         <div className="badge">{t.train_group}</div>
                     </div>
 
