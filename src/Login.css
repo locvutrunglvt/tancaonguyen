@@ -118,20 +118,20 @@ body {
   z-index: 10;
 }
 
-/* DRASTIC FONT SCALE DOWN */
+/* BALANCED FONT SCALING */
 .auth-title {
-  font-size: 15px;
-  /* Aggressive small title */
-  font-weight: 800;
+  font-size: 13px;
+  /* subtle pro label */
+  font-weight: 600;
+  /* softened */
   color: var(--tcn-dark);
   text-align: center;
   margin-bottom: 5px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.2px;
 }
 
 .auth-subtitle {
-  font-size: 10px;
+  font-size: 9px;
   /* tiny pro label */
   color: var(--tcn-deep);
   text-align: center;
