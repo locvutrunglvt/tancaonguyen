@@ -1,17 +1,17 @@
-/* MODERN LIGHT INDUSTRIAL - White-Blue & Coffee Theme (Final Polish) */
+/* TCN GREEN - Dark Green & Pure White Theme */
 :root {
   --primary: #10b981;
   --primary-dark: #059669;
-  --coffee-dark: #451a03;
-  --coffee-medium: #78350f;
-  --coffee-light: #b45309;
-  --sky-50: #f0f9ff;
-  --sky-100: #e0f2fe;
-  --sky-200: #bae6fd;
+  --tcn-dark: #064e3b;
+  --tcn-deep: #065f46;
+  --tcn-light: #ecfdf5;
+  --sky-50: #f8fafc;
+  --sky-100: #f1f5f9;
+  --sky-200: #e2e8f0;
   --slate-900: #0f172a;
   --slate-700: #334155;
   --glass-bg: rgba(255, 255, 255, 0.98);
-  --glass-border: rgba(186, 230, 253, 0.6);
+  --glass-border: rgba(16, 185, 129, 0.2);
   --font-soft: 'Lexend', sans-serif;
 }
 
@@ -22,10 +22,9 @@
 }
 
 body {
-  margin: 0;
   font-family: var(--font-soft);
-  color: var(--slate-700);
-  background: var(--sky-50);
+  background-color: var(--sky-50);
+  color: var(--tcn-dark);
 }
 
 .login-container {
@@ -34,247 +33,194 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120px 20px 60px 20px;
-  /* Increased top padding to avoid overlap */
+  padding: 80px 20px 40px 20px;
   background-color: var(--sky-50);
   position: relative;
   overflow-x: hidden;
 }
 
-/* Subtle Industrial Grid Overlay */
+/* TCN Green Grid Overlay */
 .login-container::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(186, 230, 253, 0.4) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(186, 230, 253, 0.4) 1px, transparent 1px);
-  background-size: 30px 30px;
+    linear-gradient(var(--tcn-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tcn-light) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.8;
   pointer-events: none;
-}
-
-/* Logo Bar */
-.logo-bar {
-  width: 100%;
-  max-width: 700px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 50px;
-  margin-bottom: 60px;
-  padding: 25px 40px;
-  background: white;
-  border-radius: 30px;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 15px 30px -5px rgba(186, 230, 253, 0.25);
-  z-index: 10;
-}
-
-.logo-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logo-item img {
-  height: 32px;
-  width: auto;
-  object-fit: contain;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Specific Height for NKG - Large Primary Branding */
-.logo-item img[alt="NKG"] {
-  height: 80px;
-}
-
-.logo-item img[alt="Tchibo"] {
-  height: 48px;
-  /* Slightly taller branding */
-}
-
-.logo-item img:hover {
-  transform: scale(1.08);
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 500px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 48px;
-  padding: 60px;
-  box-shadow:
-    0 1px 2px rgba(120, 53, 15, 0.02),
-    0 10px 20px rgba(120, 53, 15, 0.03),
-    0 20px 40px rgba(186, 230, 253, 0.15),
-    0 40px 80px rgba(186, 230, 253, 0.2);
-  z-index: 10;
-  animation: stableFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes stableFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.99);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-header {
-  text-align: center;
-  margin-bottom: 45px;
-}
-
-header h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--coffee-dark);
-  margin-bottom: 15px;
-  line-height: 1.3;
-  /* Soften to sentence/lowercase if requested, here none to allow JSX labels */
-  text-transform: none;
-}
-
-.form-group {
-  margin-bottom: 30px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  color: var(--coffee-medium);
-  margin-bottom: 12px;
-  font-weight: 500;
-  text-transform: none;
-  /* Softened from uppercase */
-  opacity: 0.9;
-}
-
-.input-pro {
-  width: 100%;
-  background: #fff;
-  border: 2px solid var(--sky-100);
-  border-radius: 24px;
-  padding: 18px 24px;
-  color: var(--slate-900);
-  font-size: 16px;
-  font-weight: 400;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.input-pro:focus {
-  outline: none;
-  border-color: var(--coffee-medium);
-  box-shadow: 0 0 0 6px rgba(120, 53, 15, 0.06);
-}
-
-select.input-pro {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2378350f'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  /* CRITICAL FIX: No repetition */
-  background-position: right 24px center;
-  background-size: 20px;
-}
-
-.btn-primary {
-  width: 100%;
-  background: var(--coffee-dark);
-  color: white;
-  border: none;
-  border-radius: 24px;
-  padding: 22px;
-  font-size: 16px;
-  font-weight: 600;
-  text-transform: none;
-  /* Softened from uppercase */
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 25px -5px rgba(69, 26, 3, 0.25);
-  margin-top: 5px;
-}
-
-.btn-primary:hover {
-  background: var(--coffee-medium);
-  transform: translateY(-3px);
-  box-shadow: 0 20px 40px -10px rgba(69, 26, 3, 0.35);
-}
-
-.btn-primary:active {
-  transform: translateY(-1px);
-}
-
-.footer-links {
-  margin-top: 45px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.footer-links a {
-  color: var(--coffee-light);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s;
-}
-
-.footer-links a:hover {
-  color: var(--coffee-dark);
-  text-decoration: underline;
 }
 
 .lang-selector {
   position: absolute;
-  top: 25px;
-  right: 25px;
+  top: 20px;
+  right: 20px;
   display: flex;
-  gap: 15px;
+  gap: 12px;
   z-index: 100;
-  /* Ensure flags are above everything */
 }
 
-.lang-btn {
-  background: white;
-  border: 1px solid var(--sky-100);
-  padding: 10px;
-  border-radius: 15px;
+.lang-flag {
+  width: 32px;
+  height: 22px;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1.5px solid white;
 }
 
-.lang-btn.active {
-  border-color: var(--coffee-medium);
-  background: var(--sky-50);
+.lang-flag.active {
+  border-color: var(--primary);
+}
+
+.logo-bar {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding: 15px 25px;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--sky-200);
+  z-index: 10;
+}
+
+.logo-item img {
+  height: 22px;
+  object-fit: contain;
+}
+
+.logo-item img[alt="NKG"] {
+  height: 50px;
+}
+
+.logo-item img[alt="Tchibo"] {
+  height: 32px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(6, 78, 59, 0.06);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--tcn-dark);
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.auth-subtitle {
+  font-size: 13px;
+  color: var(--tcn-deep);
+  text-align: center;
+  margin-bottom: 30px;
+  opacity: 0.7;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tcn-dark);
+  margin-bottom: 8px;
+  margin-left: 10px;
+  text-transform: uppercase;
+}
+
+.input-pro {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid var(--sky-200);
+  background: white;
+  color: var(--tcn-dark);
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.input-pro:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--tcn-light);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  border-radius: 16px;
+  border: none;
+  background: var(--tcn-dark);
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--tcn-deep);
+  transform: translateY(-2px);
+}
+
+.footer-links {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--tcn-deep);
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.footer-links a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
 }
 
 @media (max-width: 480px) {
+  .login-container {
+    padding-top: 60px;
+  }
+
   .logo-bar {
-    gap: 25px;
-    padding: 20px;
-    flex-wrap: wrap;
-    /* Better on small screen */
+    gap: 20px;
+    padding: 12px;
+    margin-bottom: 25px;
   }
 
   .logo-item img {
-    height: 28px;
+    height: 18px;
   }
 
   .logo-item img[alt="NKG"] {
-    height: 50px;
+    height: 40px;
   }
 
   .auth-card {
-    padding: 50px 30px;
-    border-radius: 40px 40px 0 0;
-    position: fixed;
-    bottom: 0;
-    max-width: none;
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+
+  .auth-title {
+    font-size: 22px;
   }
 }

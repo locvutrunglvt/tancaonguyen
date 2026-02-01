@@ -306,14 +306,12 @@ const Dashboard = () => {
             {/* Main Workspace */}
             <main className="main-content">
                 <header className="header-top">
-                    <div className="welcome-section">
-                        <h2>Xin chào, {currentUser?.email?.split('@')[0] || 'Phụ trách'}</h2>
-                        <p>{view === 'home' ? 'Chào mừng bạn trở lại hệ thống quản lý TCN.' : 'Quản lý tài khoản và phân quyền hệ thống.'}</p>
+                    <div onClick={handleLogout} className="mobile-only-logout" style={{ marginRight: 'auto', cursor: 'pointer', display: 'none' }}>
+                        <i className="fas fa-sign-out-alt" style={{ color: '#ef4444', fontSize: '20px' }}></i>
                     </div>
-                    <div className="header-meta">
-                        <span className="px-4 py-2 bg-white border border-[#e0f2fe] text-[#78350f] text-xs font-bold rounded-2xl shadow-sm">
-                            Phiên bản: 2.5.1
-                        </span>
+                    <div className="welcome-section">
+                        <p>Tân Cao Nguyên xin chào,</p>
+                        <h2>{currentUser?.email?.split('@')[0] || 'Quản trị viên'}</h2>
                     </div>
                 </header>
 

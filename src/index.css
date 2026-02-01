@@ -1,23 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Public+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  --slate-950: #020617;
+  --primary: #10b981;
+  --primary-dark: #059669;
+  --tcn-dark: #064e3b;
+  --tcn-deep: #065f46;
+  --tcn-light: #ecfdf5;
+  --sky-50: #f8fafc;
+  --sky-100: #f1f5f9;
+  --sky-200: #e2e8f0;
   --slate-900: #0f172a;
-  --slate-800: #1e293b;
-  --emerald-500: #10b981;
-  --bg-industrial: #f1f5f9;
+  --slate-700: #334155;
+  --glass-bg: rgba(255, 255, 255, 0.98);
+  --glass-border: rgba(16, 185, 129, 0.2);
+  --font-soft: 'Lexend', sans-serif;
 }
 
 a {
