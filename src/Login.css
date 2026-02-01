@@ -1,4 +1,4 @@
-/* TCN GREEN - PREMIUM COFFEE THEME - REFINED */
+/* TCN GREEN - PREMIUM COFFEE THEME - FINAL POLISH */
 :root {
   --primary: #10b981;
   --primary-dark: #059669;
@@ -42,52 +42,56 @@ body {
   position: relative;
 }
 
-/* CLEAN Flag Selector */
+/* FIXED FLAG SELECTOR - ENSURE VISIBILITY */
 .lang-selector {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 25px;
+  right: 25px;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   z-index: 100;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
 }
 
 .lang-btn {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 5px;
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  border-radius: 8px;
+  opacity: 0.5;
+  transition: all 0.3s;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
 }
 
 .lang-btn.active {
-  background: white;
-  border-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .lang-btn img {
-  width: 28px;
+  width: 35px;
+  /* slightly larger flags */
   height: auto;
-  border-radius: 2px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* LOGO BAR - PURE WHITE BACKGROUND */
 .logo-bar {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
   margin-bottom: 25px;
-  padding: 12px 30px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
+  padding: 15px 35px;
+  background: #ffffff;
+  /* MÀU TRẮNG TINH */
   border-radius: 20px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--sky-200);
   z-index: 10;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
@@ -97,24 +101,27 @@ body {
   object-fit: contain;
 }
 
+.logo-item img[alt="TCN"] {
+  height: 35px;
+}
+
 .logo-item img[alt="NKG"] {
-  height: 42px;
+  height: 45px;
 }
 
 .logo-item img[alt="Tchibo"] {
-  height: 28px;
+  height: 30px;
 }
 
 /* GLASSMORPHIC CARD */
 .auth-card {
   width: 100%;
   max-width: 440px;
-  /* narrowed slightly for elegance */
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   border-radius: 32px;
-  padding: 35px;
+  padding: 40px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
   z-index: 10;
 }
@@ -122,30 +129,27 @@ body {
 /* REFINED SPECIALIZED TITLE */
 .auth-title {
   font-size: 18px !important;
-  /* Large and bold as requested */
   font-weight: 800;
   color: var(--coffee-rich);
-  /* Modern Coffee Color */
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   line-height: 1.4;
   text-transform: uppercase;
-  /* In hoa */
   letter-spacing: 0.5px;
 }
 
 .auth-subtitle {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--tcn-deep);
   text-align: center;
   margin-bottom: 30px;
   opacity: 0.7;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 2px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
@@ -155,7 +159,7 @@ body {
   color: var(--tcn-dark);
   margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .input-pro {
@@ -163,16 +167,15 @@ body {
   padding: 14px 18px;
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.8);
+  background: white;
   font-size: 14px;
   color: var(--tcn-dark);
   font-family: var(--font-soft);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
 }
 
 .input-pro:focus {
   border-color: var(--primary);
-  background: white;
   outline: none;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
@@ -187,7 +190,7 @@ body {
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 5px;
   transition: all 0.3s;
   box-shadow: 0 8px 20px rgba(6, 78, 59, 0.25);
 }
@@ -195,10 +198,9 @@ body {
 .btn-primary:hover {
   background: var(--tcn-deep);
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(6, 78, 59, 0.35);
 }
 
-/* MODERN POLITE GREEN LINKS */
+/* MODERN POLITE GREEN LINKS - SMALL & LUXURY */
 .footer-links {
   margin-top: 25px;
   display: flex;
@@ -209,16 +211,22 @@ body {
 .footer-links button {
   background: none;
   border: none;
-  font-size: 12px;
-  color: var(--primary);
-  /* Modern polite green */
+  font-size: 10px;
+  /* smaller for luxury feel */
+  color: var(--primary-dark);
+  /* Polite modern green */
   font-weight: 700;
   cursor: pointer;
-  transition: color 0.2s;
+  opacity: 0.8;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .footer-links button:hover {
-  color: var(--primary-dark);
+  opacity: 1;
+  color: var(--primary);
+  text-decoration: underline;
 }
 
 @media (max-width: 480px) {
@@ -231,6 +239,16 @@ body {
   }
 
   .logo-bar {
-    padding: 10px 20px;
+    padding: 12px 20px;
+    gap: 12px;
+  }
+
+  .lang-selector {
+    top: 15px;
+    right: 15px;
+  }
+
+  .lang-btn img {
+    width: 30px;
   }
 }
