@@ -141,6 +141,23 @@ const Login = ({ onDevLogin }) => {
         }
     };
 
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+            });
+            if (error) throw error;
+            alert(t.reset_sent);
+            setView('login');
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -348,9 +365,22 @@ const Login = ({ onDevLogin }) => {
                     </form>
                 )}
 
+                {view === 'forgot' && (
+                    <form onSubmit={handleForgotPassword}>
+                        <div className="form-group">
+                            <label>{t.email}</label>
+                            <input className="input-pro" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
+                        </div>
+                        <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.loading : t.send_reset}</button>
+                    </form>
+                )}
+
                 <div className="footer-links">
                     {view === 'login' ? (
-                        <a href="#signup" onClick={(e) => { e.preventDefault(); setView('register'); }}>{t.signup}</a>
+                        <>
+                            <a href="#signup" onClick={(e) => { e.preventDefault(); setView('register'); }}>{t.signup}</a>
+                            <a href="#forgot" onClick={(e) => { e.preventDefault(); setView('forgot'); }}>{t.forgot}</a>
+                        </>
                     ) : (
                         <a href="#login" onClick={(e) => { e.preventDefault(); setView('login'); }}>{t.back}</a>
                     )}

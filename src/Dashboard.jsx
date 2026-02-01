@@ -159,16 +159,6 @@ const Dashboard = ({ devUser, onLogout }) => {
 
     const HomeView = () => (
         <div className="home-container">
-            <div className="home-logo-bar">
-                <img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" />
-                <img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" />
-                <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" className="logo-nkg" />
-            </div>
-
-            <h1 className="project-main-title">
-                {t.project_title}
-            </h1>
-
             <div className="home-menu-grid">
                 {menuItems.map(item => (
                     <div key={item.id} className="menu-card" onClick={item.action || (() => alert('Feature coming soon'))}>
@@ -321,7 +311,7 @@ const Dashboard = ({ devUser, onLogout }) => {
             {/* Sidebar Navigation */}
             <aside className="sidebar">
                 <div className="sidebar-logo">
-                    <span>DỰ ÁN TÂN CAO NGUYÊN</span>
+                    <span>{t.sidebar_branding}</span>
                 </div>
 
                 <nav className="nav-menu">
@@ -369,10 +359,36 @@ const Dashboard = ({ devUser, onLogout }) => {
 
             {/* Main Workspace */}
             <main className="main-content">
+                <div className="home-logo-bar persistent-branding">
+                    <img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" />
+                    <img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" />
+                    <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" className="logo-nkg" />
+                </div>
+
+                <h1 className="project-main-title persistent-title">
+                    {t.project_title}
+                </h1>
+
                 <header className="header-top">
-                    <div onClick={handleLogout} className="mobile-only-logout" style={{ marginRight: 'auto', cursor: 'pointer', display: 'none' }}>
-                        <i className="fas fa-sign-out-alt" style={{ color: '#ef4444', fontSize: '20px' }}></i>
+                    <div className="dashboard-controls" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div onClick={handleLogout} className="mobile-only-logout" style={{ cursor: 'pointer', display: 'none' }}>
+                            <i className="fas fa-sign-out-alt" style={{ color: '#ef4444', fontSize: '20px' }}></i>
+                        </div>
+
+                        {/* In-app Language Selector */}
+                        <div className="in-app-lang" style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.7)', padding: '5px 10px', borderRadius: '30px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                            <button className={`lang-mini-btn ${appLang === 'vi' ? 'active' : ''}`} onClick={() => setAppLang('vi')} style={{ border: 'none', background: 'none', cursor: 'pointer', outline: 'none', filter: appLang === 'vi' ? 'none' : 'grayscale(1)', transition: '0.3s' }}>
+                                <img src="https://flagcdn.com/w20/vn.png" alt="VI" />
+                            </button>
+                            <button className={`lang-mini-btn ${appLang === 'en' ? 'active' : ''}`} onClick={() => setAppLang('en')} style={{ border: 'none', background: 'none', cursor: 'pointer', outline: 'none', filter: appLang === 'en' ? 'none' : 'grayscale(1)', transition: '0.3s' }}>
+                                <img src="https://flagcdn.com/w20/gb.png" alt="EN" />
+                            </button>
+                            <button className={`lang-mini-btn ${appLang === 'ede' ? 'active' : ''}`} onClick={() => setAppLang('ede')} style={{ border: 'none', background: appLang === 'ede' ? 'var(--coffee-dark)' : 'none', color: appLang === 'ede' ? 'white' : 'var(--coffee-dark)', cursor: 'pointer', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>
+                                EĐ
+                            </button>
+                        </div>
                     </div>
+
                     <div className="welcome-section">
                         <p>{t.welcome}</p>
                         <h2>{currentUser?.email?.split('@')[0] || t.admin}</h2>

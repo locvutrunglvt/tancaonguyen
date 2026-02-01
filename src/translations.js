@@ -14,6 +14,13 @@ export const translations = {
         model: "Quản lý mô hình",
         users: "Quản trị hệ thống",
         home: "Trang chủ",
+        sidebar_branding: "DỰ ÁN TÂN CAO NGUYÊN",
+
+        // Forgot Password
+        forgot_title: "Quên mật khẩu?",
+        forgot_desc: "Nhập email của bạn để nhận liên kết đặt lại mật khẩu.",
+        send_reset: "Gửi yêu cầu",
+        reset_sent: "Yêu cầu đã được gửi! Vui lòng kiểm tra email.",
 
         // Menu Descriptions
         farmers_desc: "Quản lý toàn bộ thông tin căn bản, hồ sơ nhân khẩu và định danh hộ dân.",
@@ -69,6 +76,13 @@ export const translations = {
         model: "Model Management",
         users: "System Admin",
         home: "Home",
+        sidebar_branding: "TAN CAO NGUYEN PROJECT",
+
+        // Forgot Password
+        forgot_title: "Forgot Password?",
+        forgot_desc: "Enter your email to receive a password reset link.",
+        send_reset: "Send Request",
+        reset_sent: "Request sent! Please check your email.",
 
         // Menu Descriptions
         farmers_desc: "Manage basic information, demographic records, and farmer identification.",
@@ -124,6 +138,13 @@ export const translations = {
         model: "Hma kriê",
         users: "Mnuih bruă",
         home: "Sang",
+        sidebar_branding: "DỰ ÁN TÂN CAO NGUYÊN",
+
+        // Forgot Password
+        forgot_title: "Khŏ kơ mật khẩu?",
+        forgot_desc: "Čih email kơ jia bi mrâo mật khẩu.",
+        send_reset: "Gửi yêu cầu",
+        reset_sent: "Yêu cầu đã được gửi! Vui lòng kiểm tra email.",
 
         // Menu Descriptions
         farmers_desc: "Kriê ală klei kơ mnuih hma mơ̆ng sang.",
