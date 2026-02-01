@@ -77,7 +77,7 @@ body {
 }
 
 .logo-item img {
-  height: 35px;
+  height: 32px;
   width: auto;
   object-fit: contain;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -86,6 +86,11 @@ body {
 /* Specific Height for NKG - Large Primary Branding */
 .logo-item img[alt="NKG"] {
   height: 80px;
+}
+
+.logo-item img[alt="Tchibo"] {
+  height: 48px;
+  /* Slightly taller branding */
 }
 
 .logo-item img:hover {
