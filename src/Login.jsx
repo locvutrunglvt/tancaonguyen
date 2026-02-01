@@ -4,7 +4,7 @@ import './Login.css';
 
 const translations = {
     vi: {
-        title: 'Quản lý nông hộ & Thích ứng biến đổi khí hậu',
+        title: 'QUẢN LÝ MÔ HÌNH CÀ PHÊ THÍCH ỨNG BIẾN ĐỔI KHÍ HẬU',
         subtitle: '[ Xác thực hệ thống ]',
         org: 'Chọn tổ chức của bạn',
         username: 'Chọn tài khoản người dùng',
@@ -30,7 +30,7 @@ const translations = {
         ]
     },
     en: {
-        title: 'Farming Management & Climate Adaptation',
+        title: 'COFFEE MODEL MANAGEMENT & CLIMATE ADAPTATION',
         subtitle: '[ System authorization ]',
         org: 'Select your organization',
         username: 'Select user credential',
