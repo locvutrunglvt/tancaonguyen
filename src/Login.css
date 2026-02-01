@@ -1,16 +1,7 @@
 :root {
   --slate-950: #020617;
   --slate-900: #0f172a;
-  --slate-800: #1e293b;
-  --slate-700: #334155;
-  --slate-400: #94a3b8;
-  --emerald-600: #059669;
-  --emerald-500: #10b981;
-  --emerald-400: #34d399;
-  --coffee-accent: #92400e;
-  --primary-color: var(--slate-900);
   --primary: #10b981;
-  /* Emerald Green */
   --primary-dark: #059669;
   --coffee-dark: #451a03;
   --coffee-medium: #78350f;
@@ -20,8 +11,9 @@
   --sky-200: #bae6fd;
   --slate-900: #0f172a;
   --slate-700: #334155;
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(15, 23, 42, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(186, 230, 253, 0.5);
+  --font-soft: 'Lexend', sans-serif;
 }
 
 * {
@@ -32,7 +24,7 @@
 
 body {
   margin: 0;
-  font-family: 'Public Sans', sans-serif;
+  font-family: var(--font-soft);
   color: var(--slate-700);
   background: var(--sky-50);
 }
@@ -43,20 +35,21 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   background-color: var(--sky-50);
   position: relative;
   overflow-x: hidden;
+  perspective: 1000px;
 }
 
-/* Subtle Industrial Grid Overlay (Light Theme) */
+/* Subtle Industrial Grid Overlay */
 .login-container::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(186, 230, 253, 0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(186, 230, 253, 0.3) 1px, transparent 1px);
+    linear-gradient(rgba(186, 230, 253, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186, 230, 253, 0.4) 1px, transparent 1px);
   background-size: 30px 30px;
   pointer-events: none;
 }
@@ -64,130 +57,145 @@ body {
 /* Logo Bar */
 .logo-bar {
   width: 100%;
-  max-width: 600px;
+  max-width: 650px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 30px;
-  margin-bottom: 40px;
-  padding: 15px;
+  gap: 40px;
+  margin-bottom: 50px;
+  padding: 20px 30px;
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border-radius: 24px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(186, 230, 253, 0.2);
   z-index: 10;
+  backdrop-filter: blur(10px);
 }
 
 .logo-item {
-  height: 40px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .logo-item img {
-  height: 100%;
+  height: 48px;
+  /* General height increase */
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
-  transition: transform 0.3s;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Specific Height Increase for NKG */
+.logo-item img[alt="NKG"] {
+  height: 60px;
 }
 
 .logo-item img:hover {
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .auth-card {
   width: 100%;
-  max-width: 450px;
+  max-width: 480px;
   background: var(--glass-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--glass-border);
-  border-radius: 32px;
-  padding: 40px;
-  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.1);
+  border-radius: 40px;
+  padding: 50px;
+  /* 3D Floating Effect */
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    0 4px 8px rgba(0, 0, 0, 0.05),
+    0 8px 16px rgba(186, 230, 253, 0.1),
+    0 16px 32px rgba(186, 230, 253, 0.15),
+    0 32px 64px rgba(186, 230, 253, 0.2);
+  transform-style: preserve-3d;
+  transform: rotateX(2deg);
+  /* Subtle 3D tilt */
   z-index: 10;
-  animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: floatingFade 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes fadeInScale {
+@keyframes floatingFade {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(40px) rotateX(10deg);
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) rotateX(2deg);
   }
 }
 
 header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 header h1 {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--coffee-dark);
-  margin-bottom: 8px;
-  line-height: 1.2;
-  text-transform: uppercase;
+  margin-bottom: 12px;
+  line-height: 1.25;
 }
 
 .tech-badge {
   display: inline-block;
   background: var(--sky-100);
   color: var(--coffee-medium);
-  padding: 4px 14px;
+  padding: 6px 16px;
   border-radius: 100px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  margin-bottom: 16px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
 }
 
 .form-group {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .form-group label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--coffee-medium);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  opacity: 0.8;
 }
 
 .input-pro {
   width: 100%;
   background: white;
   border: 2px solid var(--sky-100);
-  border-radius: 16px;
-  padding: 14px 18px;
+  border-radius: 20px;
+  padding: 16px 20px;
   color: var(--slate-900);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .input-pro:focus {
   outline: none;
   border-color: var(--coffee-medium);
-  background: white;
-  box-shadow: 0 0 0 4px rgba(120, 53, 15, 0.1);
+  box-shadow: 0 0 0 5px rgba(120, 53, 15, 0.08);
+  transform: translateY(-2px);
 }
 
 select.input-pro {
   cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2378350f'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 18px center;
-  background-size: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2378350f'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-position: right 20px center;
+  background-size: 18px;
 }
 
 .btn-primary {
@@ -195,96 +203,86 @@ select.input-pro {
   background: var(--coffee-dark);
   color: white;
   border: none;
-  border-radius: 16px;
-  padding: 18px;
-  font-size: 15px;
+  border-radius: 20px;
+  padding: 20px;
+  font-size: 16px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-top: 10px;
+  box-shadow: 0 10px 20px -5px rgba(69, 26, 3, 0.3);
 }
 
 .btn-primary:hover {
   background: var(--coffee-medium);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px -5px rgba(69, 26, 3, 0.3);
+  transform: translateY(-4px) translateZ(20px);
+  box-shadow: 0 20px 40px -10px rgba(69, 26, 3, 0.4);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(-1px) translateZ(10px);
 }
 
 .footer-links {
-  margin-top: 32px;
+  margin-top: 40px;
   display: flex;
   justify-content: space-between;
-  gap: 16px;
 }
 
 .footer-links a {
   color: var(--coffee-light);
   text-decoration: none;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: all 0.3s;
 }
 
 .footer-links a:hover {
   color: var(--coffee-dark);
+  text-decoration: underline;
 }
 
-.lang-selector {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  display: flex;
-  gap: 10px;
-  z-index: 20;
+/* Custom Scrollbar for the whole app */
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-.lang-btn {
-  background: white;
-  border: 1px solid var(--sky-200);
-  padding: 8px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+::-webkit-scrollbar-track {
+  background: var(--sky-50);
 }
 
-.lang-btn.active {
-  border-color: var(--coffee-medium);
-  background: var(--sky-100);
+::-webkit-scrollbar-thumb {
+  background: var(--sky-200);
+  border-radius: 10px;
 }
 
-.lang-btn img {
-  width: 24px;
-  display: block;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--coffee-light);
 }
 
-/* Mobile Adjustments */
 @media (max-width: 480px) {
   .logo-bar {
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 20px;
+    padding: 15px;
   }
 
-  .logo-item {
-    height: 30px;
+  .logo-item img {
+    height: 32px;
+  }
+
+  .logo-item img[alt="NKG"] {
+    height: 40px;
   }
 
   .auth-card {
-    padding: 40px 20px;
-    border-radius: 32px 32px 0 0;
+    padding: 40px 25px;
+    border-radius: 40px 40px 0 0;
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
     max-width: none;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+    transform: rotateX(0);
+    /* Remove 3D on mobile for better touch */
   }
 }
