@@ -103,6 +103,9 @@
 .main-content {
     flex: 1;
     padding: 40px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .header-top {
@@ -128,6 +131,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 25px;
+    flex: 1;
 }
 
 .menu-card {
@@ -189,22 +193,115 @@
     opacity: 0.8;
 }
 
-.card-action {
-    margin-top: auto;
+/* User Table Styles */
+.data-table-container {
+    background: white;
+    border-radius: 30px;
+    border: 1px solid var(--sky-200);
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.table-header {
+    padding: 25px 40px;
+    border-bottom: 1px solid var(--sky-100);
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    font-size: 14px;
+    background: var(--sky-50);
+}
+
+.table-header h3 {
+    font-weight: 700;
+    color: var(--coffee-dark);
+}
+
+.pro-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pro-table th {
+    text-align: left;
+    padding: 20px 40px;
+    background: white;
+    font-size: 13px;
     font-weight: 700;
     color: var(--coffee-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.card-action i {
-    transition: transform 0.3s;
+.pro-table td {
+    padding: 20px 40px;
+    border-top: 1px solid var(--sky-100);
+    font-size: 14px;
+    color: var(--slate-700);
 }
 
-.menu-card:hover .card-action i {
-    transform: translateX(5px);
+.pro-table tr:hover {
+    background: var(--sky-50);
+}
+
+.role-badge {
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.role-admin {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.role-viewer {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.role-farmer {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+/* Dashboard Footer */
+.dashboard-footer {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid var(--sky-100);
+    text-align: center;
+    opacity: 0.8;
+}
+
+.footer-logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 20px;
+}
+
+.footer-logos img {
+    height: 35px;
+    /* STRICT LIMIT to prevent distortion */
+    width: auto;
+    object-fit: contain;
+    filter: grayscale(1) opacity(0.5);
+    transition: all 0.3s;
+}
+
+.footer-logos img:hover {
+    filter: grayscale(0) opacity(1);
+    transform: scale(1.1);
+}
+
+.copyright {
+    font-size: 10px;
+    color: var(--coffee-medium);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 @media (max-width: 1024px) {
