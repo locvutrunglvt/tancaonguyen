@@ -181,17 +181,26 @@ const Login = () => {
                 </button>
             </div>
 
+            <div className="logo-bar">
+                <div className="logo-item">
+                    <img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" />
+                </div>
+                <div className="logo-item">
+                    <img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" />
+                </div>
+                <div className="logo-item">
+                    <img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" />
+                </div>
+            </div>
+
             <div className="auth-card">
-                <div className="logo-section">
-                    <div className="logo-circle">
-                        <img src="/anh-cafe.jpg" alt="Coffee Logo" />
-                    </div>
-                    <span className="tech-badge">CODE: {view.toUpperCase()}</span>
+                <div className="logo-section" style={{ display: 'none' }}>
+                    {/* Hidden default logo section in favor of top bar or specific branding */}
                 </div>
 
                 <header>
                     <h1>{t.title}</h1>
-                    <p style={{ color: '#94a3b8', fontSize: '14px' }}>System Version 2.4.0</p>
+                    <span className="tech-badge">CODE: {view.toUpperCase()}</span>
                 </header>
 
                 {view === 'login' && (
