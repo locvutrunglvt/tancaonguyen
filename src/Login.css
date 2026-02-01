@@ -1,13 +1,12 @@
-/* TCN GREEN - Drastic Scale Fix - Final Correction */
+/* TCN GREEN - PREMIUM COFFEE THEME */
 :root {
   --primary: #10b981;
   --primary-dark: #059669;
   --tcn-dark: #064e3b;
   --tcn-deep: #065f46;
   --tcn-light: #ecfdf5;
-  --sky-50: #f8fafc;
-  --sky-100: #f1f5f9;
-  --sky-200: #e2e8f0;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.4);
   --font-soft: 'Lexend', sans-serif;
 }
 
@@ -19,9 +18,7 @@
 
 body {
   font-family: var(--font-soft);
-  background-color: var(--sky-50);
-  color: var(--tcn-dark);
-  line-height: 1.4;
+  overflow-x: hidden;
 }
 
 .login-container {
@@ -31,50 +28,49 @@ body {
   align-items: center;
   justify-content: center;
   padding: 20px 15px;
-  background-color: var(--sky-50);
+  /* PREMIUM COFFEE BACKGROUND */
+  background:
+    linear-gradient(rgba(6, 78, 59, 0.4), rgba(6, 78, 59, 0.4)),
+    url('https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/Anh%20Cafe.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   position: relative;
-}
-
-/* Subtle background grid */
-.login-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--tcn-light) 1px, transparent 1px),
-    linear-gradient(90deg, var(--tcn-light) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.5;
-  pointer-events: none;
 }
 
 /* CLEAN Flag Selector */
 .lang-selector {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 20px;
+  right: 20px;
   display: flex;
-  gap: 8px;
+  gap: 10px;
   z-index: 100;
 }
 
 .lang-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
 }
 
 .lang-btn.active {
-  opacity: 1;
+  background: white;
+  border-color: var(--primary);
 }
 
 .lang-btn img {
-  width: 32px;
+  width: 28px;
   height: auto;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 .logo-bar {
@@ -82,12 +78,14 @@ body {
   justify-content: center;
   align-items: center;
   gap: 20px;
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid var(--sky-200);
+  margin-bottom: 25px;
+  padding: 12px 25px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
   z-index: 10;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .logo-item img {
@@ -103,85 +101,115 @@ body {
   height: 26px;
 }
 
+/* GLASSMORPHIC CARD */
 .auth-card {
   width: 100%;
-  max-width: 380px;
-  background: white;
-  border: 1px solid var(--sky-200);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 20px rgba(6, 78, 59, 0.05);
+  max-width: 400px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  padding: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
   z-index: 10;
 }
 
-/* FIXED: SPECIFIC CLASS TO OVERRIDE BLOATED H1 */
 .auth-title {
   font-size: 14px !important;
-  /* Explicitly small as requested */
   font-weight: 700;
   color: var(--tcn-dark);
   text-align: center;
-  margin-bottom: 5px;
-  line-height: 1.2;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.auth-subtitle {
+  font-size: 10px;
+  color: var(--tcn-deep);
+  text-align: center;
+  margin-bottom: 25px;
+  opacity: 0.8;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
   display: block;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--tcn-deep);
-  margin-bottom: 4px;
+  color: var(--tcn-dark);
+  margin-bottom: 5px;
   text-transform: uppercase;
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .input-pro {
   width: 100%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--sky-200);
-  background: #fdfdfd;
-  font-size: 13px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  font-size: 14px;
   color: var(--tcn-dark);
   font-family: var(--font-soft);
+  transition: all 0.3s;
+}
+
+.input-pro:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .btn-primary {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 14px;
   border: none;
   background: var(--tcn-dark);
   color: white;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   margin-top: 10px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
+}
+
+.btn-primary:hover {
+  background: var(--tcn-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(6, 78, 59, 0.3);
 }
 
 .footer-links {
-  margin-top: 15px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 20px;
 }
 
 .footer-links button {
   background: none;
   border: none;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--primary);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
 @media (max-width: 480px) {
   .auth-card {
-    padding: 15px;
+    padding: 25px 20px;
+  }
+
+  .logo-bar {
+    gap: 15px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
   }
 
   .auth-title {
