@@ -181,89 +181,97 @@ const Login = () => {
                 </button>
             </div>
 
-            <header>
-                <span className="tech-label">{t.subtitle}</span>
-                <h1>{t.title}</h1>
-                <p>System Ver. 2.4.0 | View: {view.toUpperCase()}</p>
-            </header>
-
-            {view === 'login' && (
-                <form onSubmit={handleLogin}>
-                    <div className="form-group">
-                        <label><i className="fas fa-coffee"></i> {t.org}</label>
-                        <select required value={formData.org} onChange={(e) => setFormData({ ...formData, org: e.target.value })}>
-                            <option value="">{t.selectOrg}</option>
-                            {t.orgs.map(org => <option key={org.id} value={org.id}>{org.name}</option>)}
-                        </select>
+            <div className="auth-card">
+                <div className="logo-section">
+                    <div className="logo-circle">
+                        <img src="/anh-cafe.jpg" alt="Coffee Logo" />
                     </div>
+                    <span className="tech-badge">CODE: {view.toUpperCase()}</span>
+                </div>
 
-                    {formData.org && (
-                        <div className="animate-in fade-in duration-300">
-                            <div className="form-group">
-                                <label><i className="fas fa-user"></i> {t.username}</label>
-                                <select required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}>
-                                    <option value="">{isFetchingUsers ? 'LOADING...' : t.selectUser}</option>
-                                    {users.map((u, i) => <option key={i} value={u.email}>{u.full_name.toUpperCase()}</option>)}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label><i className="fas fa-key"></i> {t.password}</label>
-                                <input type="password" required value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
-                            </div>
-                            <button type="submit" className="btn-login" disabled={isLoading}>{isLoading ? t.verifying : t.login}</button>
+                <header>
+                    <h1>{t.title}</h1>
+                    <p style={{ color: '#94a3b8', fontSize: '14px' }}>System Version 2.4.0</p>
+                </header>
+
+                {view === 'login' && (
+                    <form onSubmit={handleLogin}>
+                        <div className="form-group">
+                            <label>{t.org}</label>
+                            <select className="input-pro" required value={formData.org} onChange={(e) => setFormData({ ...formData, org: e.target.value })}>
+                                <option value="">{t.selectOrg}</option>
+                                {t.orgs.map(org => <option key={org.id} value={org.id}>{org.name}</option>)}
+                            </select>
                         </div>
-                    )}
-                </form>
-            )}
 
-            {view === 'register' && (
-                <form onSubmit={handleRegister}>
-                    <div className="form-group">
-                        <label>{t.fullName}</label>
-                        <input type="text" required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} placeholder="NGUYEN VAN A" />
-                    </div>
-                    <div className="form-group">
-                        <label>{t.email}</label>
-                        <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
-                    </div>
-                    <div className="form-group">
-                        <label>{t.phone}</label>
-                        <input type="tel" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="090..." />
-                    </div>
-                    <div className="form-group">
-                        <label>{t.org}</label>
-                        <select required value={formData.org} onChange={(e) => setFormData({ ...formData, org: e.target.value })}>
-                            <option value="">{t.selectOrg}</option>
-                            {t.orgs.map(org => <option key={org.id} value={org.id}>{org.name}</option>)}
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label>{t.password}</label>
-                        <input type="password" required minLength="6" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
-                    </div>
-                    <button type="submit" className="btn-login" disabled={isLoading}>{isLoading ? t.loading : t.register}</button>
-                </form>
-            )}
-
-            {view === 'forgot' && (
-                <form onSubmit={handleForgot}>
-                    <div className="form-group">
-                        <label>{t.email}</label>
-                        <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
-                    </div>
-                    <button type="submit" className="btn-login" disabled={isLoading}>{isLoading ? t.loading : t.reset}</button>
-                </form>
-            )}
-
-            <div className="footer-links">
-                {view === 'login' ? (
-                    <>
-                        <a href="#forgot" onClick={() => setView('forgot')}>{t.forgot}</a>
-                        <a href="#signup" onClick={() => setView('register')}>{t.signup}</a>
-                    </>
-                ) : (
-                    <a href="#login" onClick={() => setView('login')}>{t.back}</a>
+                        {formData.org && (
+                            <div className="animate-in">
+                                <div className="form-group">
+                                    <label>{t.username}</label>
+                                    <select className="input-pro" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}>
+                                        <option value="">{isFetchingUsers ? 'LOADING...' : t.selectUser}</option>
+                                        {users.map((u, i) => <option key={i} value={u.email}>{u.full_name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>{t.password}</label>
+                                    <input className="input-pro" type="password" required value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
+                                </div>
+                                <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.verifying : t.login}</button>
+                            </div>
+                        )}
+                    </form>
                 )}
+
+                {view === 'register' && (
+                    <form onSubmit={handleRegister}>
+                        <div className="form-group">
+                            <label>{t.fullName}</label>
+                            <input className="input-pro" type="text" required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} placeholder="Nguyen Van A" />
+                        </div>
+                        <div className="form-group">
+                            <label>{t.email}</label>
+                            <input className="input-pro" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
+                        </div>
+                        <div className="form-group">
+                            <label>{t.phone}</label>
+                            <input className="input-pro" type="tel" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="090..." />
+                        </div>
+                        <div className="form-group">
+                            <label>{t.org}</label>
+                            <select className="input-pro" required value={formData.org} onChange={(e) => setFormData({ ...formData, org: e.target.value })}>
+                                <option value="">{t.selectOrg}</option>
+                                {t.orgs.map(org => <option key={org.id} value={org.id}>{org.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>{t.password}</label>
+                            <input className="input-pro" type="password" required minLength="6" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
+                        </div>
+                        <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.loading : t.register}</button>
+                    </form>
+                )}
+
+                {view === 'forgot' && (
+                    <form onSubmit={handleForgot}>
+                        <div className="form-group">
+                            <label>{t.email}</label>
+                            <input className="input-pro" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
+                        </div>
+                        <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.loading : t.reset}</button>
+                    </form>
+                )}
+
+                <div className="footer-links">
+                    {view === 'login' ? (
+                        <>
+                            <a href="#forgot" onClick={(e) => { e.preventDefault(); setView('forgot'); }}>{t.forgot}</a>
+                            <a href="#signup" onClick={(e) => { e.preventDefault(); setView('register'); }}>{t.signup}</a>
+                        </>
+                    ) : (
+                        <a href="#login" onClick={(e) => { e.preventDefault(); setView('login'); }}>{t.back}</a>
+                    )}
+                </div>
             </div>
         </div>
     );

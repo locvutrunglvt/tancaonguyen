@@ -33,81 +33,103 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="dashboard-container fade-up space-y-6">
-            <header className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
-                <div className="space-y-1">
-                    <p className="tech-label-pro">
-                        <i className="fas fa-user-shield coffee-accent"></i> [ AUTH_LEVEL: MASTER_ACCESS ]
-                    </p>
-                    <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tighter">
-                        Hệ thống Điều hành
-                    </h2>
-                </div>
-                <div className="flex gap-2">
-                    <button onClick={loadData} className="w-12 h-12 flex items-center justify-center bg-white text-slate-900 border-2 border-slate-900 hover:bg-slate-50 transition-all">
-                        <i className="fas fa-sync-alt"></i>
+        <div className="min-h-screen bg-slate-50 font-sans">
+            {/* Modern Header with Background Image */}
+            <div className="relative h-48 bg-slate-900 overflow-hidden">
+                <img
+                    src="/anh-cafe.jpg"
+                    alt="Coffee Background"
+                    className="w-full h-full object-cover opacity-40"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+                <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                    <div>
+                        <span className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold tracking-widest rounded-full mb-2">
+                            SYSTEM_DASHBOARD_V2
+                        </span>
+                        <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                            DAKLACK <span className="text-emerald-500">MANAGEMENT</span>
+                        </h1>
+                    </div>
+                    <button
+                        onClick={handleLogout}
+                        className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                    >
+                        Sign Out
                     </button>
-                    <button onClick={handleLogout} className="w-12 h-12 flex items-center justify-center bg-white text-red-600 border-2 border-red-200 hover:bg-red-600 hover:text-white transition-all">
-                        <i className="fas fa-power-off"></i>
-                    </button>
-                </div>
-            </header>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-6 bg-white border-2 border-slate-900 relative">
-                    <p className="tech-label-pro mb-2">
-                        <i className="fas fa-users coffee-accent"></i> DATA_01: TOTAL_CREDENTIALS
-                    </p>
-                    <h3 className="text-5xl font-bold text-slate-900 tracking-tighter">
-                        {loading ? '--' : stats.total}
-                    </h3>
-                </div>
-                <div className="p-6 bg-white border-2 border-slate-900 relative">
-                    <p className="tech-label-pro mb-2">
-                        <i className="fas fa-microchip coffee-accent"></i> DATA_02: CORE_UPTIME
-                    </p>
-                    <h3 className="text-5xl font-bold text-slate-900 tracking-tighter">99.9%</h3>
                 </div>
             </div>
 
-            <div className="pro-card p-0 overflow-hidden">
-                <div className="bg-slate-900 text-white p-4 flex justify-between items-center">
-                    <p className="tech-label-pro text-slate-300">
-                        <i className="fas fa-stream text-emerald-500"></i> [ LIVE_STORAGE_NODES ]
-                    </p>
-                    <span className="text-[9px] font-mono animate-pulse">● SYNC_ACTIVE</span>
+            <main className="max-w-6xl mx-auto p-6 -mt-8 relative z-10">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Credentials</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black text-slate-900">{stats.total}</span>
+                            <span className="text-emerald-600 text-xs font-bold">Nodes Connected</span>
+                        </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Core Uptime</p>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-black text-slate-900">99.9%</span>
+                            <span className="text-emerald-600 text-xs font-bold">Stable</span>
+                        </div>
+                    </div>
                 </div>
-                <div className="divide-y-2 divide-slate-100 max-h-[500px] overflow-y-auto custom-scrollbar">
-                    {loading ? (
-                        <div className="text-center py-20 tech-label-pro italic">REQUESTING_DATA_NODES...</div>
-                    ) : profiles.length === 0 ? (
-                        <div className="text-center py-20 tech-label-pro italic">NO_DATA_AVAILABLE</div>
-                    ) : (
-                        profiles.map(p => (
-                            <div key={p.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 flex items-center justify-center bg-slate-100 border border-slate-200 text-slate-900 font-bold text-sm">
-                                        {p.full_name?.charAt(0) || '?'}
+
+                {/* User List */}
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                        <h2 className="text-lg font-bold text-slate-900">User Directory</h2>
+                        <button
+                            onClick={loadData}
+                            className="text-emerald-600 hover:text-emerald-700 text-sm font-bold p-2 transition-colors"
+                            title="Refresh Data"
+                        >
+                            <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
+                        </button>
+                    </div>
+
+                    <div className="divide-y divide-slate-50">
+                        {profiles.length > 0 ? (
+                            profiles.map((p) => (
+                                <div key={p.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 font-bold">
+                                            {p.full_name?.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-900">{p.full_name}</p>
+                                            <p className="text-xs text-slate-500">
+                                                {p.organization} • {p.phone || 'No Phone'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-900 uppercase">{p.full_name}</p>
-                                        <p className="tech-label-pro text-[9px] mt-0.5">
-                                            {p.organization} | {p.phone} | {p.email}
-                                        </p>
-                                        <p className="tech-label-pro text-[8px] font-mono text-slate-400">
-                                            NODE_ID: #{p.id.slice(0, 8).toUpperCase()}
-                                        </p>
+                                    <div className="text-right">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${p.role === 'Admin' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                                            }`}>
+                                            {p.role}
+                                        </span>
+                                        <p className="text-[10px] font-mono text-slate-300 mt-1">ID: {p.id.slice(0, 8)}</p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <span className="tech-label-pro text-[9px] bg-slate-900 text-white px-2 py-0.5 mb-1 inline-block">{p.role}</span>
-                                    <p className="text-[8px] font-mono text-emerald-600 font-bold">NODE_ACTIVE</p>
-                                </div>
+                            ))
+                        ) : (
+                            <div className="p-12 text-center text-slate-400 italic">
+                                {loading ? 'Fetching nodes...' : 'No data nodes found in core.'}
                             </div>
-                        ))
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
+
+                <footer className="mt-8 text-center">
+                    <p className="text-[10px] text-slate-400 font-mono tracking-widest uppercase">
+                        &copy; 2026 TCN_SYSTEMS // SECURE_ACCESS_GRANTED
+                    </p>
+                </footer>
+            </main>
         </div>
     );
 };
