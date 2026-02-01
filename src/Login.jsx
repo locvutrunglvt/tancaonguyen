@@ -218,10 +218,10 @@ const Login = ({ onDevLogin }) => {
             id: id,
             email: formData.email,
             full_name: formData.fullName,
-            organization: formData.org,
+            organization: 'gus',
             phone: formData.phone,
-            role: 'Employee',
-            employee_code: `DEV-${Math.floor(Math.random() * 1000)}`,
+            role: 'Guest',
+            employee_code: `GUS-${Math.floor(Math.random() * 900) + 100}`,
             created_at: new Date().toISOString()
         };
 
