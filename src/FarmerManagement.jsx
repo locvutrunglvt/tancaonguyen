@@ -75,7 +75,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
         }
 
         if (error) {
-            alert((appLang === 'vi' ? 'Lỗi lưu hộ dân: ' : 'Error saving farmer: ') + error.message);
+            alert((t.save_error || 'Error: ') + error.message);
         } else {
             alert(t.save_success || 'Farmer registered successfully.');
             setShowModal(false);
@@ -110,9 +110,9 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                         <tr>
                             <th>{t.farmer_name}</th>
                             <th>{t.farmer_phone}</th>
-                            <th>{t.farm_total_area || 'Area'}</th>
+                            <th>{t.farmer_area}</th>
                             <th>{t.farmer_members}</th>
-                            <th>{t.reg_date || 'Reg Date'}</th>
+                            <th>{t.reg_date}</th>
                             <th>{t.actions}</th>
                         </tr>
                     </thead>

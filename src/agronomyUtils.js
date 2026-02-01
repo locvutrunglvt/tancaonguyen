@@ -43,6 +43,15 @@ export const getPHRecommendation = (ph, lang = 'vi') => {
             return "Lưu ý: Đất kiềm. Cần kiểm tra lại nguồn nước và khả năng hấp thụ vi lượng.";
         }
         return "Độ pH lý tưởng cho sự phát triển của cà phê.";
+    } else if (lang === 'ede') {
+        if (value < 4.0) {
+            return "DLÊÑ: PH hduê dleh (< 4.0). Čih: Bón vôi ngay kơ jia bi dleh phân hữu cơ.";
+        } else if (value < 5.0) {
+            return "Klei kơ: PH hduê dleh. Čih: Kriê ală bruă bón phân trung vi lượng.";
+        } else if (value > 7.0) {
+            return "Klei kơ: Đất kĭm. Čih: Kriê êa hồ bi dleh kơ mnuih hma.";
+        }
+        return "PH klă kơ kăphê.";
     } else {
         if (value < 4.0) {
             return "WARNING: Soil pH is too low (< 4.0). Recommend: Apply lime immediately and increase organic fertilizer to improve soil structure.";

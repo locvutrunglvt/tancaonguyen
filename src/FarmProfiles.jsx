@@ -95,7 +95,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
             .insert([payload]);
 
         if (error) {
-            alert((appLang === 'vi' ? 'Lỗi lưu dữ liệu: ' : 'Error saving data: ') + error.message);
+            alert((t.save_error || 'Error: ') + error.message);
         } else {
             alert(t.save_success || 'Saved successfully.');
             setShowForm(false);

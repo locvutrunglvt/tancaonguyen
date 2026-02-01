@@ -14,6 +14,9 @@
     display: flex;
     min-height: 100vh;
     background-color: #ffffff;
+    /* Lock layout on mobile */
+    overscroll-behavior: none;
+    touch-action: pan-y;
 }
 
 /* Sidebar */
