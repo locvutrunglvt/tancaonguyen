@@ -211,15 +211,14 @@ body {
 .footer-links button {
   background: none;
   border: none;
-  font-size: 10px;
-  /* smaller for luxury feel */
-  color: var(--primary-dark);
-  /* Polite modern green */
+  font-size: 9px;
+  /* exactly 9px for luxury feel */
+  color: #10b981;
+  /* Vibrant TCN Green */
   font-weight: 700;
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 0.9;
   transition: all 0.2s;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
