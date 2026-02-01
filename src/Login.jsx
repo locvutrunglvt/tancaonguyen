@@ -54,6 +54,32 @@ const translations = {
             { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
             { id: 'farmer', name: 'Model Farmer' }
         ]
+    },
+    ede: {
+        title: 'ČIH MRÂO KƠ KĂPHÊ DLEH MLIH YAN HRUÊ',
+        subtitle: '[ Klă dưi hệ thống ]',
+        org: 'Hriêng knhuă bruă',
+        username: 'Hriêng mnuih bruă',
+        password: 'Mật khẩu',
+        login: 'Lôt tnih hệ thống',
+        signup: '[ Čih anăn mrâo ]',
+        forgot: '[ Khŏ kơ mật khẩu? ]',
+        back: '[ Lêt glơ̆ đăng nhập ]',
+        register: 'Čih anăn',
+        reset: 'Gửi yêu cầu',
+        selectOrg: '-- Hriêng knhuă --',
+        selectUser: '-- Hriêng mnuih --',
+        verifying: 'Đang xác thực...',
+        loading: 'Đang tải...',
+        fullName: 'Anăn mnuih',
+        phone: 'Số điện thoại',
+        email: 'Email address',
+        orgs: [
+            { id: 'tcn', name: 'Tân Cao Nguyên' },
+            { id: 'tchibo', name: 'Tchibo Việt Nam' },
+            { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
+            { id: 'farmer', name: 'Mnuih hma' }
+        ]
     }
 };
 

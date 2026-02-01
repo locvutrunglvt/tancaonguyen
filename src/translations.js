@@ -152,6 +152,16 @@ export const translations = {
         farmer_members: "Số mnuih mơ̆ng sang",
         farmer_add_title: "Add mnuih hma mrâo",
         farmer_edit_title: "Mrâo mnuih hma",
-        farmer_actions: "Bruă"
+        farmer_actions: "Bruă",
+
+        // Farm Profiles
+        farm_title: "Kriê ală hma kăphê",
+        farm_baseline: "Baseline (Nhóm A)",
+        farm_village: "Buôn/Čar",
+        farm_coffee_area: "DT kăphê (ha)",
+        farm_gps: "GPS",
+        farm_soil_ph: "pH đất",
+        farm_ph_status: "Trạng thái đất",
+        farm_add: "Add Baseline mrâo"
     }
 };
