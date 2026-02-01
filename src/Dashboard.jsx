@@ -240,11 +240,22 @@ const Dashboard = () => {
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                 <div className="form-group">
+                                    <label>Mã nhân viên</label>
+                                    <input className="input-pro" value={userForm.employee_code} onChange={e => setUserForm({ ...userForm, employee_code: e.target.value })} placeholder="VD: TCN-001" />
+                                </div>
+                                <div className="form-group">
+                                    <label>Số điện thoại</label>
+                                    <input className="input-pro" value={userForm.phone} onChange={e => setUserForm({ ...userForm, phone: e.target.value })} placeholder="09xx xxx xxx" />
+                                </div>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className="form-group">
                                     <label>Tổ chức</label>
                                     <select className="input-pro" value={userForm.organization} onChange={e => setUserForm({ ...userForm, organization: e.target.value })}>
                                         <option value="tcn">Tần Cao Nguyên</option>
                                         <option value="tchibo">Tchibo</option>
                                         <option value="nkg">NKG</option>
+                                        <option value="farmer">Nông hộ</option>
                                     </select>
                                 </div>
                                 <div className="form-group">
@@ -257,7 +268,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Lưu thay đổi</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>{isEditing ? 'Cập nhật' : 'Thêm mới'}</button>
                                 <button type="button" onClick={() => setShowUserModal(false)} className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>Hủy</button>
                             </div>
                         </form>
@@ -272,8 +283,7 @@ const Dashboard = () => {
             {/* Sidebar Navigation */}
             <aside className="sidebar">
                 <div className="sidebar-logo">
-                    <img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" />
-                    <span>TCN CORE</span>
+                    <span>DỰ ÁN TÂN CAO NGUYÊN</span>
                 </div>
 
                 <nav className="nav-menu">

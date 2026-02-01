@@ -76,58 +76,58 @@ body {
 
 .logo-bar {
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 30px;
-  margin-bottom: 30px;
-  padding: 15px 25px;
+  gap: 25px;
+  margin-bottom: 25px;
+  padding: 12px 20px;
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid var(--sky-200);
   z-index: 10;
 }
 
 .logo-item img {
-  height: 22px;
+  height: 20px;
   object-fit: contain;
 }
 
 .logo-item img[alt="NKG"] {
-  height: 50px;
+  height: 48px;
 }
 
 .logo-item img[alt="Tchibo"] {
-  height: 32px;
+  height: 30px;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 460px;
+  max-width: 420px;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 32px;
-  padding: 40px;
+  border-radius: 28px;
+  padding: 30px;
   box-shadow: 0 20px 40px rgba(6, 78, 59, 0.06);
   backdrop-filter: blur(10px);
   z-index: 10;
 }
 
 .auth-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--tcn-dark);
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   letter-spacing: -0.5px;
 }
 
 .auth-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--tcn-deep);
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   opacity: 0.7;
 }
 
