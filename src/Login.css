@@ -1,6 +1,5 @@
+/* MODERN LIGHT INDUSTRIAL - White-Blue & Coffee Theme (Final Polish) */
 :root {
-  --slate-950: #020617;
-  --slate-900: #0f172a;
   --primary: #10b981;
   --primary-dark: #059669;
   --coffee-dark: #451a03;
@@ -11,8 +10,8 @@
   --sky-200: #bae6fd;
   --slate-900: #0f172a;
   --slate-700: #334155;
-  --glass-bg: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(186, 230, 253, 0.5);
+  --glass-bg: rgba(255, 255, 255, 0.98);
+  --glass-border: rgba(186, 230, 253, 0.6);
   --font-soft: 'Lexend', sans-serif;
 }
 
@@ -39,7 +38,6 @@ body {
   background-color: var(--sky-50);
   position: relative;
   overflow-x: hidden;
-  perspective: 1000px;
 }
 
 /* Subtle Industrial Grid Overlay */
@@ -57,20 +55,19 @@ body {
 /* Logo Bar */
 .logo-bar {
   width: 100%;
-  max-width: 650px;
+  max-width: 700px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;
-  margin-bottom: 50px;
-  padding: 20px 30px;
+  gap: 50px;
+  margin-bottom: 60px;
+  padding: 25px 40px;
   background: white;
-  border-radius: 24px;
+  border-radius: 30px;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 10px 15px -3px rgba(186, 230, 253, 0.2);
+    0 15px 30px -5px rgba(186, 230, 253, 0.25);
   z-index: 10;
-  backdrop-filter: blur(10px);
 }
 
 .logo-item {
@@ -81,47 +78,40 @@ body {
 
 .logo-item img {
   height: 35px;
-  /* Smaller for TCN and Tchibo */
   width: auto;
   object-fit: contain;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Specific Height Increase for NKG */
+/* Specific Height for NKG - Large Primary Branding */
 .logo-item img[alt="NKG"] {
-  height: 65px;
-  /* Noticeably taller as requested */
+  height: 80px;
 }
 
 .logo-item img:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .auth-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 40px;
-  padding: 50px;
-  /* Stable 3D Shadow Depth */
+  border-radius: 48px;
+  padding: 60px;
   box-shadow:
-    0 1px 2px rgba(120, 53, 15, 0.05),
-    0 4px 8px rgba(120, 53, 15, 0.05),
-    0 8px 16px rgba(186, 230, 253, 0.15),
-    0 16px 32px rgba(186, 230, 253, 0.15),
-    0 32px 64px rgba(186, 230, 253, 0.2);
+    0 1px 2px rgba(120, 53, 15, 0.02),
+    0 10px 20px rgba(120, 53, 15, 0.03),
+    0 20px 40px rgba(186, 230, 253, 0.15),
+    0 40px 80px rgba(186, 230, 253, 0.2);
   z-index: 10;
-  /* Stabilized transform to avoid "loạn" look */
-  transform: translateY(0);
-  animation: stableFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+  animation: stableFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes stableFadeIn {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.98);
+    transform: translateY(20px) scale(0.99);
   }
 
   to {
@@ -130,79 +120,62 @@ body {
   }
 }
 
-.auth-card:hover {
-  transform: translateY(-5px) scale(1.005);
-  box-shadow:
-    0 10px 20px rgba(120, 53, 15, 0.05),
-    0 20px 40px rgba(186, 230, 253, 0.3);
-}
-
 header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 45px;
 }
 
 header h1 {
-  font-size: 26px;
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: 700;
   color: var(--coffee-dark);
-  margin-bottom: 12px;
-  line-height: 1.25;
-}
-
-.tech-badge {
-  display: inline-block;
-  background: var(--sky-100);
-  color: var(--coffee-medium);
-  padding: 6px 16px;
-  border-radius: 100px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  margin-bottom: 20px;
-  text-transform: uppercase;
+  margin-bottom: 15px;
+  line-height: 1.3;
+  /* Soften to sentence/lowercase if requested, here none to allow JSX labels */
+  text-transform: none;
 }
 
 .form-group {
-  margin-bottom: 28px;
+  margin-bottom: 30px;
 }
 
 .form-group label {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--coffee-medium);
-  margin-bottom: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  opacity: 0.8;
+  margin-bottom: 12px;
+  font-weight: 500;
+  text-transform: none;
+  /* Softened from uppercase */
+  opacity: 0.9;
 }
 
 .input-pro {
   width: 100%;
-  background: white;
+  background: #fff;
   border: 2px solid var(--sky-100);
-  border-radius: 20px;
-  padding: 16px 20px;
+  border-radius: 24px;
+  padding: 18px 24px;
   color: var(--slate-900);
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 400;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .input-pro:focus {
   outline: none;
   border-color: var(--coffee-medium);
-  box-shadow: 0 0 0 5px rgba(120, 53, 15, 0.08);
-  transform: translateY(-2px);
+  box-shadow: 0 0 0 6px rgba(120, 53, 15, 0.06);
 }
 
 select.input-pro {
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2378350f'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-position: right 20px center;
-  background-size: 18px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2378350f'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  /* CRITICAL FIX: No repetition */
+  background-position: right 24px center;
+  background-size: 20px;
 }
 
 .btn-primary {
@@ -210,29 +183,30 @@ select.input-pro {
   background: var(--coffee-dark);
   color: white;
   border: none;
-  border-radius: 20px;
-  padding: 20px;
+  border-radius: 24px;
+  padding: 22px;
   font-size: 16px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  font-weight: 600;
+  text-transform: none;
+  /* Softened from uppercase */
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 20px -5px rgba(69, 26, 3, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(69, 26, 3, 0.25);
+  margin-top: 5px;
 }
 
 .btn-primary:hover {
   background: var(--coffee-medium);
-  transform: translateY(-4px) translateZ(20px);
-  box-shadow: 0 20px 40px -10px rgba(69, 26, 3, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -10px rgba(69, 26, 3, 0.35);
 }
 
 .btn-primary:active {
-  transform: translateY(-1px) translateZ(10px);
+  transform: translateY(-1px);
 }
 
 .footer-links {
-  margin-top: 40px;
+  margin-top: 45px;
   display: flex;
   justify-content: space-between;
 }
@@ -240,9 +214,8 @@ select.input-pro {
 .footer-links a {
   color: var(--coffee-light);
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 14px;
+  font-weight: 500;
   transition: all 0.3s;
 }
 
@@ -251,45 +224,49 @@ select.input-pro {
   text-decoration: underline;
 }
 
-/* Custom Scrollbar for the whole app */
-::-webkit-scrollbar {
-  width: 10px;
+.lang-selector {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  display: flex;
+  gap: 12px;
 }
 
-::-webkit-scrollbar-track {
+.lang-btn {
+  background: white;
+  border: 1px solid var(--sky-100);
+  padding: 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.lang-btn.active {
+  border-color: var(--coffee-medium);
   background: var(--sky-50);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--sky-200);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--coffee-light);
 }
 
 @media (max-width: 480px) {
   .logo-bar {
-    gap: 20px;
-    padding: 15px;
+    gap: 25px;
+    padding: 20px;
+    flex-wrap: wrap;
+    /* Better on small screen */
   }
 
   .logo-item img {
-    height: 32px;
+    height: 28px;
   }
 
   .logo-item img[alt="NKG"] {
-    height: 40px;
+    height: 50px;
   }
 
   .auth-card {
-    padding: 40px 25px;
+    padding: 50px 30px;
     border-radius: 40px 40px 0 0;
     position: fixed;
     bottom: 0;
     max-width: none;
-    transform: rotateX(0);
-    /* Remove 3D on mobile for better touch */
   }
 }
