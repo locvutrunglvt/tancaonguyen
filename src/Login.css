@@ -1,4 +1,4 @@
-/* TCN GREEN - PREMIUM COFFEE THEME - FINAL POLISH */
+/* TCN GREEN - PREMIUM COFFEE THEME - RESPONSIVE OPTIMIZED */
 :root {
   --primary: #10b981;
   --primary-dark: #059669;
@@ -6,7 +6,6 @@
   --tcn-deep: #065f46;
   --tcn-light: #ecfdf5;
   --coffee-rich: #5d4037;
-  /* Modern Coffee Brown */
   --glass-bg: rgba(255, 255, 255, 0.9);
   --glass-border: rgba(255, 255, 255, 0.4);
   --font-soft: 'Lexend', sans-serif;
@@ -32,7 +31,6 @@ body {
   justify-content: center;
   padding: 20px 15px;
   margin: 0;
-  /* PERFECT FULL-SCREEN COFFEE BACKGROUND */
   background:
     linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
     url('https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/Anh%20Cafe.jpg');
@@ -44,7 +42,6 @@ body {
   overflow-x: hidden;
 }
 
-/* FIXED FLAG SELECTOR - ENSURE VISIBILITY */
 .lang-selector {
   position: absolute;
   top: 25px;
@@ -76,13 +73,11 @@ body {
 
 .lang-btn img {
   width: 35px;
-  /* slightly larger flags */
   height: auto;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* LOGO BAR - PURE WHITE BACKGROUND */
 .logo-bar {
   display: flex;
   justify-content: center;
@@ -91,7 +86,6 @@ body {
   margin-bottom: 25px;
   padding: 15px 35px;
   background: #ffffff;
-  /* MÀU TRẮNG TINH */
   border-radius: 20px;
   border: 1px solid var(--sky-200);
   z-index: 10;
@@ -115,7 +109,6 @@ body {
   height: 30px;
 }
 
-/* GLASSMORPHIC CARD */
 .auth-card {
   width: 100%;
   max-width: 440px;
@@ -128,7 +121,6 @@ body {
   z-index: 10;
 }
 
-/* REFINED SPECIALIZED TITLE */
 .auth-title {
   font-size: 18px !important;
   font-weight: 800;
@@ -202,7 +194,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* MODERN POLITE GREEN LINKS - SMALL & LUXURY */
 .footer-links {
   margin-top: 25px;
   display: flex;
@@ -214,9 +205,7 @@ body {
   background: none;
   border: none;
   font-size: 9px;
-  /* exactly 9px for luxury feel */
   color: #10b981;
-  /* Vibrant TCN Green */
   font-weight: 700;
   cursor: pointer;
   opacity: 0.9;
@@ -230,26 +219,129 @@ body {
   text-decoration: underline;
 }
 
-@media (max-width: 480px) {
-  .auth-card {
-    padding: 30px 20px;
-  }
+/* ===== RESPONSIVE DESIGN - MOBILE FIRST ===== */
 
-  .auth-title {
-    font-size: 15px !important;
+/* Small Mobile Devices (320px - 480px) */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px 10px;
   }
 
   .logo-bar {
-    padding: 12px 20px;
-    gap: 12px;
+    padding: 10px 15px;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .logo-item img {
+    height: 16px;
+  }
+
+  .logo-item img[alt="TCN"] {
+    height: 28px;
+  }
+
+  .logo-item img[alt="NKG"] {
+    height: 36px;
+  }
+
+  .logo-item img[alt="Tchibo"] {
+    height: 22px;
+  }
+
+  .auth-card {
+    padding: 25px 18px;
+    border-radius: 24px;
+    max-width: 100%;
+  }
+
+  .auth-title {
+    font-size: 14px !important;
+    margin-bottom: 10px;
+  }
+
+  .auth-subtitle {
+    font-size: 8px;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+
+  .input-pro {
+    padding: 12px 14px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  .btn-primary {
+    padding: 14px;
+    font-size: 14px;
+    border-radius: 14px;
+  }
+
+  .footer-links {
+    margin-top: 18px;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .footer-links button {
+    font-size: 8px;
   }
 
   .lang-selector {
-    top: 15px;
-    right: 15px;
+    top: 12px;
+    right: 12px;
+    gap: 8px;
   }
 
   .lang-btn img {
-    width: 30px;
+    width: 28px;
+  }
+}
+
+/* Tablet Devices (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .login-container {
+    padding: 20px 15px;
+  }
+
+  .auth-card {
+    max-width: 420px;
+    padding: 32px 25px;
+  }
+
+  .auth-title {
+    font-size: 16px !important;
+  }
+
+  .logo-bar {
+    padding: 14px 25px;
+  }
+}
+
+/* Small Laptops (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .auth-card {
+    max-width: 450px;
+  }
+}
+
+/* Large Desktop (1441px+) */
+@media (min-width: 1441px) {
+  .auth-card {
+    max-width: 500px;
+    padding: 45px 40px;
+  }
+
+  .auth-title {
+    font-size: 20px !important;
   }
 }
