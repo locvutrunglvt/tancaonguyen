@@ -5,7 +5,7 @@ import './Login.css';
 const translations = {
     vi: {
         title: 'QUẢN LÝ MÔ HÌNH CÀ PHÊ THÍCH ỨNG BIẾN ĐỔI KHÍ HẬU',
-        subtitle: '[ Xác thực hệ thống ]',
+        subtitle: 'ĐĂNG NHẬP',
         org: 'Chọn tổ chức của bạn',
         username: 'Chọn tài khoản người dùng',
         password: 'Mật khẩu truy cập',
@@ -24,14 +24,14 @@ const translations = {
         email: 'Địa chỉ email',
         orgs: [
             { id: 'tcn', name: 'Tân Cao Nguyên' },
-            { id: 'tchibo', name: 'Tchibo Việt Nam' },
+            { id: 'tch', name: 'Tchibo Việt Nam' },
             { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
             { id: 'farmer', name: 'Nông hộ hình mẫu' }
         ]
     },
     en: {
         title: 'COFFEE MODEL MANAGEMENT & CLIMATE ADAPTATION',
-        subtitle: '[ System authorization ]',
+        subtitle: 'LOGIN',
         org: 'Select your organization',
         username: 'Select user credential',
         password: 'Access password',
@@ -50,14 +50,14 @@ const translations = {
         email: 'Email address',
         orgs: [
             { id: 'tcn', name: 'Tan Cao Nguyen' },
-            { id: 'tchibo', name: 'Tchibo Vietnam' },
+            { id: 'tch', name: 'Tchibo Vietnam' },
             { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
             { id: 'farmer', name: 'Model Farmer' }
         ]
     },
     ede: {
         title: 'ČIH MRÂO KƠ KĂPHÊ DLEH MLIH YAN HRUÊ',
-        subtitle: '[ Klă dưi hệ thống ]',
+        subtitle: 'LÔT TNIH',
         org: 'Hriêng knhuă bruă',
         username: 'Hriêng mnuih bruă',
         password: 'Mật khẩu',
@@ -76,7 +76,7 @@ const translations = {
         email: 'Email address',
         orgs: [
             { id: 'tcn', name: 'Tân Cao Nguyên' },
-            { id: 'tchibo', name: 'Tchibo Việt Nam' },
+            { id: 'tch', name: 'Tchibo Việt Nam' },
             { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
             { id: 'farmer', name: 'Mnuih hma' }
         ]
@@ -117,20 +117,14 @@ const Login = ({ onDevLogin }) => {
             // Try fetching from 'profiles' first (standard), then 'User'
             let { data, error } = await supabase
                 .from('profiles')
-                .select('email, full_name, role')
+                .select('id, email, full_name, role')
                 .eq('organization', orgId)
                 .order('full_name');
 
             if (error) {
-                console.warn('Profiles fetch failed, trying User table...');
-                const { data: userData, error: userError } = await supabase
-                    .from('User')
-                    .select('email, full_name, role')
-                    .eq('organization', orgId)
-                    .order('full_name');
-
-                if (userError) throw userError;
-                data = userData;
+                console.error('Profiles fetch failed:', error.message);
+                // No fallback to corrupt 'User' table
+                throw error;
             }
 
             setUsers(data || []);
@@ -181,9 +175,10 @@ const Login = ({ onDevLogin }) => {
                     onDevLogin({
                         email: formData.email,
                         full_name: selectedUser?.full_name || formData.email.split('@')[0],
+                        phone: formData.phone,
                         organization: formData.org,
                         role: selectedUser?.role || 'Viewer',
-                        id: formData.email
+                        id: selectedUser?.id || '00000000-0000-0000-0000-000000000000' // Use real UUID or fallback empty UUID
                     });
                     return;
                 }
@@ -232,33 +227,25 @@ const Login = ({ onDevLogin }) => {
             id: id,
             email: formData.email,
             full_name: formData.fullName,
-            organization: 'gus',
-            Phone: formData.phone, // Map UI 'phone' to DB 'Phone' (uppercase)
+            organization: formData.org || 'gus',
+            phone: formData.phone,
             role: 'Guest',
-            employee_code: `GUS-${Math.floor(Math.random() * 900) + 100}`,
+            approved: false,
+            employee_code: `PENDING-${Math.floor(Math.random() * 900) + 100}`,
             created_at: new Date().toISOString()
         };
 
-        // Try 'profiles' table first (preferred)
+        // Insert into 'profiles' table which is verified to exist and have correct schema
         const { error: profError } = await supabase.from('profiles').insert([userData]);
 
         if (profError) {
             console.error('Profiles insert failed:', profError.message);
-            // Fallback to 'User' table if it exists
-            const { error: userError } = await supabase.from('User').insert([userData]);
-
-            if (userError) {
-                // If it's a duplicate key, handle it gracefully
-                if (userError.code === '23505') {
-                    alert(currentLang === 'vi' ? 'Tài khoản đã tồn tại.' : 'Account already exists.');
-                    setView('login');
-                    return;
-                }
-                throw new Error(`DATABASE_ERROR: ${profError.message} (and ${userError.message})`);
-            }
+            throw new Error(`DATABASE_ERROR: ${profError.message}`);
         }
 
-        alert(currentLang === 'vi' ? 'ĐĂNG KÝ THÀNH CÔNG!' : 'REGISTRATION SUCCESS!');
+        alert(currentLang === 'vi'
+            ? 'ĐĂNG KÝ THÀNH CÔNG! Vui lòng chờ Admin TCN phê duyệt tài khoản của bạn.'
+            : 'REGISTRATION SUCCESS! Please wait for TCN Admin to approve your account.');
         setView('login');
     };
 
@@ -294,19 +281,20 @@ const Login = ({ onDevLogin }) => {
                 <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>
                     <img src="https://flagcdn.com/w40/gb.png" alt="UK" />
                 </button>
-                <button className={`lang-btn ${lang === 'ede' ? 'active' : ''}`} onClick={() => setLang('ede')} style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                <button className={`lang-btn ${lang === 'ede' ? 'active' : ''}`} onClick={() => setLang('ede')} style={{ fontSize: '12px', fontWeight: 'bold', color: '#fbbf24', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
                     Ê Đê
                 </button>
             </div>
 
-            <div className="logo-bar">
-                <div className="logo-item"><img src="https://raw.githubusercontent.com/locvutrunglvt/Tancaonguyen/refs/heads/main/tancaonguyen_old/TCN%20logo.jpg" alt="TCN" /></div>
-                <div className="logo-item"><img src="https://logos-world.net/wp-content/uploads/2023/03/Tchibo-Logo.jpg" alt="Tchibo" /></div>
-                <div className="logo-item"><img src="https://nkgvietnam.com/wp-content/uploads/2023/05/NKG-Vietnam_Logo_left-1-01.svg" alt="NKG" /></div>
+            <div className="login-branding">
+                <div className="logo-bar-centered">
+                    <img src="https://github.com/locvutrunglvt/Tancaonguyen/blob/main/Logo.png?raw=true" alt="TCN - Tchibo - NKG" className="logo-2x" />
+                </div>
+                <h1 className="login-project-title-top">{t.title}</h1>
             </div>
 
             <div className="auth-card">
-                <header><p className="auth-title">{t.title}</p></header>
+                <header><p className="auth-subtitle">{t.subtitle}</p></header>
 
                 {view === 'login' && (
                     <form onSubmit={handleLogin}>

@@ -8,13 +8,13 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
 
-    // Form state
+    // Form state - only use fields that exist in profiles table
     const [formData, setFormData] = useState({
         full_name: '',
-        phone: '',
-        area: '',
-        members: ''
+        phone: ''
     });
 
     useEffect(() => {
@@ -25,24 +25,13 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
         setLoading(true);
         try {
             const { data, error } = await supabase
-                .from('User')
+                .from('profiles')
                 .select('*')
                 .eq('role', 'Farmer')
                 .order('created_at', { ascending: false });
 
-            if (error) {
-                // Try fallback to 'profiles' if 'User' doesn't exist
-                const { data: profData, error: profError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('role', 'Farmer')
-                    .order('created_at', { ascending: false });
-
-                if (profError) throw profError;
-                setFarmers(profData || []);
-            } else {
-                setFarmers(data || []);
-            }
+            if (error) throw error;
+            setFarmers(data || []);
         } catch (e) {
             console.error('Error fetching farmers:', e.message);
         } finally {
@@ -50,39 +39,79 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
         }
     };
 
+    const handleEdit = (farmer) => {
+        setFormData({
+            full_name: farmer.full_name,
+            phone: farmer.phone
+        });
+        setEditingId(farmer.id);
+        setIsEditing(true);
+        setShowModal(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm(t.delete_confirm || 'Are you sure you want to delete this farmer?')) return;
+        setLoading(true);
+        const { error } = await supabase.from('profiles').delete().eq('id', id);
+        if (error) {
+            alert((t.delete_error || 'Error: ') + error.message);
+        } else {
+            alert(t.delete_success || 'Deleted successfully.');
+            fetchFarmers();
+        }
+        setLoading(false);
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const newFarmer = {
-            id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
-            full_name: formData.full_name,
-            phone: formData.phone,
-            role: 'Farmer',
-            organization: 'farmer',
-            area: formData.area + ' ha',
-            members: parseInt(formData.members) || 0,
-            created_at: new Date().toISOString()
-        };
+        if (isEditing) {
+            // Update existing farmer
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    full_name: formData.full_name,
+                    phone: formData.phone
+                })
+                .eq('id', editingId);
 
-        // Try 'User' table first
-        let { error } = await supabase.from('User').insert([newFarmer]);
-
-        if (error) {
-            console.warn('Insert into User failed, trying profiles...', error);
-            const { error: profError } = await supabase.from('profiles').insert([newFarmer]);
-            error = profError;
-        }
-
-        if (error) {
-            alert((t.save_error || 'Error: ') + error.message);
+            if (error) {
+                alert((t.save_error || 'Error: ') + error.message);
+            } else {
+                alert(t.save_success || 'Updated successfully.');
+                handleModalClose();
+                fetchFarmers();
+            }
         } else {
-            alert(t.save_success || 'Farmer registered successfully.');
-            setShowModal(false);
-            setFormData({ full_name: '', phone: '', area: '', members: '' });
-            fetchFarmers();
+            // Create new farmer
+            const newFarmer = {
+                id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+                full_name: formData.full_name,
+                phone: formData.phone,
+                role: 'Farmer',
+                organization: 'farmer',
+                created_at: new Date().toISOString()
+            };
+
+            const { error } = await supabase.from('profiles').insert([newFarmer]);
+
+            if (error) {
+                alert((t.save_error || 'Error: ') + error.message);
+            } else {
+                alert(t.save_success || 'Farmer registered successfully.');
+                handleModalClose();
+                fetchFarmers();
+            }
         }
         setLoading(false);
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setIsEditing(false);
+        setEditingId(null);
+        setFormData({ full_name: '', phone: '' });
     };
 
     return (
@@ -92,7 +121,10 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                     <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
                 <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => {
+                        setIsEditing(false);
+                        setShowModal(true);
+                    }}
                     className="btn-add-user"
                     style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
@@ -130,9 +162,21 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                                     <td>{f.members || 'N/A'}</td>
                                     <td>{new Date(f.created_at).toLocaleDateString(appLang === 'vi' ? 'vi-VN' : 'en-US')}</td>
                                     <td>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button style={{ background: 'none', border: 'none', color: 'var(--coffee-medium)', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
-                                            <button style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><i className="fas fa-trash"></i></button>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button onClick={() => handleEdit(f)} style={{
+                                                background: '#fef3c7', border: '1px solid #d97706',
+                                                color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }} title={t.edit || "Edit"}>
+                                                <i className="fas fa-pen"></i>
+                                            </button>
+                                            <button onClick={() => handleDelete(f.id)} style={{
+                                                background: '#fef2f2', border: '1px solid #ef4444',
+                                                color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }} title={t.delete || "Delete"}>
+                                                <i className="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

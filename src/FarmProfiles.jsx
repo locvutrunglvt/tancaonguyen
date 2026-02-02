@@ -113,7 +113,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
                 <div style={{ flex: 1 }}></div>
                 {!showForm && (
                     <button onClick={() => setShowForm(true)} className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>
-                        <i className="fas fa-map-plus"></i> {t.farm_add.toUpperCase()}
+                        <i className="fas fa-map-plus"></i> {(t.farm_add || 'ADD FARM').toUpperCase()}
                     </button>
                 )}
             </div>
@@ -159,7 +159,10 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
                                             </span>
                                         </td>
                                         <td>
-                                            <button style={{ background: 'none', border: 'none', color: '#64748b' }}><i className="fas fa-eye"></i></button>
+                                            <button style={{
+                                                background: 'var(--sky-100)', border: '1px solid var(--sky-200)',
+                                                color: 'var(--tcn-deep)', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
+                                            }} title="View"><i className="fas fa-eye"></i></button>
                                         </td>
                                     </tr>
                                 ))

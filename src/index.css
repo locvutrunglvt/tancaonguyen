@@ -30,11 +30,22 @@ body {
   margin: 0;
   padding: 0;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100vh;
   font-family: 'Outfit', 'Public Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow: hidden;
+  /* Prevent global scroll */
+}
+
+/* Hide scrollbars globally */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+*::-webkit-scrollbar {
+  display: none !important;
 }
 
 h1 {
@@ -116,17 +127,9 @@ button:focus-visible {
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Disabled */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--slate-900);
+  display: none;
 }
 
 .dashboard-container {

@@ -8,6 +8,8 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
     const [models, setModels] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [currentModel, setCurrentModel] = useState({
         name: '',
         location: '',
@@ -34,24 +36,79 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
         }
     };
 
+    const handleEdit = (model) => {
+        setCurrentModel({
+            name: model.name,
+            location: model.location,
+            coffee_type: model.coffee_type,
+            area: model.area,
+            adaptation_status: model.adaptation_status,
+            last_inspection: model.last_inspection || new Date().toISOString().split('T')[0]
+        });
+        setEditingId(model.id);
+        setIsEditing(true);
+        setShowModal(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm(t.delete_confirm || 'Are you sure you want to delete this model?')) return;
+        setLoading(true);
+        const { error } = await supabase.from('coffee_models').delete().eq('id', id);
+        if (error) {
+            alert((t.delete_error || 'Error: ') + error.message);
+        } else {
+            alert(t.delete_success || 'Deleted successfully.');
+            fetchModels();
+        }
+        setLoading(false);
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         setLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         const userId = session?.user?.id || devUser?.id;
 
-        const { error } = await supabase.from('coffee_models').insert([{
-            ...currentModel,
-            user_id: userId
-        }]);
+        if (isEditing) {
+            const { error } = await supabase
+                .from('coffee_models')
+                .update(currentModel)
+                .eq('id', editingId);
 
-        if (error) alert(error.message);
-        else {
-            alert(t.save_success || 'Saved successfully.');
-            setShowModal(false);
-            fetchModels();
+            if (error) alert(error.message);
+            else {
+                alert(t.save_success || 'Updated successfully.');
+                handleModalClose();
+                fetchModels();
+            }
+        } else {
+            const { error } = await supabase.from('coffee_models').insert([{
+                ...currentModel,
+                user_id: userId
+            }]);
+
+            if (error) alert(error.message);
+            else {
+                alert(t.save_success || 'Saved successfully.');
+                handleModalClose();
+                fetchModels();
+            }
         }
         setLoading(false);
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+        setIsEditing(false);
+        setEditingId(null);
+        setCurrentModel({
+            name: '',
+            location: '',
+            coffee_type: 'Robusta',
+            area: '',
+            adaptation_status: 'Planning',
+            last_inspection: new Date().toISOString().split('T')[0]
+        });
     };
 
     return (
@@ -61,7 +118,10 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                     <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
                 <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => {
+                        setIsEditing(false);
+                        setShowModal(true);
+                    }}
                     className="btn-add-user"
                     style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
@@ -103,9 +163,19 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                                         </span>
                                     </td>
                                     <td>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button style={{ background: 'none', border: 'none', color: 'var(--tcn-deep)', cursor: 'pointer' }}><i className="fas fa-info-circle"></i></button>
-                                            <button style={{ background: 'none', border: 'none', color: 'var(--coffee-medium)', cursor: 'pointer' }}><i className="fas fa-edit"></i></button>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button onClick={() => handleEdit(m)} style={{
+                                                background: 'var(--tcn-light)', border: '1px solid var(--tcn-primary)',
+                                                color: 'var(--tcn-dark)', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
+                                            }} title={t.edit || "Edit"}>
+                                                <i className="fas fa-pen"></i>
+                                            </button>
+                                            <button onClick={() => handleDelete(m.id)} style={{
+                                                background: '#fef2f2', border: '1px solid #fecaca',
+                                                color: '#ef4444', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
+                                            }} title={t.delete || "Delete"}>
+                                                <i className="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

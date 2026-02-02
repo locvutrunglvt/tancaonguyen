@@ -156,7 +156,12 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
                                             {e.cost < 0 ? '+' : '-'}{formatCurrency(Math.abs(e.cost))}
                                         </td>
                                         <td>
-                                            <button style={{ background: 'none', border: 'none', color: '#64748b' }}><i className="fas fa-trash-alt"></i></button>
+                                            <button onClick={() => { }} style={{
+                                                background: '#fef2f2', border: '1px solid #fecaca',
+                                                color: '#ef4444', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
+                                            }} title={t.delete || "Delete"}>
+                                                <i className="fas fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
