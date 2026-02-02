@@ -287,10 +287,10 @@ const Login = ({ onDevLogin }) => {
             </div>
 
             <div className="login-branding">
-                <div className="logo-bar-centered">
-                    <img src="https://github.com/locvutrunglvt/Tancaonguyen/blob/main/Logo.png?raw=true" alt="TCN - Tchibo - NKG" className="logo-2x" />
+                <div className="branding-bar-glass">
+                    <img src="https://github.com/locvutrunglvt/Tancaonguyen/blob/main/Logo.png?raw=true" alt="TCN - Tchibo - NKG" className="branding-logos" />
                 </div>
-                <h1 className="login-project-title-top">{t.title}</h1>
+                <h1 className="login-project-title-center">{t.title}</h1>
             </div>
 
             <div className="auth-card">

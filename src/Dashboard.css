@@ -216,6 +216,8 @@ body {
     width: 100%;
     align-items: center;
     text-align: center;
+    position: relative;
+    /* Ensure controls-row can be absolutely positioned */
 }
 
 .header-row {
@@ -259,7 +261,8 @@ body {
     letter-spacing: -0.5px;
     margin: 10px 0;
     line-height: 1.2;
-    white-space: nowrap;
+    white-space: normal;
+    /* Allow wrap for long titles on small screens */
 }
 
 .welcome-section {
@@ -839,8 +842,11 @@ body {
         width: 100%;
         height: auto;
         position: relative;
-        padding: 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        background: white;
+        /* Change from brown to white for mobile top bar as requested */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        color: var(--coffee-dark);
     }
 
     .sidebar-logo {
@@ -913,7 +919,12 @@ body {
     }
 
     .header-project-title {
-        font-size: 22px;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .header-logo-unified {
+        height: 20px;
     }
 
     .main-content {
@@ -977,28 +988,40 @@ body {
 }
 
 /* Small Mobile - Extra Compact */
-@media (max-width: 480px) {
-    .main-content {
-        padding: 16px;
-    }
+.menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
 
-    .project-main-title {
-        font-size: 20px;
-    }
+.menu-card {
+    padding: 12px 10px;
+    border-radius: 12px;
+}
 
-    .btn-add-user,
-    .btn-primary {
-        padding: 12px 20px;
-        font-size: 14px;
-    }
+.menu-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+}
 
-    .menu-card h3 {
-        font-size: 16px;
-    }
+.menu-icon i {
+    font-size: 18px;
+}
 
-    .menu-card p {
-        font-size: 13px;
-    }
+.menu-card h3 {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.menu-card p {
+    font-size: 10px;
+    display: none;
+    /* Hide descriptions on mobile grid for space */
+}
+
+.project-main-title {
+    font-size: 15px;
+    margin-bottom: 15px;
 }
 
 .dashboard-footer-branding {

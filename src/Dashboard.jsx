@@ -640,16 +640,21 @@ const Dashboard = ({ devUser, onLogout }) => {
 
             <nav className="mobile-bottom-nav">
                 <button className={`nav-item-mobile ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
-                    <i className="fas fa-home"></i> <span>{t.home.toUpperCase()}</span>
+                    <i className="fas fa-home"></i>
+                    <span>{t.home}</span>
                 </button>
-                <button className={`nav-item-mobile ${view === 'growth' ? 'active' : ''}`} onClick={() => setView('growth')}>
-                    <i className="fas fa-chart-line"></i> <span>TĂNG TRƯỞNG</span>
+                <button className={`nav-item-mobile ${view === 'farmers' ? 'active' : ''}`} onClick={() => setView('farmers')}>
+                    <i className="fas fa-address-book"></i>
+                    <span>{t.farmers}</span>
                 </button>
-                {isAdmin && (
-                    <button className={`nav-item-mobile ${view === 'users' ? 'active' : ''}`} onClick={() => setView('users')}>
-                        <i className="fas fa-user-cog"></i> <span>ADMIN</span>
-                    </button>
-                )}
+                <button className={`nav-item-mobile ${view === 'activities' ? 'active' : ''}`} onClick={() => setView('activities')}>
+                    <i className="fas fa-calendar-alt"></i>
+                    <span>{t.activities}</span>
+                </button>
+                <button className="nav-item-mobile logout-mobile-only" onClick={handleLogout}>
+                    <i className="fas fa-sign-out-alt" style={{ color: '#ef4444' }}></i>
+                    <span style={{ color: '#ef4444' }}>{t.logout}</span>
+                </button>
             </nav>
         </div>
     );

@@ -46,7 +46,7 @@ export const translations = {
         // Menu Item Titles
         farmers: "Hồ sơ nông hộ",
         farms: "Thông tin trang trại",
-        activities: "Hoạt động thường niên",
+        activities: "Các hoạt động",
         planning: "Kế hoạch mùa vụ",
         training: "Hỗ trợ - Tập huấn",
         model: "Quản lý mô hình",
@@ -243,7 +243,7 @@ export const translations = {
         // Menu Item Titles
         farmers: "Farmer Profiles",
         farms: "Farm Information",
-        activities: "Annual Activities",
+        activities: "Activities",
         planning: "Seasonal Planning",
         training: "Support - Training",
         model: "Model Management",
