@@ -193,16 +193,14 @@ body {
 /* ============= MAIN CONTENT ============= */
 .main-content {
     flex: 1;
-    padding: 20px 30px;
+    padding: 24px 40px;
     background: transparent;
     display: flex;
     flex-direction: column;
-    width: calc(100% - 260px);
-    /* Account for fixed sidebar */
-    margin-left: 260px;
-    /* Offset for fixed sidebar */
+    /* Removed width and margin-left to use flexbox properly with sidebar */
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 /* STACKED HEADER STYLING */
@@ -435,6 +433,7 @@ body {
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    /* 3 columns on PC */
     gap: 30px;
     /* Increased from 20px for more air on PC */
     width: 100%;
@@ -885,37 +884,41 @@ body {
     }
 
     .menu-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        /* 2 columns on mobile */
         gap: 12px;
         padding: 10px;
     }
 
     .menu-card {
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        text-align: left;
-        gap: 20px;
+        padding: 15px 10px;
+        flex-direction: column;
+        /* Stack icons and text for 2-col layout */
+        text-align: center;
+        gap: 8px;
+        max-width: 100%;
     }
 
     .menu-icon {
-        margin: 0;
-        width: 50px;
-        height: 50px;
-        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        margin: 0 auto;
+        /* Center icon when stacked */
     }
 
     .menu-icon i {
-        font-size: 24px;
+        font-size: 18px;
     }
 
     .menu-card h3 {
-        font-size: 16px;
-        margin-bottom: 4px;
+        font-size: 13px;
+        line-height: 1.2;
+        margin-bottom: 0;
     }
 
-    .card-info {
-        text-align: left;
+    .menu-card p {
+        display: none;
+        /* Keep descriptions hidden on mobile */
     }
 
     .persistent-branding-section {
@@ -939,7 +942,11 @@ body {
     }
 
     .main-content {
-        padding: 20px;
+        padding: 15px;
+        margin-left: 0;
+        /* Critical: Remove PC margin */
+        width: 100%;
+        /* Critical: Set full width */
     }
 
     .project-main-title {
@@ -955,19 +962,6 @@ body {
 
     .home-logo-bar img {
         height: 28px;
-    }
-
-    .menu-card {
-        padding: 24px 20px;
-    }
-
-    .menu-icon {
-        width: 56px;
-        height: 56px;
-    }
-
-    .menu-icon i {
-        font-size: 28px;
     }
 
     .data-table-wrapper {
@@ -999,46 +993,6 @@ body {
 }
 
 /* Small Mobile - Extra Compact */
-.menu-grid {
-    grid-template-columns: 1fr;
-    /* Back to 1 column for usability */
-    gap: 15px;
-    padding: 10px;
-}
-
-.menu-card {
-    padding: 20px;
-    max-width: 100%;
-    /* Full width on mobile */
-    display: flex;
-    align-items: center;
-    text-align: left;
-    gap: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    /* Subtle shadow */
-}
-
-.menu-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 0;
-}
-
-.menu-icon i {
-    font-size: 24px;
-}
-
-.menu-card h3 {
-    font-size: 16px;
-    margin-bottom: 0;
-}
-
-.menu-card p {
-    display: none;
-    /* Keep descriptions hidden on mobile */
-}
-
 .project-main-title {
     font-size: 18px;
     margin-bottom: 20px;
