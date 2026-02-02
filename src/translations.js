@@ -48,7 +48,7 @@ export const translations = {
         farms: "Thông tin trang trại",
         activities: "Hoạt động thường niên",
         planning: "Kế hoạch mùa vụ",
-        training: "Tập huấn & Cây hỗ trợ",
+        training: "Hỗ trợ - Tập huấn",
         model: "Quản lý mô hình",
         users: "Quản trị hệ thống",
 
@@ -57,7 +57,7 @@ export const translations = {
         farms_desc: "Quản lý dữ liệu nền, tọa độ GPS, diện tích và hiện trạng canh tác trang trại.",
         activities_desc: "Theo dõi nhật ký kỹ thuật, canh tác, phân bón và bảo vệ thực vật.",
         planning_desc: "Lập kế hoạch sản xuất, dự báo sản lượng và quản lý tài chính.",
-        training_desc: "Lịch sử tập huấn, nâng cao năng lực và theo dõi cấp phát cây giống.",
+        training_desc: "Hỗ trợ kỹ thuật, cấp phát cây giống và lịch sử tập huấn.",
         model_desc: "Quản lý nông hộ hình mẫu và các kịch bản thích ứng biến đổi khí hậu.",
         users_desc: "Quản lý tài khoản, phân quyền và danh sách nhân viên hệ thống.",
 
@@ -245,7 +245,7 @@ export const translations = {
         farms: "Farm Information",
         activities: "Annual Activities",
         planning: "Seasonal Planning",
-        training: "Training & Support Trees",
+        training: "Support - Training",
         model: "Model Management",
         users: "System Admin",
 
@@ -254,7 +254,7 @@ export const translations = {
         farms_desc: "Manage baseline data, GPS coordinates, area, and cultivation status.",
         activities_desc: "Track technical logs, cultivation, fertilization, and plant protection.",
         planning_desc: "Production planning, yield forecasting, and financial management.",
-        training_desc: "Training history, capacity building, and seedling distribution tracking.",
+        training_desc: "Technical support, seedling distribution, and training history.",
         model_desc: "Manage demonstration farmers and climate change adaptation scenarios.",
         users_desc: "Manage accounts, permissions, and system employee lists.",
 
@@ -440,7 +440,7 @@ export const translations = {
         farms: "Hma kăphê",
         activities: "Bruă hma hruê",
         planning: "Ală bruă mruê",
-        training: "Hriăm bruă hma",
+        training: "Hrim hduê - Tập huấn",
         model: "Hma kriê",
         users: "Mnuih bruă",
 
@@ -449,7 +449,7 @@ export const translations = {
         farms_desc: "Kriê ală klei kơ hma kăphê, GPS hồ DT.",
         activities_desc: "Čih ală bruă hma hruê hruê.",
         planning_desc: "Dữ ală bruă hma kơ mruê.",
-        training_desc: "Hriăm ală bruă hma mrâo.",
+        training_desc: "Hrim hduê knuă, knuă hrim hruê.",
         model_desc: "Kriê ală hma kriê kăphê.",
         users_desc: "Kriê mnuih bruă hệ thống.",
 

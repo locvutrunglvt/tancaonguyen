@@ -183,7 +183,7 @@ const UserManagementView = ({
                             </div>
                             <div className="form-group">
                                 <label>{t.user_email}</label>
-                                <input className="input-pro" type="email" value={userForm.email} onChange={e => onFormChange({ ...userForm, email: e.target.value })} disabled={isEditing} required />
+                                <input className="input-pro" type="email" value={userForm.email} onChange={e => onFormChange({ ...userForm, email: e.target.value })} disabled={isEditing} style={{ background: isEditing ? '#f1f5f9' : 'white' }} required />
                             </div>
                             <div className="form-group">
                                 <label>{t.user_phone}</label>
