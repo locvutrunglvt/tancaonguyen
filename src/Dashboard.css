@@ -435,18 +435,29 @@ body {
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 30px;
+    /* Increased from 20px for more air on PC */
     width: 100%;
-    padding: 10px 0;
-    /* Align left */
+    max-width: 1200px;
+    /* Cap width for PC */
+    margin: 0 auto;
+    /* Center the grid */
+    padding: 20px 0;
 }
 
 .menu-card {
     background: white;
-    padding: 16px 14px;
-    border-radius: 10px;
+    padding: 30px 20px;
+    /* More vertical padding for 'box hẹp lại' feel */
+    border-radius: 12px;
+    max-width: 320px;
+    /* Narrower boxes as requested */
+    margin: 0 auto;
+    /* Center in grid cell */
     text-align: center;
     cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    /* Softer shadow */
     transition: all var(--transition-slow);
     border: 2px solid transparent;
     box-shadow: var(--shadow-md);
@@ -989,39 +1000,48 @@ body {
 
 /* Small Mobile - Extra Compact */
 .menu-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: 1fr;
+    /* Back to 1 column for usability */
+    gap: 15px;
+    padding: 10px;
 }
 
 .menu-card {
-    padding: 12px 10px;
+    padding: 20px;
+    max-width: 100%;
+    /* Full width on mobile */
+    display: flex;
+    align-items: center;
+    text-align: left;
+    gap: 20px;
     border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow */
 }
 
 .menu-icon {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 8px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0;
 }
 
 .menu-icon i {
-    font-size: 18px;
+    font-size: 24px;
 }
 
 .menu-card h3 {
-    font-size: 12px;
-    margin-bottom: 4px;
+    font-size: 16px;
+    margin-bottom: 0;
 }
 
 .menu-card p {
-    font-size: 10px;
     display: none;
-    /* Hide descriptions on mobile grid for space */
+    /* Keep descriptions hidden on mobile */
 }
 
 .project-main-title {
-    font-size: 15px;
-    margin-bottom: 15px;
+    font-size: 18px;
+    margin-bottom: 20px;
 }
 
 .dashboard-footer-branding {

@@ -93,13 +93,16 @@ body {
 }
 
 .login-project-title-center {
-  font-size: 42px;
+  font-size: 32px;
+  /* Reduced from 42px to fit 1 line better */
   font-weight: 800;
   color: white;
   text-transform: uppercase;
   letter-spacing: 1px;
   text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
   line-height: 1.2;
+  white-space: nowrap;
+  /* Force 1 line on PC */
 }
 
 /* AUTH CARD */
@@ -223,6 +226,8 @@ body {
   .login-project-title-center {
     font-size: 20px;
     padding: 0 10px;
+    white-space: normal;
+    /* Allow wrap for small screens */
   }
 
   .auth-card {
