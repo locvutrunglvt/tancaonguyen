@@ -121,7 +121,6 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
                 <div className="data-table-container">
                     <div className="table-header">
                         <h3><i className="fas fa-coins" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.plan_title}</h3>
-                        <div className="badge">{t.plan_group}</div>
                     </div>
 
                     <table className="pro-table">

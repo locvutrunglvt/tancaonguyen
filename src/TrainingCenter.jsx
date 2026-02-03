@@ -143,7 +143,6 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi' }) => {
                             <i className={activeTab === 'training' ? "fas fa-chalkboard-teacher" : "fas fa-tree"} style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>
                             {activeTab === 'training' ? t.train_history_title : t.train_tree_title}
                         </h3>
-                        <div className="badge">{t.train_group}</div>
                     </div>
 
                     <table className="pro-table">

@@ -26,7 +26,7 @@ const translations = {
             { id: 'tcn', name: 'Tân Cao Nguyên' },
             { id: 'tch', name: 'Tchibo Việt Nam' },
             { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
-            { id: 'farmer', name: 'Nông hộ hình mẫu' }
+            { id: 'far', name: 'Nông hộ hình mẫu' }
         ]
     },
     en: {
@@ -52,7 +52,7 @@ const translations = {
             { id: 'tcn', name: 'Tan Cao Nguyen' },
             { id: 'tch', name: 'Tchibo Vietnam' },
             { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
-            { id: 'farmer', name: 'Model Farmer' }
+            { id: 'far', name: 'Model Farmer' }
         ]
     },
     ede: {
@@ -78,7 +78,7 @@ const translations = {
             { id: 'tcn', name: 'Tân Cao Nguyên' },
             { id: 'tch', name: 'Tchibo Việt Nam' },
             { id: 'nkg', name: 'Neumann Kaffee Gruppe' },
-            { id: 'farmer', name: 'Mnuih hma' }
+            { id: 'far', name: 'Mnuih hma' }
         ]
     }
 };
@@ -91,8 +91,8 @@ const Login = ({ onDevLogin }) => {
         localStorage.setItem('app_lang', lang);
     }, [lang]);
     const [formData, setFormData] = useState({
-        org: '',
-        email: '',
+        org: 'tcn', // Default to TCN
+        email: 'locvutrung@gmail.com', // Default Admin Email
         password: '',
         fullName: '',
         phone: ''
@@ -227,11 +227,10 @@ const Login = ({ onDevLogin }) => {
             id: id,
             email: formData.email,
             full_name: formData.fullName,
-            organization: formData.org || 'gus',
-            phone: formData.phone,
+            organization: 'gus',
+            phone: formData.phone, // Verified lowercase phone in profiles table
             role: 'Guest',
-            approved: false,
-            employee_code: `PENDING-${Math.floor(Math.random() * 900) + 100}`,
+            employee_code: `GUS-${Math.floor(Math.random() * 900) + 100}`,
             created_at: new Date().toISOString()
         };
 
@@ -243,9 +242,7 @@ const Login = ({ onDevLogin }) => {
             throw new Error(`DATABASE_ERROR: ${profError.message}`);
         }
 
-        alert(currentLang === 'vi'
-            ? 'ĐĂNG KÝ THÀNH CÔNG! Vui lòng chờ Admin TCN phê duyệt tài khoản của bạn.'
-            : 'REGISTRATION SUCCESS! Please wait for TCN Admin to approve your account.');
+        alert(currentLang === 'vi' ? 'ĐĂNG KÝ THÀNH CÔNG!' : 'REGISTRATION SUCCESS!');
         setView('login');
     };
 
@@ -287,10 +284,10 @@ const Login = ({ onDevLogin }) => {
             </div>
 
             <div className="login-branding">
-                <div className="branding-bar-glass">
-                    <img src="https://github.com/locvutrunglvt/Tancaonguyen/blob/main/Logo.png?raw=true" alt="TCN - Tchibo - NKG" className="branding-logos" />
+                <div className="logo-bar-centered">
+                    <img src="https://github.com/locvutrunglvt/Tancaonguyen/blob/main/Logo.png?raw=true" alt="TCN - Tchibo - NKG" className="logo-2x" />
                 </div>
-                <h1 className="login-project-title-center">{t.title}</h1>
+                <h1 className="login-project-title-top">{t.title}</h1>
             </div>
 
             <div className="auth-card">

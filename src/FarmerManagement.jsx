@@ -128,7 +128,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                     className="btn-add-user"
                     style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                    <i className="fas fa-user-plus"></i> {t.add.toUpperCase()} {t.farmers.toUpperCase()}
+                    <i className="fas fa-user-plus"></i> {t.add} {t.farmers}
                 </button>
             </div>
 

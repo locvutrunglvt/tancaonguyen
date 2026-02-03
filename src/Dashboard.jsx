@@ -20,19 +20,15 @@ const HomeView = ({ menuItems, t }) => (
                         <i className={item.icon}></i>
                     </div>
                     <div className="card-info">
-                        <h3 style={{ fontSize: '1.4rem' }}>{item.title}</h3>
-                        <p style={{ fontSize: '1rem', opacity: 0.8 }}>{item.desc}</p>
+                        <h3>{item.title}</h3>
+                        <p>{item.desc}</p>
                     </div>
                 </div>
             ))}
         </div>
-        <div style={{ position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', width: '100%', pointerEvents: 'none' }}>
-            <div style={{ background: 'rgba(255,255,255,0.8)', padding: '10px 30px', borderRadius: '30px', display: 'inline-block', backdropFilter: 'blur(10px)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', pointerEvents: 'auto' }}>
-                <p style={{ margin: 0, fontSize: '12px', fontWeight: 800, color: 'var(--coffee-dark)', letterSpacing: '0.5px' }}>
-                    © 2026 Bản quyền và phát triển bởi <span style={{ color: 'var(--coffee-primary)' }}>Tân Cao Nguyên (TCN)</span>
-                </p>
-            </div>
-        </div>
+        <footer className="dashboard-footer-branding">
+            Bản quyền và phát triển bởi Tân Cao Nguyên, 2026
+        </footer>
     </div>
 );
 
@@ -72,15 +68,15 @@ const UserManagementView = ({
     users, t, currentUser, onBack, onAdd, onEdit, onDelete,
     showModal, onModalClose, userForm, onFormChange, onSave, isEditing, isLoading
 }) => {
-    const isTCNAdmin = currentUser?.email?.includes('admin@daklack.com') || (currentUser?.organization === 'tcn' && currentUser?.role === 'Admin');
-
-    const canFullManage = isTCNAdmin;
+    // Permission Logic: Only Admin of the same org OR TCN Admin can Manage
     const canManageUser = (targetOrg) => {
         if (!currentUser) return false;
-        if (isTCNAdmin) return true;
-
-        // Org Admin can manage their own org members BUT with limited fields (only role)
-        return currentUser.role === 'Admin' && currentUser.organization === targetOrg;
+        const isAdmin = currentUser.role === 'Admin';
+        const isTCNAdmin = currentUser.organization === 'tcn' && isAdmin;
+        const isSameOrg = currentUser.organization === targetOrg;
+        // Exception: Grand admin can manage all
+        const isSuperAdmin = currentUser.email?.includes('admin@daklack.com');
+        return isAdmin && (isSameOrg || isTCNAdmin || isSuperAdmin);
     };
 
     const perms = { view: true, add: true, edit: true, delete: true }; // Form permissions helper
@@ -97,7 +93,7 @@ const UserManagementView = ({
                         className="btn-add-user"
                         style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
-                        <i className="fas fa-user-plus"></i> {t.user_add_btn}
+                        <i className="fas fa-user-plus"></i> {t.add} {t.farmers}
                     </button>
                 )}
             </div>
@@ -105,7 +101,6 @@ const UserManagementView = ({
             <div className="data-table-container">
                 <div className="table-header">
                     <h3><i className="fas fa-users-cog" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.user_list_title}</h3>
-                    <div className="badge">{users.length} {t.users?.toLowerCase() || 'members'}</div>
                 </div>
                 <table className="pro-table">
                     <thead>
@@ -133,15 +128,6 @@ const UserManagementView = ({
                                 </td>
                                 <td>
                                     <div style={{ display: 'flex', gap: '8px' }}>
-                                        {canFullManage && u.approved === false && (
-                                            <button onClick={() => onSave({ ...u, approved: true }, true)} style={{
-                                                background: '#dcfce7', border: '1px solid #22c55e',
-                                                color: '#15803d', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }} title={t.approved || "Approve"}>
-                                                <i className="fas fa-check-circle"></i>
-                                            </button>
-                                        )}
                                         {canManageUser(u.organization) && (
                                             <>
                                                 <button onClick={() => onEdit(u)} style={{
@@ -151,15 +137,13 @@ const UserManagementView = ({
                                                 }} title={t.edit || "Edit"}>
                                                     <i className="fas fa-pen"></i>
                                                 </button>
-                                                {canFullManage && (
-                                                    <button onClick={() => onDelete(u.id)} style={{
-                                                        background: '#fef2f2', border: '1px solid #ef4444',
-                                                        color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                    }} title={t.delete || "Delete"}>
-                                                        <i className="fas fa-trash"></i>
-                                                    </button>
-                                                )}
+                                                <button onClick={() => onDelete(u.id)} style={{
+                                                    background: '#fef2f2', border: '1px solid #ef4444',
+                                                    color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }} title={t.delete || "Delete"}>
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
                                             </>
                                         )}
                                     </div>
@@ -183,7 +167,7 @@ const UserManagementView = ({
                             </div>
                             <div className="form-group">
                                 <label>{t.user_email}</label>
-                                <input className="input-pro" type="email" value={userForm.email} onChange={e => onFormChange({ ...userForm, email: e.target.value })} disabled={isEditing} style={{ background: isEditing ? '#f1f5f9' : 'white' }} required />
+                                <input className="input-pro" type="email" value={userForm.email} onChange={e => onFormChange({ ...userForm, email: e.target.value })} disabled={isEditing} required />
                             </div>
                             <div className="form-group">
                                 <label>{t.user_phone}</label>
@@ -225,37 +209,16 @@ const UserManagementView = ({
                                 </div>
                             </div>
                             {!isEditing ? (
-                                <>
-                                    <div className="form-group">
-                                        <label>{t.user_role}</label>
-                                        <select className="input-pro" value={userForm.role} onChange={e => onFormChange({ ...userForm, role: e.target.value })}>
-                                            <option value="Guest">Khách (Guest)</option>
-                                            <option value="Viewer">Viewer</option>
-                                            <option value="Farmer">Farmer</option>
-                                            <option value="Admin">Admin</option>
-                                        </select>
-                                    </div>
-                                    {isTCNAdmin && (
-                                        <div className="form-group">
-                                            <label>{t.status || 'Trạng thái'}</label>
-                                            <select className="input-pro" value={userForm.approved === false ? 'pending' : 'approved'} onChange={e => onFormChange({ ...userForm, approved: e.target.value === 'approved' })}>
-                                                <option value="approved">{t.approved || 'Đã phê duyệt'}</option>
-                                                <option value="pending">{t.pending || 'Chờ phê duyệt'}</option>
-                                            </select>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                isTCNAdmin && (
-                                    <div className="form-group">
-                                        <label>{t.status || 'Trạng thái'}</label>
-                                        <select className="input-pro" value={userForm.approved === false ? 'pending' : 'approved'} onChange={e => onFormChange({ ...userForm, approved: e.target.value === 'approved' })}>
-                                            <option value="approved">{t.approved || 'Đã phê duyệt'}</option>
-                                            <option value="pending">{t.pending || 'Chờ phê duyệt'}</option>
-                                        </select>
-                                    </div>
-                                )
-                            )}
+                                <div className="form-group">
+                                    <label>{t.user_role}</label>
+                                    <select className="input-pro" value={userForm.role} onChange={e => onFormChange({ ...userForm, role: e.target.value })}>
+                                        <option value="Guest">Khách (Guest)</option>
+                                        <option value="Viewer">Viewer</option>
+                                        <option value="Farmer">Farmer</option>
+                                        <option value="Admin">Admin</option>
+                                    </select>
+                                </div>
+                            ) : null}
 
                             <div className="permissions-section" style={{ background: '#f8fafc', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
                                 <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--coffee-dark)', marginBottom: '8px', display: 'block' }}>
@@ -403,7 +366,7 @@ const Dashboard = ({ devUser, onLogout }) => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('id, email, full_name, organization, role, employee_code, phone')
                 .order('created_at', { ascending: false });
             if (error) throw error;
             setUsers(data || []);
@@ -429,48 +392,69 @@ const Dashboard = ({ devUser, onLogout }) => {
             }
         });
 
-        const nextNum = (maxNum + 1).toString().padStart(3, '0');
+        const nextNum = (maxNum + 1).toString().padStart(4, '0'); // 4 digits as requested
         return `${prefix}-${nextNum}`;
     };
 
-    const handleSaveUser = async (e, directData = null) => {
-        if (e && e.preventDefault) e.preventDefault();
+    const handleSaveUser = async (e) => {
+        e.preventDefault();
         setLoading(true);
         try {
-            const dataToSave = directData || userForm;
-            const isEditingMode = isEditing || !!directData;
-
-            // Business Logic: Generate structured code if missing
-            let finalCode = dataToSave.employee_code;
-            if (!finalCode || finalCode.startsWith('PENDING-')) {
-                finalCode = handleGenerateEmployeeCode(dataToSave.organization, users);
+            // Business Logic: Generate structured code if missing or or organization changed
+            let finalCode = userForm.employee_code;
+            if (!finalCode) {
+                finalCode = handleGenerateEmployeeCode(userForm.organization, users);
             }
 
-            if (isEditingMode) {
+            if (isEditing) {
                 const { error } = await supabase
                     .from('profiles')
                     .upsert({
-                        ...dataToSave,
-                        employee_code: finalCode
+                        id: userForm.id,
+                        email: userForm.email,
+                        full_name: userForm.full_name,
+                        organization: userForm.organization,
+                        role: userForm.role,
+                        employee_code: finalCode,
+                        phone: userForm.phone
                     });
                 if (error) throw error;
             } else {
-                // ... same logic for signup as before, but handleSaveUser is mostly for Admin manual add
-                const { error: signUpError } = await supabase.auth.signUp({
-                    email: dataToSave.email,
-                    password: dataToSave.password || '12345678',
+                // Perform account registration in Supabase Auth
+                const { data, error: signUpError } = await supabase.auth.signUp({
+                    email: userForm.email,
+                    password: userForm.password || '12345678', // Default if not provided
                     options: {
                         data: {
-                            full_name: dataToSave.full_name,
-                            organization: dataToSave.organization,
-                            role: dataToSave.role,
+                            full_name: userForm.full_name,
+                            organization: userForm.organization,
+                            role: userForm.role,
                             employee_code: finalCode,
-                            phone: dataToSave.phone,
-                            approved: dataToSave.approved !== false
+                            phone: userForm.phone
                         }
                     }
                 });
+
                 if (signUpError) throw signUpError;
+
+                // CRITICAL: Manual insert into 'profiles' as fallback if trigger is not set
+                if (data?.user) {
+                    const { error: profError } = await supabase
+                        .from('profiles')
+                        .insert([{
+                            id: data.user.id,
+                            email: userForm.email,
+                            full_name: userForm.full_name,
+                            organization: userForm.organization,
+                            role: userForm.role,
+                            employee_code: finalCode,
+                            phone: userForm.phone
+                        }]);
+                    if (profError) {
+                        console.error("METADATA_SYNC_FAIL: ", profError.message);
+                        // We don't throw because the account IS created, but we log it.
+                    }
+                }
             }
             setShowUserModal(false);
             fetchUsersList();
@@ -512,9 +496,8 @@ const Dashboard = ({ devUser, onLogout }) => {
 
     // Security check: Is current user an Admin?
     const isAdmin = currentUser?.role === 'Admin' || currentUser?.email?.includes('admin@daklack.com');
-    const isApproved = currentUser?.approved !== false; // Handle null/undefined as true for legacy, but false if explicitly false
 
-    if (isAdmin && isApproved) {
+    if (isAdmin) {
         menuItems.push({ id: 'users', title: 'Admin', desc: t.users_desc || 'Quản trị hệ thống và người dùng.', icon: 'fas fa-users-cog', action: () => setView('users') });
     }
 
@@ -575,12 +558,15 @@ const Dashboard = ({ devUser, onLogout }) => {
                     </div>
 
                     <div className="header-row header-title-row">
-                        <h1 className="header-project-title">QUẢN LÝ MÔ HÌNH CÀ PHÊ THÍCH ỨNG BIẾN ĐỔI KHÍ HẬU</h1>
+                        <h1 className="header-project-title">
+                            MÔ HÌNH CÀ PHÊ BỀN VỮNG<br />
+                            THÍCH ỨNG BIẾN ĐỔI KHÍ HẬU
+                        </h1>
                     </div>
 
-                    <div className="header-row header-controls-row" style={{ position: 'absolute', top: '20px', right: '20px', display: 'flex', gap: '10px' }}>
+                    <div className="header-row header-controls-row">
                         <div className="header-controls-group">
-                            <div className="in-app-lang" style={{ background: 'rgba(255,255,255,0.9)', padding: '5px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                            <div className="in-app-lang">
                                 <button className={`lang-mini-btn ${appLang === 'vi' ? 'active' : ''}`} onClick={() => setAppLang('vi')}><img src="https://flagcdn.com/w20/vn.png" alt="VI" /></button>
                                 <button className={`lang-mini-btn ${appLang === 'en' ? 'active' : ''}`} onClick={() => setAppLang('en')}><img src="https://flagcdn.com/w20/gb.png" alt="EN" /></button>
                                 <button className={`lang-mini-btn ${appLang === 'ede' ? 'active' : ''}`} onClick={() => setAppLang('ede')} style={{ border: 'none', background: appLang === 'ede' ? 'var(--coffee-dark)' : 'none', color: appLang === 'ede' ? 'white' : 'var(--coffee-dark)', cursor: 'pointer', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>EĐ</button>
@@ -590,41 +576,30 @@ const Dashboard = ({ devUser, onLogout }) => {
                 </header>
 
                 <div className="view-scroll-container">
-                    {!isApproved ? (
+                    {view === 'home' && <HomeView menuItems={menuItems} t={t} />}
+                    {view === 'growth' && (
                         <div className="view-container" style={{ textAlign: 'center', padding: '100px 20px', background: 'white', borderRadius: '24px' }}>
-                            <div style={{ fontSize: '64px', color: '#f59e0b', marginBottom: '20px' }}><i className="fas fa-user-clock"></i></div>
-                            <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)' }}>DANG CHỜ PHÊ DUYỆT</h2>
-                            <p style={{ color: '#64748b', marginTop: '10px' }}>Tài khoản của bạn đã được đăng ký nhưng đang chờ Admin TCN phê duyệt. Vui lòng liên hệ quản trị viên.</p>
-                            <button onClick={handleLogout} className="btn-primary" style={{ marginTop: '30px', width: 'auto', padding: '12px 40px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>{t.logout}</button>
+                            <div style={{ fontSize: '64px', color: 'var(--coffee-primary)', marginBottom: '20px' }}><i className="fas fa-chart-line"></i></div>
+                            <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)' }}>TĂNG TRƯỞNG & PHÁT TRIỂN</h2>
+                            <p style={{ color: '#64748b', marginTop: '10px' }}>Chức năng đang được đồng bộ dữ liệu thực địa. Vui lòng quay lại sau.</p>
+                            <button onClick={() => setView('home')} className="btn-primary" style={{ marginTop: '30px', width: 'auto', padding: '12px 40px' }}>{t.back}</button>
                         </div>
-                    ) : (
-                        <>
-                            {view === 'home' && <HomeView menuItems={menuItems} t={t} />}
-                            {view === 'growth' && (
-                                <div className="view-container" style={{ textAlign: 'center', padding: '100px 20px', background: 'white', borderRadius: '24px' }}>
-                                    <div style={{ fontSize: '64px', color: 'var(--coffee-primary)', marginBottom: '20px' }}><i className="fas fa-chart-line"></i></div>
-                                    <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)' }}>TĂNG TRƯỞNG & PHÁT TRIỂN</h2>
-                                    <p style={{ color: '#64748b', marginTop: '10px' }}>Chức năng đang được đồng bộ dữ liệu thực địa. Vui lòng quay lại sau.</p>
-                                    <button onClick={() => setView('home')} className="btn-primary" style={{ marginTop: '30px', width: 'auto', padding: '12px 40px' }}>{t.back}</button>
-                                </div>
-                            )}
-                            {view === 'users' && (
-                                <UserManagementView
-                                    users={users} t={t} currentUser={currentUser}
-                                    onBack={() => setView('home')}
-                                    onAdd={() => { setUserForm({ id: '', email: '', full_name: '', organization: currentUser?.organization || 'gus', role: 'Guest', employee_code: '', phone: '' }); setIsEditing(false); setShowUserModal(true); }}
-                                    onEdit={(u) => { setUserForm(u); setIsEditing(true); setShowUserModal(true); }}
-                                    onDelete={handleDeleteUser}
-                                    showModal={showUserModal}
-                                    onModalClose={() => setShowUserModal(false)}
-                                    userForm={userForm}
-                                    onFormChange={setUserForm}
-                                    onSave={handleSaveUser}
-                                    isEditing={isEditing}
-                                    isLoading={loading}
-                                />
-                            )}
-                        </>
+                    )}
+                    {view === 'users' && (
+                        <UserManagementView
+                            users={users} t={t} currentUser={currentUser}
+                            onBack={() => setView('home')}
+                            onAdd={() => { setUserForm({ id: '', email: '', full_name: '', organization: currentUser?.organization || 'gus', role: 'Guest', employee_code: '', phone: '' }); setIsEditing(false); setShowUserModal(true); }}
+                            onEdit={(u) => { setUserForm(u); setIsEditing(true); setShowUserModal(true); }}
+                            onDelete={handleDeleteUser}
+                            showModal={showUserModal}
+                            onModalClose={() => setShowUserModal(false)}
+                            userForm={userForm}
+                            onFormChange={setUserForm}
+                            onSave={handleSaveUser}
+                            isEditing={isEditing}
+                            isLoading={loading}
+                        />
                     )}
                     {view === 'model' && <ModelManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
                     {view === 'activities' && <AnnualActivities onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
@@ -640,20 +615,7 @@ const Dashboard = ({ devUser, onLogout }) => {
 
             <nav className="mobile-bottom-nav">
                 <button className={`nav-item-mobile ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
-                    <i className="fas fa-home"></i>
-                    <span>{t.home}</span>
-                </button>
-                <button className={`nav-item-mobile ${view === 'farmers' ? 'active' : ''}`} onClick={() => setView('farmers')}>
-                    <i className="fas fa-address-book"></i>
-                    <span>{t.farmers}</span>
-                </button>
-                <button className={`nav-item-mobile ${view === 'activities' ? 'active' : ''}`} onClick={() => setView('activities')}>
-                    <i className="fas fa-calendar-alt"></i>
-                    <span>{t.activities}</span>
-                </button>
-                <button className="nav-item-mobile logout-mobile-only" onClick={handleLogout}>
-                    <i className="fas fa-sign-out-alt" style={{ color: '#ef4444' }}></i>
-                    <span style={{ color: '#ef4444' }}>{t.logout}</span>
+                    <i className="fas fa-home"></i> <span>{t.home}</span>
                 </button>
             </nav>
         </div>

@@ -12,15 +12,6 @@ export const translations = {
         password_success: "Đã đổi mật khẩu thành công!",
         working_user: "Người dùng đang làm việc",
         user_info: "Thông tin tài khoản",
-        signup_title: "Đăng ký thành viên",
-        signup_success: "Đăng ký thành công! Vui lòng chờ Admin TCN phê duyệt.",
-        waiting_approval: "Tài khoản của bạn đang chờ phê duyệt từ Admin TCN.",
-        already_have_account: "Đã có tài khoản? Đăng nhập",
-        join_us: "Tham gia cùng chúng tôi",
-        status: "Trạng thái",
-        approved: "Đã phê duyệt",
-        pending: "Chờ phê duyệt",
-        manage_perms: "Phân quyền",
 
         // Forgot Password
         forgot_title: "Quên mật khẩu?",
@@ -46,9 +37,9 @@ export const translations = {
         // Menu Item Titles
         farmers: "Hồ sơ nông hộ",
         farms: "Thông tin trang trại",
-        activities: "Các hoạt động",
+        activities: "Hoạt động thường niên",
         planning: "Kế hoạch mùa vụ",
-        training: "Hỗ trợ - Tập huấn",
+        training: "Tập huấn & Cây hỗ trợ",
         model: "Quản lý mô hình",
         users: "Quản trị hệ thống",
 
@@ -56,8 +47,9 @@ export const translations = {
         farmers_desc: "Quản lý toàn bộ thông tin căn bản, hồ sơ nhân khẩu và định danh hộ dân.",
         farms_desc: "Quản lý dữ liệu nền, tọa độ GPS, diện tích và hiện trạng canh tác trang trại.",
         activities_desc: "Theo dõi nhật ký kỹ thuật, canh tác, phân bón và bảo vệ thực vật.",
+        act_group: "Canh tác & Bảo vệ thực vật",
         planning_desc: "Lập kế hoạch sản xuất, dự báo sản lượng và quản lý tài chính.",
-        training_desc: "Hỗ trợ kỹ thuật, cấp phát cây giống và lịch sử tập huấn.",
+        training_desc: "Lịch sử tập huấn, nâng cao năng lực và theo dõi cấp phát cây giống.",
         model_desc: "Quản lý nông hộ hình mẫu và các kịch bản thích ứng biến đổi khí hậu.",
         users_desc: "Quản lý tài khoản, phân quyền và danh sách nhân viên hệ thống.",
 
@@ -95,7 +87,7 @@ export const translations = {
 
         // Seasonal Planning
         plan_title: "Quản lý Tài chính & Kế hoạch mùa vụ",
-        plan_group: "Nhóm C: Hiệu quả kinh tế",
+        plan_group: "Hiệu quả kinh tế",
         plan_add_btn: "GHI NHẬN CHI PHÍ / DOANH THU",
         plan_total_cost: "Tổng chi phí",
         plan_total_rev: "Tổng doanh thu",
@@ -173,7 +165,8 @@ export const translations = {
         save_success: "Đã lưu thành công!",
         save_error: "Lỗi lưu dữ liệu: ",
         no_data: "Chưa có dữ liệu.",
-        farm_baseline: "Baseline (Nhóm A)",
+        farm_title: "Quản lý thông tin trang trại",
+        farm_baseline: "Baseline",
         farm_owner: "Chủ hộ",
         farm_total_area: "Tổng DT (ha)",
         farm_date: "Ngày khảo sát",
@@ -209,15 +202,6 @@ export const translations = {
         password_success: "Password changed successfully!",
         working_user: "Active User",
         user_info: "User Information",
-        signup_title: "Member Registration",
-        signup_success: "Registration successful! Please wait for TCN Admin approval.",
-        waiting_approval: "Your account is pending approval from TCN Admin.",
-        already_have_account: "Already have an account? Login",
-        join_us: "Join Us",
-        status: "Status",
-        approved: "Approved",
-        pending: "Pending",
-        manage_perms: "Manage Permissions",
 
         // Forgot Password
         forgot_title: "Forgot Password?",
@@ -243,9 +227,9 @@ export const translations = {
         // Menu Item Titles
         farmers: "Farmer Profiles",
         farms: "Farm Information",
-        activities: "Activities",
+        activities: "Annual Activities",
         planning: "Seasonal Planning",
-        training: "Support - Training",
+        training: "Training & Support Trees",
         model: "Model Management",
         users: "System Admin",
 
@@ -254,7 +238,7 @@ export const translations = {
         farms_desc: "Manage baseline data, GPS coordinates, area, and cultivation status.",
         activities_desc: "Track technical logs, cultivation, fertilization, and plant protection.",
         planning_desc: "Production planning, yield forecasting, and financial management.",
-        training_desc: "Technical support, seedling distribution, and training history.",
+        training_desc: "Training history, capacity building, and seedling distribution tracking.",
         model_desc: "Manage demonstration farmers and climate change adaptation scenarios.",
         users_desc: "Manage accounts, permissions, and system employee lists.",
 
@@ -404,15 +388,6 @@ export const translations = {
         confirm_password: "Xác nhận",
         password_mismatch: "Khŏ klă!",
         password_success: "Mlih mật khẩu thành công!",
-        signup_title: "Čih anăn mrâo",
-        signup_success: "Čih anăn thành công! Čăng Admin TCN phê duyệt.",
-        waiting_approval: "Mật khẩu čăng Admin TCN phê duyệt.",
-        already_have_account: "Čih anăn hruê? Lêt tnih",
-        join_us: "Lôt kơ hmô",
-        status: "Trạng thái",
-        approved: "Klă",
-        pending: "Čăng",
-        manage_perms: "Klei phân quyền",
 
         // Forgot Password
         forgot_title: "Khŏ kơ mật khẩu?",
@@ -440,7 +415,7 @@ export const translations = {
         farms: "Hma kăphê",
         activities: "Bruă hma hruê",
         planning: "Ală bruă mruê",
-        training: "Hrim hduê - Tập huấn",
+        training: "Hriăm bruă hma",
         model: "Hma kriê",
         users: "Mnuih bruă",
 
@@ -449,7 +424,7 @@ export const translations = {
         farms_desc: "Kriê ală klei kơ hma kăphê, GPS hồ DT.",
         activities_desc: "Čih ală bruă hma hruê hruê.",
         planning_desc: "Dữ ală bruă hma kơ mruê.",
-        training_desc: "Hrim hduê knuă, knuă hrim hruê.",
+        training_desc: "Hriăm ală bruă hma mrâo.",
         model_desc: "Kriê ală hma kriê kăphê.",
         users_desc: "Kriê mnuih bruă hệ thống.",
 

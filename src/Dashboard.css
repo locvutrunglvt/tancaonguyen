@@ -2,27 +2,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    /* Coffee Theme - Rich & Professional */
-    --coffee-primary: #6B4423;
-    --coffee-dark: #3E2723;
+    /* Coffee Theme - Refined Parchment & Coffee Palette */
+    --coffee-primary: #A67C52;
+    --coffee-dark: #4B3621;
     --coffee-medium: #8D6E63;
-    --coffee-light: #D7CCC8;
-    --cream: #FFF8E1;
-    --cream-light: #FFFBF0;
+    --coffee-light: #E0C9A6;
+    --cream: #F2E7D5;
+    --cream-light: #F9F3E8;
 
     /* Accents */
-    --green-accent: #4CAF50;
-    --gold-accent: #FFB300;
-    --gold-light: #FFD54F;
+    --green-accent: #6B8E23;
+    --gold-accent: #D4AF37;
+    --gold-light: #F0E68C;
 
     /* Neutrals */
     --white: #FFFFFF;
-    --gray-50: #FAFAFA;
-    --gray-100: #F5F5F5;
-    --gray-200: #EEEEEE;
-    --gray-300: #E0E0E0;
-    --gray-700: #616161;
-    --gray-900: #212121;
+    --gray-50: #FAF7F2;
+    --gray-100: #F2E7D5;
+    --gray-200: #E0D5C0;
+    --gray-300: #C0B090;
+    --gray-700: #5D4037;
+    --gray-900: #3E2723;
 
     /* Semantic */
     --success: #4CAF50;
@@ -65,8 +65,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
-    margin: 0;
-    padding: 0;
+    /* Prevent body scroll */
 }
 
 /* Hide scrollbars globally */
@@ -99,14 +98,13 @@ body {
     display: flex;
     flex-direction: column;
     padding: 32px 24px;
-    position: fixed;
-    /* Change from sticky to fixed for absolute left alignment */
-    left: 0;
+    position: sticky;
     top: 0;
     height: 100vh;
     color: white;
     z-index: 1000;
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    transition: width var(--transition-slow), transform var(--transition-slow);
 }
 
 /* Sidebar branding removed as requested to unify with header */
@@ -127,8 +125,8 @@ body {
     border-radius: 12px;
     color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-base);
     position: relative;
@@ -193,29 +191,29 @@ body {
 /* ============= MAIN CONTENT ============= */
 .main-content {
     flex: 1;
-    padding: 24px 40px;
+    padding: 20px 30px;
     background: transparent;
     display: flex;
     flex-direction: column;
-    /* Removed width and margin-left to use flexbox properly with sidebar */
+    width: 100%;
     height: 100vh;
     overflow: hidden;
-    position: relative;
 }
 
 /* STACKED HEADER STYLING */
 .header-stack {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
+    gap: 8px;
+    /* Reduced from 15px */
+    margin-bottom: 15px;
+    /* Reduced from 30px */
+    padding-bottom: 10px;
+    /* Reduced from 20px */
     border-bottom: 1px solid var(--gray-200);
     width: 100%;
     align-items: center;
     text-align: center;
-    position: relative;
-    /* Ensure controls-row can be absolutely positioned */
 }
 
 .header-row {
@@ -251,16 +249,14 @@ body {
 }
 
 .header-project-title {
-    font-size: 32px;
-    /* Reduced by ~50% as requested */
+    font-size: clamp(16px, 3.5vw, 36px);
     font-weight: 800;
     color: var(--coffee-dark);
     text-transform: uppercase;
     letter-spacing: -0.5px;
-    margin: 10px 0;
-    line-height: 1.2;
-    white-space: normal;
-    /* Allow wrap for long titles on small screens */
+    margin: 5px 0;
+    line-height: 1.1;
+    text-align: center;
 }
 
 .welcome-section {
@@ -315,6 +311,12 @@ body {
     justify-content: center;
     opacity: 0.7;
     cursor: pointer;
+    background: none;
+    /* Removed background */
+    border: none;
+    /* Removed border */
+    padding: 0;
+    /* Removed padding */
 }
 
 .lang-mini-btn:hover {
@@ -329,10 +331,10 @@ body {
 }
 
 .lang-mini-btn img {
-    width: 24px;
+    width: 20px;
+    /* Shrunken globally for elegance */
     height: auto;
-    border-radius: 4px;
-    box-shadow: var(--shadow-sm);
+    display: block;
 }
 
 /* welcome-section removed from here, integrated into header-right */
@@ -345,11 +347,17 @@ body {
     padding: 0;
     width: 100%;
     max-width: 100%;
-    /* Ensure full width */
     flex: 1;
     overflow-y: auto;
     scrollbar-width: none;
     animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 769px) {
+    .home-container {
+        overflow: hidden;
+        /* Remove scrollbar on PC as requested */
+    }
 }
 
 .home-hero-section {
@@ -357,8 +365,10 @@ body {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin-bottom: 24px;
-    padding: 10px;
+    margin-bottom: 12px;
+    /* Reduced from 24px */
+    padding: 5px;
+    /* Reduced from 10px */
 }
 
 .hero-logo {
@@ -417,11 +427,13 @@ body {
 }
 
 .project-main-title {
-    font-size: 24px;
+    font-size: 30px;
+    /* PC Default */
     font-weight: 800;
     color: var(--coffee-dark);
     text-align: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    /* Reduced from 12px */
     letter-spacing: -0.5px;
     line-height: 1.2;
 }
@@ -433,32 +445,23 @@ body {
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    /* 3 columns on PC */
-    gap: 30px;
-    /* Increased from 20px for more air on PC */
+    gap: 12px;
+    /* Further reduced from 15px */
     width: 100%;
-    max-width: 1200px;
-    /* Cap width for PC */
-    margin: 0 auto;
-    /* Center the grid */
-    padding: 20px 0;
+    padding: 2px 0;
+    /* Reduced from 5px */
 }
 
 .menu-card {
     background: white;
-    padding: 30px 20px;
-    /* More vertical padding for 'box hẹp lại' feel */
+    padding: 12px 10px;
+    /* Shrunk box */
     border-radius: 12px;
-    max-width: 320px;
-    /* Narrower boxes as requested */
-    margin: 0 auto;
-    /* Center in grid cell */
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    /* Softer shadow */
     transition: all var(--transition-slow);
-    border: 2px solid transparent;
+    border: 1.5px solid var(--gray-200);
+    /* Refined border */
     box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
@@ -487,10 +490,12 @@ body {
 }
 
 .menu-icon {
-    width: 64px;
-    /* Larger icon container */
-    height: 64px;
-    margin: 0 auto 15px;
+    width: 54px;
+    /* Shrunken from 64px */
+    height: 54px;
+    /* Shrunken from 64px */
+    margin: 0 auto 10px;
+    /* Reduced from 15px */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -507,8 +512,8 @@ body {
 }
 
 .menu-icon i {
-    font-size: 32px;
-    /* Much larger icons as requested */
+    font-size: 26px;
+    /* Reduced from 32px */
     color: var(--coffee-primary);
     transition: all var(--transition-base);
     display: flex;
@@ -517,17 +522,18 @@ body {
 }
 
 .menu-card h3 {
-    font-size: 22px;
-    /* Larger title */
+    font-size: 14px;
+    /* Slightly smaller */
     font-weight: 800;
     color: var(--coffee-dark);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .menu-card p {
-    font-size: 14px;
+    font-size: 10px;
+    /* Slightly smaller */
     color: var(--coffee-medium);
-    line-height: 1.4;
+    line-height: 1.2;
 }
 
 /* ============= MOBILE BOTTOM NAV ============= */
@@ -591,6 +597,8 @@ body {
     border-radius: 16px;
     box-shadow: var(--shadow-md);
     overflow: hidden;
+    overflow-x: auto;
+    /* Enable horizontal scrolling */
     margin-bottom: 24px;
     width: 100%;
 }
@@ -604,7 +612,8 @@ body {
 }
 
 .table-header h3 {
-    font-size: 18px;
+    font-size: 12px;
+    /* As requested: Tên bảng biểu 12px */
     color: var(--coffee-dark);
     margin: 0;
 }
@@ -620,15 +629,36 @@ body {
     background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-primary) 100%);
 }
 
+.data-table-container h2,
+.view-container h2 {
+    font-size: 18px;
+    /* As requested: h2 18px */
+    color: var(--coffee-dark);
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.table-header h3,
+.view-container h3,
+h3 {
+    font-size: 16px;
+    /* As requested: h3 16px (PC) */
+    color: var(--coffee-dark);
+    font-weight: 700;
+}
+
 .pro-table thead th,
 .data-table thead th {
-    padding: 18px 20px;
+    padding: 10px 8px;
+    /* Further reduced from 12px 14px */
     text-align: left;
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
     color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    text-transform: none;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    /* Keep headers on one line if possible, scroll if not */
 }
 
 .pro-table tbody tr,
@@ -649,8 +679,10 @@ body {
 
 .pro-table tbody td,
 .data-table tbody td {
-    padding: 14px 20px;
-    font-size: 14px;
+    padding: 12px 14px;
+    /* As requested: Padding 12px 14px */
+    font-size: 11px;
+    /* Matching th size for consistency/compactness */
     color: var(--gray-900);
     vertical-align: middle;
 }
@@ -658,18 +690,20 @@ body {
 /* ============= BUTTONS ============= */
 .btn-add-user,
 .btn-primary {
-    padding: 14px 28px;
-    border-radius: 12px;
+    padding: 10px 20px;
+    /* Reduced from 14x28 */
+    border-radius: 10px;
     background: linear-gradient(135deg, var(--coffee-primary) 0%, var(--coffee-dark) 100%);
     color: white;
     border: none;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 13px;
+    /* Reduced from 15px */
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(107, 68, 35, 0.2);
     transition: all var(--transition-base);
 }
 
@@ -727,20 +761,25 @@ body {
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    /* Tighter */
     color: var(--coffee-dark);
     font-weight: 600;
-    font-size: 15px;
+    font-size: 12px;
+    /* Kept 12px as previously requested, checking casing via text-transform if needed */
+    /* Ensure no text-transform: uppercase is applied here, it seems clean */
 }
 
 .form-group input,
 .form-group select,
-.form-group textarea {
+.form-group textarea,
+.input-pro {
     width: 100%;
-    padding: 14px 16px;
-    border: 2px solid var(--gray-300);
+    padding: 12px 13px;
+    /* As requested: 12px 13px */
+    border: 2px solid var(--gray-200);
     border-radius: 10px;
-    font-size: 15px;
+    font-size: 14px;
     font-family: 'Inter', sans-serif;
     transition: all var(--transition-base);
     background: white;
@@ -849,119 +888,118 @@ body {
     }
 
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        padding: 10px;
-        background: white;
-        /* Change from brown to white for mobile top bar as requested */
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        color: var(--coffee-dark);
-    }
-
-    .sidebar-logo {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border: none;
-    }
-
-    .nav-menu {
         display: none;
-        /* Hidden by default on mobile */
     }
 
-    .sidebar.mobile-open .nav-menu {
+    .main-content {
+        padding: 12px;
+        height: calc(100vh - 70px);
+    }
+
+    .header-stack {
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        gap: 6px;
         display: flex;
-        margin-top: 20px;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .sidebar-footer {
-        display: none;
+    .header-logo-row {
+        margin-bottom: 5px;
     }
 
-    .sidebar.mobile-open .sidebar-footer {
-        display: block;
+    .header-logo-unified {
+        height: 24px;
+    }
+
+    .header-project-title {
+        font-size: 20px !important;
+        font-weight: 800;
+        margin: 6px 0 !important;
+        order: 1;
+        line-height: 1.25;
+        /* Improved line height for 2 lines */
+        max-width: 100%;
+        /* Allow full width */
+        padding: 0 10px;
+        /* Prevent edge touching */
+        white-space: pre-wrap;
+        /* Force line break if needed */
+        text-align: center;
+    }
+
+    .header-controls-row {
+        order: 2;
+        /* Lang buttons below title */
+        justify-content: center !important;
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .in-app-lang {
+        gap: 15px;
+        /* More spacing on mobile */
+        justify-content: center;
+    }
+
+    .lang-mini-btn img {
+        width: 16px;
+        /* Even smaller on mobile */
     }
 
     .menu-grid {
         grid-template-columns: repeat(2, 1fr);
-        /* 2 columns on mobile */
-        gap: 12px;
-        padding: 10px;
+        /* 2 Columns as requested */
+        gap: 10px;
+        padding: 0;
     }
 
     .menu-card {
-        padding: 15px 10px;
+        padding: 8px 6px;
+        /* Further shrunken for ultra-premium density */
+        display: flex;
         flex-direction: column;
-        /* Stack icons and text for 2-col layout */
+        align-items: center;
         text-align: center;
-        gap: 8px;
-        max-width: 100%;
+        gap: 6px;
+        border-radius: 12px;
+        min-height: auto;
+        border: 1px solid var(--gray-200);
+        background: white;
     }
 
     .menu-icon {
-        width: 40px;
-        height: 40px;
-        margin: 0 auto;
-        /* Center icon when stacked */
+        width: 36px;
+        /* Even smaller icon container */
+        height: 36px;
+        margin: 0;
+        flex-shrink: 0;
     }
 
     .menu-icon i {
         font-size: 18px;
+        /* Shrunken icon */
     }
 
     .menu-card h3 {
-        font-size: 13px;
-        line-height: 1.2;
+        font-size: 10px;
+        /* Smaller font as requested */
         margin-bottom: 0;
+        text-transform: none;
+        /* Keep original case or title case from source */
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .menu-card h3::first-letter {
+        text-transform: uppercase;
+        /* Ensure first letter is capitalized */
     }
 
     .menu-card p {
-        display: none;
-        /* Keep descriptions hidden on mobile */
-    }
-
-    .persistent-branding-section {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-
-    .header-logo-img {
-        height: 36px;
-    }
-
-    .header-project-title {
-        font-size: 14px;
-        margin-top: 5px;
-    }
-
-    .header-logo-unified {
-        height: 20px;
-    }
-
-    .main-content {
-        padding: 15px;
-        margin-left: 0;
-        /* Critical: Remove PC margin */
-        width: 100%;
-        /* Critical: Set full width */
-    }
-
-    .project-main-title {
-        font-size: 24px;
-        margin-bottom: 24px;
-    }
-
-    .home-logo-bar {
-        flex-direction: column;
-        gap: 20px;
-        padding: 16px;
-    }
-
-    .home-logo-bar img {
-        height: 28px;
+        display: none !important;
+        /* Remove descriptions on mobile */
     }
 
     .data-table-wrapper {
@@ -972,39 +1010,60 @@ body {
         min-width: 600px;
     }
 
-    .header-top {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-
     .welcome-section {
-        text-align: left;
-    }
-
-    .form-container {
-        padding: 24px;
-    }
-
-    .modal-content {
-        padding: 24px;
-        width: 95%;
+        display: none;
+        /* Hide welcome section on mobile to save space */
     }
 }
 
 /* Small Mobile - Extra Compact */
-.project-main-title {
-    font-size: 18px;
-    margin-bottom: 20px;
+@media (max-width: 480px) {
+    .main-content {
+        padding: 16px;
+    }
+
+    .project-main-title {
+        font-size: 20px;
+    }
+
+    .btn-add-user,
+    .btn-primary {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    .menu-card h3 {
+        font-size: 16px;
+    }
+
+    .menu-card p {
+        font-size: 13px;
+    }
 }
 
 .dashboard-footer-branding {
-    text-align: center;
-    padding: 20px;
-    font-size: 13px;
+    text-align: right;
+    /* Default to right for PC */
+    padding: 10px 0;
+    /* Reduced padding */
+    font-size: 11px;
+    /* Smaller font */
     color: var(--coffee-medium);
-    opacity: 0.8;
-    font-weight: 600;
-    border-top: 1px solid var(--gray-200);
-    margin-top: 20px;
+    opacity: 0.7;
+    font-weight: 500;
+    border-top: 1px solid var(--gray-100);
+    margin-top: 15px;
+    /* Reduced margin */
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .dashboard-footer-branding {
+        text-align: center;
+        /* Center for mobile */
+        font-size: 10px;
+        margin-top: 10px;
+        padding-bottom: 20px;
+        /* Space for bottom nav */
+    }
 }
