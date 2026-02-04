@@ -296,21 +296,17 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     <td onClick={(e) => e.stopPropagation()}>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             {/* VIEW BUTTON (Always visible) */}
-                                            <button onClick={() => handleView(f)} style={{
-                                                background: '#e0f2fe', border: '1px solid #7dd3fc',
-                                                color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }} title={t.details}>
+                                            <button onClick={() => handleView(f)} className="btn-icon btn-view" title={t.details}>
                                                 <i className="fas fa-eye"></i>
                                             </button>
 
                                             {/* EDIT/DELETE (Admin Only) */}
                                             {canEdit() && (
                                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button onClick={() => handleEdit(f)} className="btn-primary btn-edit" title={t.edit}>
+                                                    <button onClick={() => handleEdit(f)} className="btn-icon btn-edit" title={t.edit}>
                                                         <i className="fas fa-edit"></i>
                                                     </button>
-                                                    <button onClick={() => handleDelete(f.id)} className="btn-primary btn-delete" title={t.delete}>
+                                                    <button onClick={() => handleDelete(f.id)} className="btn-icon btn-delete" title={t.delete}>
                                                         <i className="fas fa-trash-alt"></i>
                                                     </button>
                                                 </div>

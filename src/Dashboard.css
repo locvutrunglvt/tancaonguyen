@@ -732,6 +732,35 @@ h3 {
     transform: translateY(0);
 }
 
+/* Icon-Only Action Buttons (View, Edit, Delete in tables) */
+.btn-icon {
+    padding: 6px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    box-shadow: none !important;
+    gap: 0 !important;
+}
+
+.btn-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Variant: View Button */
+.btn-view {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+    border: 1px solid #7dd3fc !important;
+}
+
+.btn-view:hover {
+    background: #bae6fd !important;
+}
+
 /* Variant: Edit Button */
 .btn-edit {
     background: #fef3c7 !important;
