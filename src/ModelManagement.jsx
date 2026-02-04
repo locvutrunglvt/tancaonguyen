@@ -6,27 +6,84 @@ import './Dashboard.css';
 const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [models, setModels] = useState([]);
+    const [farmers, setFarmers] = useState([]);
+    const [farms, setFarms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    // Detail View State
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedModel, setSelectedModel] = useState(null);
+
     const [currentModel, setCurrentModel] = useState({
+        farmer_id: '',
+        farm_id: '',
+        model_code: '',
         name: '',
-        location: '',
         coffee_type: 'Robusta',
+        variety: '',
         area: '',
-        adaptation_status: 'Planning',
-        last_inspection: new Date().toISOString().split('T')[0]
+        tree_count: '',
+        planting_year: '',
+        tree_age: '',
+        location: '',
+        adaptation_status: 'planning',
+        last_inspection: '',
+        notes: ''
     });
 
     useEffect(() => {
+        fetchFarmers();
         fetchModels();
     }, []);
+
+    const fetchFarmers = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('farmers')
+                .select('id, farmer_code, full_name, village')
+                .eq('status', 'active')
+                .order('full_name');
+
+            if (error) throw error;
+            setFarmers(data || []);
+        } catch (e) {
+            console.error('Error fetching farmers:', e.message);
+        }
+    };
+
+    const fetchFarmsForFarmer = async (farmerId) => {
+        if (!farmerId) {
+            setFarms([]);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('farm_baselines')
+                .select('id, farm_code, total_area, coffee_area')
+                .eq('farmer_id', farmerId);
+
+            if (error) throw error;
+            setFarms(data || []);
+        } catch (e) {
+            console.error('Error fetching farms:', e.message);
+        }
+    };
 
     const fetchModels = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase.from('coffee_models').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabase
+                .from('coffee_models')
+                .select(`
+                    *,
+                    farmer:farmers(farmer_code, full_name, village),
+                    farm:farm_baselines(farm_code, total_area)
+                `)
+                .order('created_at', { ascending: false });
+
             if (error) throw error;
             setModels(data || []);
         } catch (e) {
@@ -36,28 +93,51 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         }
     };
 
+    const handleFarmerChange = async (farmerId) => {
+        setCurrentModel({ ...currentModel, farmer_id: farmerId, farm_id: '' });
+        await fetchFarmsForFarmer(farmerId);
+    };
+
     const handleEdit = (model) => {
         setCurrentModel({
+            farmer_id: model.farmer_id,
+            farm_id: model.farm_id || '',
+            model_code: model.model_code,
             name: model.name,
-            location: model.location,
-            coffee_type: model.coffee_type,
-            area: model.area,
-            adaptation_status: model.adaptation_status,
-            last_inspection: model.last_inspection || new Date().toISOString().split('T')[0]
+            coffee_type: model.coffee_type || 'Robusta',
+            variety: model.variety || '',
+            area: model.area || '',
+            tree_count: model.tree_count || '',
+            planting_year: model.planting_year || '',
+            tree_age: model.tree_age || '',
+            location: model.location || '',
+            adaptation_status: model.adaptation_status || 'planning',
+            last_inspection: model.last_inspection || '',
+            notes: model.notes || ''
         });
         setEditingId(model.id);
         setIsEditing(true);
         setShowModal(true);
+
+        // Load farms for this farmer
+        if (model.farmer_id) {
+            fetchFarmsForFarmer(model.farmer_id);
+        }
+    };
+
+    const handleView = (model) => {
+        setSelectedModel(model);
+        setShowDetailModal(true);
     };
 
     const handleDelete = async (id) => {
-        if (!confirm(t.delete_confirm || 'Are you sure you want to delete this model?')) return;
+        if (!confirm(t.delete_confirm || 'Bạn có chắc chắn muốn xóa mô hình này?')) return;
         setLoading(true);
         const { error } = await supabase.from('coffee_models').delete().eq('id', id);
         if (error) {
-            alert((t.delete_error || 'Error: ') + error.message);
+            alert((t.delete_error || 'Lỗi: ') + error.message);
         } else {
-            alert(t.delete_success || 'Deleted successfully.');
+            alert(t.delete_success || 'Đã xóa thành công.');
             fetchModels();
         }
         setLoading(false);
@@ -66,54 +146,99 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const handleSave = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id || devUser?.id;
 
-        if (isEditing) {
-            const { error } = await supabase
-                .from('coffee_models')
-                .update(currentModel)
-                .eq('id', editingId);
+        try {
+            const payload = {
+                farmer_id: currentModel.farmer_id,
+                farm_id: currentModel.farm_id || null,
+                name: currentModel.name,
+                coffee_type: currentModel.coffee_type,
+                variety: currentModel.variety,
+                area: parseFloat(currentModel.area) || null,
+                tree_count: parseInt(currentModel.tree_count) || null,
+                planting_year: parseInt(currentModel.planting_year) || null,
+                tree_age: parseInt(currentModel.tree_age) || null,
+                location: currentModel.location,
+                adaptation_status: currentModel.adaptation_status,
+                last_inspection: currentModel.last_inspection || null,
+                notes: currentModel.notes
+            };
 
-            if (error) alert(error.message);
-            else {
-                alert(t.save_success || 'Updated successfully.');
-                handleModalClose();
-                fetchModels();
+            if (isEditing) {
+                const { error } = await supabase
+                    .from('coffee_models')
+                    .update(payload)
+                    .eq('id', editingId);
+
+                if (error) throw error;
+                alert(t.save_success || 'Cập nhật thành công.');
+            } else {
+                const { error } = await supabase
+                    .from('coffee_models')
+                    .insert([payload]);
+
+                if (error) throw error;
+                alert(t.save_success || 'Lưu thành công.');
             }
-        } else {
-            const { error } = await supabase.from('coffee_models').insert([{
-                ...currentModel,
-                user_id: userId
-            }]);
 
-            if (error) alert(error.message);
-            else {
-                alert(t.save_success || 'Saved successfully.');
-                handleModalClose();
-                fetchModels();
-            }
+            handleModalClose();
+            fetchModels();
+        } catch (error) {
+            alert((t.save_error || 'Lỗi: ') + error.message);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleModalClose = () => {
         setShowModal(false);
         setIsEditing(false);
         setEditingId(null);
+        setFarms([]);
         setCurrentModel({
+            farmer_id: '',
+            farm_id: '',
+            model_code: '',
             name: '',
-            location: '',
             coffee_type: 'Robusta',
+            variety: '',
             area: '',
-            adaptation_status: 'Planning',
-            last_inspection: new Date().toISOString().split('T')[0]
+            tree_count: '',
+            planting_year: '',
+            tree_age: '',
+            location: '',
+            adaptation_status: 'planning',
+            last_inspection: '',
+            notes: ''
         });
     };
 
     const canEdit = () => {
         if (!currentUser) return false;
         return currentUser.role === 'Admin';
+    };
+
+    const getStatusBadge = (status) => {
+        const styles = {
+            planning: { bg: '#fef3c7', color: '#92400e', text: 'Lập kế hoạch' },
+            implementing: { bg: '#dbeafe', color: '#1e40af', text: 'Đang triển khai' },
+            monitoring: { bg: '#e0e7ff', color: '#4338ca', text: 'Giám sát' },
+            completed: { bg: '#dcfce7', color: '#166534', text: 'Hoàn thành' },
+            suspended: { bg: '#fee2e2', color: '#991b1b', text: 'Tạm ngưng' }
+        };
+        const style = styles[status] || styles.planning;
+        return (
+            <span style={{
+                background: style.bg,
+                color: style.color,
+                padding: '4px 12px',
+                borderRadius: '12px',
+                fontSize: '11px',
+                fontWeight: 700
+            }}>
+                {style.text}
+            </span>
+        );
     };
 
     return (
@@ -130,59 +255,71 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     className="btn-add-user"
                     style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                    <i className="fas fa-plus"></i> {t.model_add_btn}
+                    <i className="fas fa-plus"></i> {t.model_add_btn || 'THÊM MÔ HÌNH'}
                 </button>
             </div>
 
             <div className="data-table-container">
                 <div className="table-header">
-                    <h3><i className="fas fa-project-diagram" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.model_title}</h3>
-                    <div className="badge">{models.length} {t.model?.toLowerCase() || 'models'}</div>
+                    <h3><i className="fas fa-project-diagram" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.model_title || 'Quản lý mô hình cà phê'}</h3>
+                    <div className="badge">{models.length} mô hình</div>
                 </div>
                 <table className="pro-table">
                     <thead>
                         <tr>
-                            <th>{t.model_name}</th>
-                            <th>{t.model_loc}</th>
-                            <th>{t.model_coffee_type}</th>
-                            <th>{t.model_area}</th>
-                            <th>{t.model_status}</th>
-                            <th>{t.model_last_inspection || 'Last Inspection'}</th>
+                            <th>Mã nông dân</th>
+                            <th>{t.model_name || 'Tên mô hình'}</th>
+                            <th>Loại cà phê</th>
+                            <th>Diện tích (ha)</th>
+                            <th>Tuổi cây</th>
+                            <th>Trạng thái</th>
                             <th>{t.actions}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading && models.length === 0 ? (
-                            <tr><td colSpan="6" style={{ textAlign: 'center' }}>{t.loading}</td></tr>
+                            <tr><td colSpan="7" style={{ textAlign: 'center' }}>{t.loading}</td></tr>
                         ) : models.length === 0 ? (
-                            <tr><td colSpan="6" style={{ textAlign: 'center', opacity: 0.5 }}>{t.loading}</td></tr>
+                            <tr><td colSpan="7" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data}</td></tr>
                         ) : (
                             models.map(m => (
-                                <tr key={m.id}>
-                                    <td><div style={{ fontWeight: 700 }}>{m.name}</div></td>
-                                    <td>{m.location}</td>
-                                    <td>{m.coffee_type}</td>
-                                    <td>{m.area} ha</td>
+                                <tr key={m.id} onClick={() => handleView(m)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
                                     <td>
-                                        <span className={`role-badge role-${m.adaptation_status?.toLowerCase()}`} style={{ background: m.adaptation_status === 'Active' ? '#dcfce7' : '#f1f5f9', color: m.adaptation_status === 'Active' ? '#166534' : '#475569' }}>
-                                            {m.adaptation_status}
+                                        <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>
+                                            {m.farmer?.farmer_code}
                                         </span>
+                                        <div style={{ fontSize: '10px', opacity: 0.6 }}>{m.farmer?.full_name}</div>
                                     </td>
-                                    <td>{m.last_inspection || '-'}</td>
-                                    <td>
+                                    <td><div style={{ fontWeight: 700 }}>{m.name}</div></td>
+                                    <td>{m.coffee_type}</td>
+                                    <td>{m.area || '-'}</td>
+                                    <td>{m.tree_age ? `${m.tree_age} năm` : '-'}</td>
+                                    <td>{getStatusBadge(m.adaptation_status)}</td>
+                                    <td onClick={(e) => e.stopPropagation()}>
                                         <div style={{ display: 'flex', gap: '8px' }}>
+                                            {/* VIEW BUTTON (Always visible) */}
+                                            <button onClick={() => handleView(m)} style={{
+                                                background: '#e0f2fe', border: '1px solid #7dd3fc',
+                                                color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }} title="Xem chi tiết">
+                                                <i className="fas fa-eye"></i>
+                                            </button>
+
                                             {canEdit() && (
                                                 <>
                                                     <button onClick={() => handleEdit(m)} style={{
-                                                        background: 'var(--tcn-light)', border: '1px solid var(--tcn-primary)',
-                                                        color: 'var(--tcn-dark)', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
-                                                    }} title={t.edit || "Edit"}>
+                                                        background: '#fef3c7', border: '1px solid #d97706',
+                                                        color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }} title={t.edit || "Sửa"}>
                                                         <i className="fas fa-pen"></i>
                                                     </button>
                                                     <button onClick={() => handleDelete(m.id)} style={{
-                                                        background: '#fef2f2', border: '1px solid #fecaca',
-                                                        color: '#ef4444', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
-                                                    }} title={t.delete || "Delete"}>
+                                                        background: '#fef2f2', border: '1px solid #ef4444',
+                                                        color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }} title={t.delete || "Xóa"}>
                                                         <i className="fas fa-trash"></i>
                                                     </button>
                                                 </>
@@ -198,51 +335,227 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
             {showModal && (
                 <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <div className="modal-content" style={{ background: 'white', padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '600px' }}>
-                        <h3 style={{ marginBottom: '25px', color: 'var(--tcn-dark)' }}>{t.model_setup_title}</h3>
+                    <div className="modal-content" style={{ background: 'white', padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
+                        <h3 style={{ marginBottom: '25px', color: 'var(--tcn-dark)' }}>
+                            {isEditing ? 'Cập nhật mô hình cà phê' : 'Thêm mô hình cà phê mới'}
+                        </h3>
                         <form onSubmit={handleSave}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div className="form-group">
-                                    <label>{t.model_name}</label>
-                                    <input className="input-pro" required value={currentModel.name} onChange={e => setCurrentModel({ ...currentModel, name: e.target.value })} placeholder="VD: Model 01..." />
-                                </div>
-                                <div className="form-group">
-                                    <label>{t.model_loc}</label>
-                                    <input className="input-pro" value={currentModel.location} onChange={e => setCurrentModel({ ...currentModel, location: e.target.value })} placeholder="Xã, Huyện, Tỉnh" />
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                {/* Column 1 */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>Thông tin chủ sở hữu</h4>
+
                                     <div className="form-group">
-                                        <label>{t.model_coffee_type}</label>
-                                        <select className="input-pro" value={currentModel.coffee_type} onChange={e => setCurrentModel({ ...currentModel, coffee_type: e.target.value })}>
-                                            <option>Robusta</option>
-                                            <option>Arabica</option>
+                                        <label>Chọn nông dân *</label>
+                                        <select
+                                            className="input-pro"
+                                            required
+                                            value={currentModel.farmer_id}
+                                            onChange={e => handleFarmerChange(e.target.value)}
+                                        >
+                                            <option value="">-- Chọn nông dân --</option>
+                                            {farmers.map(f => (
+                                                <option key={f.id} value={f.id}>
+                                                    {f.farmer_code} - {f.full_name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
+
                                     <div className="form-group">
-                                        <label>{t.model_area} (ha)</label>
-                                        <input className="input-pro" type="number" step="0.1" value={currentModel.area} onChange={e => setCurrentModel({ ...currentModel, area: e.target.value })} />
+                                        <label>Chọn trang trại (tùy chọn)</label>
+                                        <select
+                                            className="input-pro"
+                                            value={currentModel.farm_id}
+                                            onChange={e => setCurrentModel({ ...currentModel, farm_id: e.target.value })}
+                                            disabled={!currentModel.farmer_id}
+                                        >
+                                            <option value="">-- Không chọn --</option>
+                                            {farms.map(f => (
+                                                <option key={f.id} value={f.id}>
+                                                    {f.farm_code} - {f.total_area} ha
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Tên mô hình *</label>
+                                        <input className="input-pro" required value={currentModel.name} onChange={e => setCurrentModel({ ...currentModel, name: e.target.value })} placeholder="Mô hình cà phê bền vững..." />
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                        <div className="form-group">
+                                            <label>Loại cà phê</label>
+                                            <select className="input-pro" value={currentModel.coffee_type} onChange={e => setCurrentModel({ ...currentModel, coffee_type: e.target.value })}>
+                                                <option value="Robusta">Robusta</option>
+                                                <option value="Arabica">Arabica</option>
+                                                <option value="Mixed">Hỗn hợp</option>
+                                                <option value="Other">Khác</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Giống</label>
+                                            <input className="input-pro" value={currentModel.variety} onChange={e => setCurrentModel({ ...currentModel, variety: e.target.value })} placeholder="TR4, Catimor..." />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Vị trí</label>
+                                        <input className="input-pro" value={currentModel.location} onChange={e => setCurrentModel({ ...currentModel, location: e.target.value })} placeholder="Thôn, xã..." />
                                     </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+
+                                {/* Column 2 */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>Thông tin kỹ thuật</h4>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                        <div className="form-group">
+                                            <label>Diện tích (ha)</label>
+                                            <input className="input-pro" type="number" step="0.1" value={currentModel.area} onChange={e => setCurrentModel({ ...currentModel, area: e.target.value })} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Số cây</label>
+                                            <input className="input-pro" type="number" value={currentModel.tree_count} onChange={e => setCurrentModel({ ...currentModel, tree_count: e.target.value })} />
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                        <div className="form-group">
+                                            <label>Năm trồng</label>
+                                            <input className="input-pro" type="number" min="1900" max="2100" value={currentModel.planting_year} onChange={e => setCurrentModel({ ...currentModel, planting_year: e.target.value })} placeholder="2020" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Tuổi cây (năm)</label>
+                                            <input className="input-pro" type="number" value={currentModel.tree_age} onChange={e => setCurrentModel({ ...currentModel, tree_age: e.target.value })} />
+                                        </div>
+                                    </div>
+
                                     <div className="form-group">
-                                        <label>{t.model_status || 'Adaptation Status'}</label>
+                                        <label>Trạng thái thích ứng</label>
                                         <select className="input-pro" value={currentModel.adaptation_status} onChange={e => setCurrentModel({ ...currentModel, adaptation_status: e.target.value })}>
-                                            <option value="Planning">Planning</option>
-                                            <option value="Active">Active</option>
-                                            <option value="Completed">Completed</option>
+                                            <option value="planning">Lập kế hoạch</option>
+                                            <option value="implementing">Đang triển khai</option>
+                                            <option value="monitoring">Giám sát</option>
+                                            <option value="completed">Hoàn thành</option>
+                                            <option value="suspended">Tạm ngưng</option>
                                         </select>
                                     </div>
+
                                     <div className="form-group">
-                                        <label>{t.model_last_inspection || 'Last Inspection'}</label>
+                                        <label>Ngày kiểm tra cuối</label>
                                         <input className="input-pro" type="date" value={currentModel.last_inspection} onChange={e => setCurrentModel({ ...currentModel, last_inspection: e.target.value })} />
                                     </div>
                                 </div>
-                                <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                    <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>{loading ? t.loading : t.save}</button>
-                                    <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={() => setShowModal(false)}>{t.cancel}</button>
-                                </div>
+                            </div>
+
+                            <div className="form-group" style={{ marginTop: '15px' }}>
+                                <label>Ghi chú</label>
+                                <textarea className="input-pro" rows="3" value={currentModel.notes} onChange={e => setCurrentModel({ ...currentModel, notes: e.target.value })} placeholder="Ghi chú thêm về mô hình..."></textarea>
+                            </div>
+
+                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>
+                                    {loading ? t.loading : (isEditing ? 'CẬP NHẬT' : 'THÊM MÔ HÌNH')}
+                                </button>
+                                <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={handleModalClose}>
+                                    {t.cancel}
+                                </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODEL DETAIL MODAL */}
+            {showDetailModal && selectedModel && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
+                    <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
+                                <i className="fas fa-project-diagram" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
+                                Chi tiết mô hình
+                            </h3>
+                            <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            {/* Section 1: Overview */}
+                            <div className="detail-section" style={{ gridColumn: 'span 2' }}>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Tổng quan</h4>
+                            </div>
+
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tên mô hình</label>
+                                <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedModel.name}</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Chủ sở hữu</label>
+                                <div style={{ fontWeight: 600 }}>{selectedModel.farmer?.full_name} ({selectedModel.farmer?.farmer_code})</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Trang trại</label>
+                                <div>{selectedModel.farm ? `${selectedModel.farm.farm_code} (${selectedModel.farm.total_area} ha)` : 'Không liên kết'}</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Trạng thái</label>
+                                <div>{getStatusBadge(selectedModel.adaptation_status)}</div>
+                            </div>
+
+                            {/* Section 2: Technical */}
+                            <div className="detail-section" style={{ gridColumn: 'span 2', marginTop: '10px' }}>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Thông số kỹ thuật</h4>
+                            </div>
+
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Loại cà phê</label>
+                                <div>{selectedModel.coffee_type} - {selectedModel.variety}</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Diện tích</label>
+                                <div>{selectedModel.area} ha</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số lượng cây</label>
+                                <div>{selectedModel.tree_count} cây</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mật độ (ước tính)</label>
+                                <div>{selectedModel.area && selectedModel.tree_count ? Math.round(selectedModel.tree_count / selectedModel.area) : '---'} cây/ha</div>
+                            </div>
+
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Năm trồng</label>
+                                <div>{selectedModel.planting_year || '---'}</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tuổi cây</label>
+                                <div>{selectedModel.tree_age ? `${selectedModel.tree_age} năm` : '---'}</div>
+                            </div>
+
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Vị trí</label>
+                                <div>{selectedModel.location || '---'}</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Kiểm tra lần cuối</label>
+                                <div>{selectedModel.last_inspection ? new Date(selectedModel.last_inspection).toLocaleDateString('vi-VN') : '---'}</div>
+                            </div>
+
+                            {selectedModel.notes && (
+                                <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <div style={{ fontStyle: 'italic' }}>{selectedModel.notes}</div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                            <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
+                                Đóng
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

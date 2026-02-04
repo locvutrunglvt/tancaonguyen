@@ -601,12 +601,12 @@ const Dashboard = ({ devUser, onLogout }) => {
                             isLoading={loading}
                         />
                     )}
-                    {view === 'model' && <ModelManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
-                    {view === 'activities' && <AnnualActivities onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
-                    {view === 'training' && <TrainingCenter onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
-                    {view === 'farms' && <FarmProfiles onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
-                    {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
-                    {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} />}
+                    {view === 'model' && <ModelManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'activities' && <AnnualActivities onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'training' && <TrainingCenter onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'farms' && <FarmProfiles onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
                 </div>
             </main>
 

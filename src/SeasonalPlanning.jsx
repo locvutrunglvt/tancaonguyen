@@ -10,6 +10,9 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const [entries, setEntries] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    // Detail View State
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedEntry, setSelectedEntry] = useState(null);
 
     const [formData, setFormData] = useState({
         type: 'Chi phí',
@@ -114,6 +117,11 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         setShowForm(true);
     };
 
+    const handleView = (entry) => {
+        setSelectedEntry(entry);
+        setShowDetailModal(true);
+    };
+
     const handleDelete = async (id) => {
         if (!window.confirm(t.act_confirm_delete || 'Xác nhận xóa?')) return;
         setIsLoading(true);
@@ -123,7 +131,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             alert(t.delete_success || 'Deleted successfully.');
             fetchEntries();
         } catch (error) {
-            alert(`DELETE_ERROR: ${error.message}`);
+            alert(`DELETE_ERROR: ${error.message} `);
         } finally {
             setIsLoading(false);
         }
@@ -170,7 +178,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <div style={{ fontSize: '11px', color: '#065f46', fontWeight: 600, marginBottom: '5px' }}>{t.fin_revenue || 'Total Revenue'}</div>
                             <div style={{ fontSize: '20px', fontWeight: 700, color: '#059669' }}>{formatCurrency(totalRevenue)}</div>
                         </div>
-                        <div style={{ background: profit >= 0 ? '#dbeafe' : '#fef3c7', padding: '15px', borderRadius: '15px', border: `2px solid ${profit >= 0 ? '#93c5fd' : '#fcd34d'}` }}>
+                        <div style={{ background: profit >= 0 ? '#dbeafe' : '#fef3c7', padding: '15px', borderRadius: '15px', border: `2px solid ${profit >= 0 ? '#93c5fd' : '#fcd34d'} ` }}>
                             <div style={{ fontSize: '11px', color: profit >= 0 ? '#1e40af' : '#92400e', fontWeight: 600, marginBottom: '5px' }}>{t.fin_profit || 'Profit'}</div>
                             <div style={{ fontSize: '20px', fontWeight: 700, color: profit >= 0 ? '#2563eb' : '#d97706' }}>{formatCurrency(profit)}</div>
                         </div>
@@ -195,7 +203,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </thead>
                             <tbody>
                                 {entries.map(entry => (
-                                    <tr key={entry.id}>
+                                    <tr key={entry.id} onClick={() => handleView(entry)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
                                         <td>{entry.record_date}</td>
                                         <td>
                                             <span className="badge-org" style={{ background: entry.amount < 0 ? '#d1fae5' : '#fee2e2' }}>
@@ -208,13 +216,30 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         </td>
                                         <td>{entry.notes || '-'}</td>
                                         <td>
-                                            <div style={{ display: 'flex', gap: '5px' }}>
-                                                {canEdit(entry) && (
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                {/* VIEW BUTTON (Always visible) */}
+                                                <button onClick={() => handleView(entry)} style={{
+                                                    background: '#e0f2fe', border: '1px solid #7dd3fc',
+                                                    color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }} title="Xem chi tiết">
+                                                    <i className="fas fa-eye"></i>
+                                                </button>
+
+                                                {(canEdit(entry)) && (
                                                     <>
-                                                        <button onClick={() => handleEdit(entry)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer' }} title="Edit">
+                                                        <button onClick={() => handleEdit(entry)} style={{
+                                                            background: '#fef3c7', border: '1px solid #d97706',
+                                                            color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                        }} title={t.edit || "Sửa"}>
                                                             <i className="fas fa-edit"></i>
                                                         </button>
-                                                        <button onClick={() => handleDelete(entry.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Delete">
+                                                        <button onClick={() => handleDelete(entry.id)} style={{
+                                                            background: '#fef2f2', border: '1px solid #ef4444',
+                                                            color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                        }} title={t.delete || "Xóa"}>
                                                             <i className="fas fa-trash"></i>
                                                         </button>
                                                     </>
@@ -272,6 +297,61 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </button>
                         </div>
                     </form>
+                </div>
+            )}
+
+            {/* DETAIL MODAL */}
+            {showDetailModal && selectedEntry && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
+                    <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '500px', maxHeight: '80vh', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
+                                <i className="fas fa-file-invoice-dollar" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
+                                Chi tiết bản ghi
+                            </h3>
+                            <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ngày ghi chép</label>
+                                <div style={{ fontWeight: 600 }}>{new Date(selectedEntry.record_date).toLocaleDateString('vi-VN')}</div>
+                            </div>
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Phân loại</label>
+                                <div>
+                                    <span className="badge-org" style={{ background: selectedEntry.amount < 0 ? '#d1fae5' : '#fee2e2' }}>
+                                        {selectedEntry.category}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="detail-item" style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Nội dung</label>
+                                <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{selectedEntry.item_name}</div>
+                            </div>
+
+                            <div className="detail-item">
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số tiền</label>
+                                <div style={{ fontSize: '18px', fontWeight: 700, color: selectedEntry.amount < 0 ? '#059669' : '#dc2626' }}>
+                                    {formatCurrency(Math.abs(selectedEntry.amount))}
+                                </div>
+                            </div>
+
+                            {selectedEntry.notes && (
+                                <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <div style={{ fontStyle: 'italic' }}>{selectedEntry.notes}</div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                            <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
