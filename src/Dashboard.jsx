@@ -581,6 +581,20 @@ const Dashboard = ({ devUser, onLogout }) => {
                                 <button className={`lang-mini-btn ${appLang === 'en' ? 'active' : ''}`} onClick={() => { setAppLang('en'); localStorage.setItem('app_lang', 'en'); }}><img src="https://flagcdn.com/w20/gb.png" alt="EN" /></button>
                                 <button className={`lang-mini-btn ${appLang === 'ede' ? 'active' : ''}`} onClick={() => { setAppLang('ede'); localStorage.setItem('app_lang', 'ede'); }} style={{ border: 'none', background: appLang === 'ede' ? 'var(--coffee-dark)' : 'none', color: appLang === 'ede' ? 'white' : 'var(--coffee-dark)', cursor: 'pointer', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>EĐ</button>
                             </div>
+                            <button className="mobile-logout-btn" onClick={handleLogout} style={{
+                                marginLeft: '10px',
+                                background: '#fee2e2',
+                                border: 'none',
+                                color: '#b91c1c',
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                display: 'none' // Hidden by default, shown via CSS
+                            }}>
+                                <i className="fas fa-sign-out-alt"></i> {t.logout}
+                            </button>
                         </div>
                     </div>
                 </header>

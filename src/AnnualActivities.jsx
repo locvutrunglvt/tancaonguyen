@@ -286,19 +286,18 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             {!showForm ? (
                 <div className="data-table-container">
                     <div className="table-header">
-                        <h3><i className="fas fa-calendar-alt" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.act_title}</h3>
-                        <div className="badge">{logs.length} {t.act_title?.toLowerCase()}</div>
+                        <h3><i className="fas fa-calendar-alt" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.act_list_title}</h3>
+                        <div className="badge">{logs.length} {t.activities?.toLowerCase()}</div>
                     </div>
 
                     <table className="pro-table">
                         <thead>
                             <tr>
                                 <th>{t.model_code}</th>
-                                <th>{t.farmer || t.owner}</th>
+                                <th>{appLang === 'vi' ? 'Hộ dân' : appLang === 'en' ? 'Farmer' : 'Mnuih hma'}</th>
                                 <th>{t.date}</th>
-                                <th>{t.act_type}</th>
-                                <th>{t.act_detail}</th>
-                                <th>{t.quantity}</th>
+                                <th>{t.type}</th>
+                                <th>{t.details}</th>
                                 <th>{t.actions}</th>
                             </tr>
                         </thead>
@@ -536,6 +535,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 currentUrl={formData.media_url}
                                 onUploadSuccess={(url) => setFormData({ ...formData, media_url: url })}
                                 appLang={appLang}
+                                allowMultiple={true}
                             />
                         </div>
 
@@ -564,12 +564,16 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         </div>
 
                         {selectedActivity.media_url && (
-                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                {selectedActivity.media_url.endsWith('.mp4') || selectedActivity.media_url.endsWith('.mov') || selectedActivity.media_url.endsWith('.webm') ? (
-                                    <video src={selectedActivity.media_url} controls style={{ width: '100%', maxHeight: '300px', borderRadius: '15px' }} />
-                                ) : (
-                                    <img src={selectedActivity.media_url} alt="Activity" style={{ width: '100%', maxHeight: '300px', borderRadius: '15px', objectFit: 'cover' }} />
-                                )}
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
+                                {selectedActivity.media_url.split(',').map((url, idx) => (
+                                    <div key={idx} style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
+                                        {url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm') ? (
+                                            <video src={url} controls style={{ width: '100%', maxHeight: '200px', borderRadius: '15px' }} />
+                                        ) : (
+                                            <img src={url} alt={`Activity ${idx}`} style={{ width: '100%', maxHeight: '200px', borderRadius: '15px', objectFit: 'cover' }} />
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
 

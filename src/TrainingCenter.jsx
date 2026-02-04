@@ -231,21 +231,21 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     <div className="table-header">
                         <h3>
                             <i className="fas fa-chalkboard-teacher" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>
-                            {t.train_history_title}
+                            {t.train_list_title}
                         </h3>
-                        <div className="badge">{trainings.length} {t.trainings?.toLowerCase()}</div>
+                        <div className="badge">{trainings.length} {t.training?.toLowerCase()}</div>
                     </div>
 
                     <table className="pro-table">
                         <thead>
                             <tr>
                                 <th>{t.farmer_code}</th>
-                                <th>{t.farmer}</th>
+                                <th>{t.farmer_name}</th>
                                 <th>{t.date}</th>
-                                <th>{t.topic}</th>
+                                <th>{t.train_topic}</th>
                                 <th>{t.location}</th>
-                                <th>{t.duration_hours}</th>
-                                <th>{t.application_level}</th>
+                                <th>{appLang === 'vi' ? 'Thời lượng' : appLang === 'en' ? 'Duration' : 'Hruê hriăm'}</th>
+                                <th>{t.train_level}</th>
                                 <th>{t.actions}</th>
                             </tr>
                         </thead>
@@ -402,6 +402,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 currentUrl={trainingForm.photo_url}
                                 onUploadSuccess={(url) => setTrainingForm({ ...trainingForm, photo_url: url })}
                                 appLang={appLang}
+                                allowMultiple={true}
                             />
                         </div>
 
@@ -430,8 +431,16 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         </div>
 
                         {selectedTraining.photo_url && (
-                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <img src={selectedTraining.photo_url} alt="Training" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
+                                {selectedTraining.photo_url.split(',').map((url, idx) => (
+                                    <div key={idx} style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
+                                        {url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm') ? (
+                                            <video src={url} controls style={{ width: '100%', maxHeight: '200px', borderRadius: '15px' }} />
+                                        ) : (
+                                            <img src={url} alt={`Training ${idx}`} style={{ width: '100%', maxHeight: '200px', borderRadius: '15px', objectFit: 'cover' }} />
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
 

@@ -231,7 +231,7 @@ const Login = ({ onDevLogin }) => {
                 <div className="logo-bar-centered">
                     <img src="https://github.com/locvutrunglvt/Tancaonguyen/blob/main/Logo.png?raw=true" alt="TCN - Tchibo - NKG" className="logo-2x" />
                 </div>
-                <h1 className="login-project-title-top">{t.app_title_1}<br />{t.app_title_2}</h1>
+                <h1 className="login-project-title-top">{t.app_title_1}<br className="mobile-only" /> {t.app_title_2}</h1>
                 <div className="lang-selector">
                     <button className={`lang-btn ${lang === 'vi' ? 'active' : ''}`} onClick={() => setLang('vi')}>
                         <img src="https://flagcdn.com/w40/vn.png" alt="VN" />

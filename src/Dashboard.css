@@ -255,8 +255,10 @@ body {
     text-transform: uppercase;
     letter-spacing: -0.5px;
     margin: 5px 0;
-    line-height: 1.1;
+    line-height: 1.2;
     text-align: center;
+    white-space: normal !important;
+    word-wrap: break-word;
 }
 
 .welcome-section {
@@ -587,6 +589,12 @@ body {
 @media (max-width: 768px) {
     .mobile-bottom-nav {
         display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-logout-btn {
+        display: flex !important;
     }
 }
 
