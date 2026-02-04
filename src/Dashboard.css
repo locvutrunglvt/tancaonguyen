@@ -1022,6 +1022,43 @@ h3 {
         display: none;
         /* Hide welcome section on mobile to save space */
     }
+
+    /* Mobile-specific sizing refinements */
+    .table-header h3,
+    .table-header h3 i,
+    .table-header h3 span {
+        font-size: 12px !important;
+    }
+
+    .badge {
+        font-size: 10px !important;
+        padding: 4px 8px !important;
+    }
+
+    .btn-primary,
+    .btn-add-user,
+    .btn-primary i {
+        font-size: 12px !important;
+        padding: 8px 16px !important;
+    }
+
+    .header-controls-group {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        width: 100%;
+    }
+
+    .mobile-logout-btn {
+        display: flex !important;
+        order: 2;
+    }
+
+    .in-app-lang {
+        order: 1;
+    }
 }
 
 /* Small Mobile - Extra Compact */
