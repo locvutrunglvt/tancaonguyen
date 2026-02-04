@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import './Dashboard.css';
 import { translations } from './translations';
+import MediaUpload from './MediaUpload';
 
 const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
@@ -30,7 +31,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         household_members: 1,
         household_head: true,
         status: 'active',
-        notes: ''
+        notes: '',
+        photo_url: ''
     });
 
     useEffect(() => {
@@ -89,7 +91,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             household_members: farmer.household_members || 1,
             household_head: farmer.household_head !== undefined ? farmer.household_head : true,
             status: farmer.status || 'active',
-            notes: farmer.notes || ''
+            notes: farmer.notes || '',
+            photo_url: farmer.photo_url || ''
         });
         setEditingId(farmer.id);
         setIsEditing(true);
@@ -137,7 +140,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         household_members: parseInt(formData.household_members) || 1,
                         household_head: formData.household_head,
                         status: formData.status,
-                        notes: formData.notes
+                        notes: formData.notes,
+                        photo_url: formData.photo_url
                     })
                     .eq('id', editingId);
 
@@ -161,7 +165,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     household_members: parseInt(formData.household_members) || 1,
                     household_head: formData.household_head,
                     status: formData.status,
-                    notes: formData.notes
+                    notes: formData.notes,
+                    photo_url: formData.photo_url
                 }]);
 
                 if (error) throw error;
@@ -195,7 +200,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             household_members: 1,
             household_head: true,
             status: 'active',
-            notes: ''
+            notes: '',
+            photo_url: ''
         });
     };
 
@@ -270,8 +276,19 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <tr key={f.id} onClick={() => handleView(f)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
                                     <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{f.farmer_code}</span></td>
                                     <td>
-                                        <div style={{ fontWeight: 700 }}>{f.full_name}</div>
-                                        <div style={{ fontSize: '10px', opacity: 0.6 }}>{f.gender === 'Nam' ? t.gender_male : f.gender === 'Nữ' ? t.gender_female : t.gender_other}</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            {f.photo_url ? (
+                                                <img src={f.photo_url} alt="Ava" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <i className="fas fa-user" style={{ fontSize: '14px', color: '#94a3b8' }}></i>
+                                                </div>
+                                            )}
+                                            <div>
+                                                <div style={{ fontWeight: 700 }}>{f.full_name}</div>
+                                                <div style={{ fontSize: '10px', opacity: 0.6 }}>{f.gender === 'Nam' ? t.gender_male : f.gender === 'Nữ' ? t.gender_female : t.gender_other}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>{f.village || 'N/A'}</td>
                                     <td>{f.phone}</td>
@@ -417,6 +434,17 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                             </div>
 
+                            <div className="form-group" style={{ marginTop: '15px' }}>
+                                <label>{appLang === 'vi' ? 'Ảnh nông hộ' : appLang === 'en' ? 'Farmer Photo' : 'Ảnh mnuih'}</label>
+                                <MediaUpload
+                                    entityType="farmers"
+                                    entityId={isEditing ? editingId : 'new'}
+                                    currentUrl={formData.photo_url}
+                                    onUploadSuccess={(url) => setFormData({ ...formData, photo_url: url })}
+                                    appLang={appLang}
+                                />
+                            </div>
+
                             <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                                 <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>
                                     {loading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
@@ -441,6 +469,12 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
+
+                        {selectedFarmer.photo_url && (
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                                <img src={selectedFarmer.photo_url} alt="Farmer" style={{ width: '150px', height: '150px', borderRadius: '20px', objectFit: 'cover', border: '4px solid #f8fafc', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                            </div>
+                        )}
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="detail-item">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { translations } from './translations';
+import MediaUpload from './MediaUpload';
 import './Dashboard.css';
 
 const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -30,7 +31,8 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         location: '',
         adaptation_status: 'planning',
         last_inspection: '',
-        notes: ''
+        notes: '',
+        photo_url: ''
     });
 
     useEffect(() => {
@@ -113,7 +115,8 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             location: model.location || '',
             adaptation_status: model.adaptation_status || 'planning',
             last_inspection: model.last_inspection || '',
-            notes: model.notes || ''
+            notes: model.notes || '',
+            photo_url: model.photo_url || ''
         });
         setEditingId(model.id);
         setIsEditing(true);
@@ -161,7 +164,8 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 location: currentModel.location,
                 adaptation_status: currentModel.adaptation_status,
                 last_inspection: currentModel.last_inspection || null,
-                notes: currentModel.notes
+                notes: currentModel.notes,
+                photo_url: currentModel.photo_url
             };
 
             if (isEditing) {
@@ -209,7 +213,8 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             location: '',
             adaptation_status: 'planning',
             last_inspection: '',
-            notes: ''
+            notes: '',
+            photo_url: ''
         });
     };
 
@@ -290,7 +295,12 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         </span>
                                         <div style={{ fontSize: '10px', opacity: 0.6 }}>{m.farmer?.full_name}</div>
                                     </td>
-                                    <td><div style={{ fontWeight: 700 }}>{m.name}</div></td>
+                                    <td style={{ fontWeight: 600 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {m.photo_url && <img src={m.photo_url} alt="M" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                            {m.name}
+                                        </div>
+                                    </td>
                                     <td>{m.coffee_type}</td>
                                     <td>{m.area || '-'}</td>
                                     <td>{m.tree_age ? `${m.tree_age} ${appLang === 'vi' ? 'năm' : 'years'}` : '-'}</td>
@@ -456,6 +466,17 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <textarea className="input-pro" rows="3" value={currentModel.notes} onChange={e => setCurrentModel({ ...currentModel, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                             </div>
 
+                            <div className="form-group" style={{ marginTop: '15px' }}>
+                                <label>{appLang === 'vi' ? 'Ảnh hồ sơ mô hình' : appLang === 'en' ? 'Model Profile Photo' : 'Ảnh mô hình'}</label>
+                                <MediaUpload
+                                    entityType="models"
+                                    entityId={isEditing ? editingId : 'new'}
+                                    currentUrl={currentModel.photo_url}
+                                    onUploadSuccess={(url) => setCurrentModel({ ...currentModel, photo_url: url })}
+                                    appLang={appLang}
+                                />
+                            </div>
+
                             <div className="modal-actions" style={{ display: 'flex', gap: '15px', marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
                                 <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>
                                     <i className="fas fa-check"></i> {loading ? t.loading : (isEditing ? t.update.toUpperCase() : t.add.toUpperCase())}
@@ -480,6 +501,12 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
+
+                        {selectedModel.photo_url && (
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                                <img src={selectedModel.photo_url} alt="Model" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
+                            </div>
+                        )}
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Overview */}

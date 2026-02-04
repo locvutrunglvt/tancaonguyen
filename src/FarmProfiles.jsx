@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { getPHRecommendation } from './agronomyUtils';
 import { translations } from './translations';
+import MediaUpload from './MediaUpload';
 import './Dashboard.css';
 
 const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -35,7 +36,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         irrigation_system: '',
         grass_cover: 'Medium',
         shade_trees: 0,
-        notes: ''
+        notes: '',
+        photo_url: ''
     });
 
     const [phFeedback, setPhFeedback] = useState(null);
@@ -107,7 +109,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             irrigation_system: formData.irrigation_system,
             grass_cover: formData.grass_cover,
             shade_trees: parseInt(formData.shade_trees) || 0,
-            notes: formData.notes
+            notes: formData.notes,
+            photo_url: formData.photo_url
         };
 
         try {
@@ -156,7 +159,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             irrigation_system: farm.irrigation_system || '',
             grass_cover: farm.grass_cover || 'Medium',
             shade_trees: farm.shade_trees || 0,
-            notes: farm.notes || ''
+            notes: farm.notes || '',
+            photo_url: farm.photo_url || ''
         });
         setIsEditing(true);
         setEditingId(farm.id);
@@ -200,7 +204,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             irrigation_system: '',
             grass_cover: 'Medium',
             shade_trees: 0,
-            notes: ''
+            notes: '',
+            photo_url: ''
         });
     };
 
@@ -261,7 +266,12 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 baselines.map(b => (
                                     <tr key={b.id} onClick={() => handleView(b)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
                                         <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{b.farmer?.farmer_code}</span></td>
-                                        <td style={{ fontWeight: 600 }}>{b.farmer?.full_name}</td>
+                                        <td style={{ fontWeight: 600 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {b.photo_url && <img src={b.photo_url} alt="Farm" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                {b.farmer?.full_name}
+                                            </div>
+                                        </td>
                                         <td>{b.farmer?.village}</td>
                                         <td>{b.total_area} ha</td>
                                         <td>{b.coffee_area} ha</td>
@@ -470,6 +480,17 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                         </div>
 
+                        <div className="form-group" style={{ marginTop: '20px' }}>
+                            <label>{appLang === 'vi' ? 'Ảnh trang trại' : appLang === 'en' ? 'Farm Photo' : 'Ảnh hma'}</label>
+                            <MediaUpload
+                                entityType="farms"
+                                entityId={isEditing ? editingId : 'new'}
+                                currentUrl={formData.photo_url}
+                                onUploadSuccess={(url) => setFormData({ ...formData, photo_url: url })}
+                                appLang={appLang}
+                            />
+                        </div>
+
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
                                 <i className="fas fa-save"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
@@ -493,6 +514,12 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
+
+                        {selectedFarm.photo_url && (
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                                <img src={selectedFarm.photo_url} alt="Farm" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
+                            </div>
+                        )}
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Basic Info */}

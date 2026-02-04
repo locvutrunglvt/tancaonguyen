@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { translations } from './translations';
+import MediaUpload from './MediaUpload';
 import './Dashboard.css';
 
 const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -25,7 +26,8 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         participants_count: 1,
         application_level: 'partial',
         feedback: '',
-        notes: ''
+        notes: '',
+        photo_url: ''
     });
 
     useEffect(() => {
@@ -83,7 +85,8 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 participants_count: parseInt(trainingForm.participants_count) || 1,
                 application_level: trainingForm.application_level,
                 feedback: trainingForm.feedback,
-                notes: trainingForm.notes
+                notes: trainingForm.notes,
+                photo_url: trainingForm.photo_url
             };
 
             if (isEditing) {
@@ -123,7 +126,8 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             participants_count: training.participants_count || 1,
             application_level: training.application_level || 'partial',
             feedback: training.feedback || '',
-            notes: training.notes || ''
+            notes: training.notes || '',
+            photo_url: training.photo_url || ''
         });
         setIsEditing(true);
         setEditingId(training.id);
@@ -164,7 +168,8 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             participants_count: 1,
             application_level: 'partial',
             feedback: '',
-            notes: ''
+            notes: '',
+            photo_url: ''
         });
     };
 
@@ -255,7 +260,12 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{training.farmer?.farmer_code}</span></td>
                                         <td style={{ fontWeight: 600 }}>{training.farmer?.full_name}</td>
                                         <td>{training.training_date}</td>
-                                        <td><strong>{getTrainingTopicText(training.topic)}</strong></td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {training.photo_url && <img src={training.photo_url} alt="Training" style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                {getTrainingTopicText(training.topic)}
+                                            </div>
+                                        </td>
                                         <td>{training.location || '-'}</td>
                                         <td>{training.duration_hours || '-'}</td>
                                         <td>{getApplicationLevelBadge(training.application_level)}</td>
@@ -379,9 +389,20 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <textarea className="input-pro" rows="2" value={trainingForm.feedback} onChange={e => setTrainingForm({ ...trainingForm, feedback: e.target.value })} placeholder={t.notes + '...'}></textarea>
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group" style={{ marginTop: '20px' }}>
                             <label>{t.notes}</label>
-                            <textarea className="input-pro" rows="2" value={trainingForm.notes} onChange={e => setTrainingForm({ ...trainingForm, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
+                            <textarea className="input-pro" rows="3" value={trainingForm.notes} onChange={e => setTrainingForm({ ...trainingForm, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '20px' }}>
+                            <label>{appLang === 'vi' ? 'Ảnh buổi tập huấn/cấp phát' : appLang === 'en' ? 'Training/Distribution Photo' : 'Ảnh tập huấn'}</label>
+                            <MediaUpload
+                                entityType="training"
+                                entityId={isEditing ? editingId : 'new'}
+                                currentUrl={trainingForm.photo_url}
+                                onUploadSuccess={(url) => setTrainingForm({ ...trainingForm, photo_url: url })}
+                                appLang={appLang}
+                            />
                         </div>
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
@@ -407,6 +428,12 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
+
+                        {selectedTraining.photo_url && (
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                                <img src={selectedTraining.photo_url} alt="Training" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
+                            </div>
+                        )}
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Session Info */}

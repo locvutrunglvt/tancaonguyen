@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import { isGCPCompliant } from './agronomyUtils';
 import { translations } from './translations';
+import MediaUpload from './MediaUpload';
 import './Dashboard.css';
 
 const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -35,7 +36,8 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         estimated_value: '',
         // Common
         reason: '',
-        notes: ''
+        notes: '',
+        media_url: ''
     });
 
     const [gcpWarning, setGcpWarning] = useState(false);
@@ -111,7 +113,8 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 activity_type: formData.activity_type,
                 description: formData.description,
                 reason: formData.reason,
-                notes: formData.notes
+                notes: formData.notes,
+                media_url: formData.media_url
             };
 
             // Add type-specific fields
@@ -177,7 +180,8 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             survival_rate: log.survival_rate || '',
             estimated_value: log.estimated_value || '',
             reason: log.reason || '',
-            notes: log.notes || ''
+            notes: log.notes || '',
+            media_url: log.media_url || ''
         });
         setIsEditing(true);
         setEditingId(log.id);
@@ -219,7 +223,8 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             survival_rate: '',
             estimated_value: '',
             reason: '',
-            notes: ''
+            notes: '',
+            media_url: ''
         });
         setGcpWarning(false);
     };
@@ -309,7 +314,16 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                             <div style={{ fontWeight: 600 }}>{log.model?.farmer?.full_name}</div>
                                         </td>
                                         <td>{log.activity_date}</td>
-                                        <td>{getActivityTypeBadge(log.activity_type)}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {log.media_url && (
+                                                    log.media_url.endsWith('.mp4') || log.media_url.endsWith('.mov') || log.media_url.endsWith('.webm') ?
+                                                        <i className="fas fa-video" style={{ color: 'var(--coffee-primary)', fontSize: '10px' }}></i> :
+                                                        <img src={log.media_url} alt="Act" style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }} />
+                                                )}
+                                                {getActivityTypeBadge(log.activity_type)}
+                                            </div>
+                                        </td>
                                         <td>
                                             {log.activity_type === 'tree_support' ? (
                                                 <div>
@@ -514,6 +528,17 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                         </div>
 
+                        <div className="form-group" style={{ marginTop: '20px' }}>
+                            <label>{appLang === 'vi' ? 'Ảnh/Video hoạt động' : appLang === 'en' ? 'Activity Photo/Video' : 'Ảnh/Video hma'}</label>
+                            <MediaUpload
+                                entityType="activities"
+                                entityId={isEditing ? editingId : 'new'}
+                                currentUrl={formData.media_url}
+                                onUploadSuccess={(url) => setFormData({ ...formData, media_url: url })}
+                                appLang={appLang}
+                            />
+                        </div>
+
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
                                 <i className="fas fa-check"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.add.toUpperCase())}
@@ -537,6 +562,16 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
+
+                        {selectedActivity.media_url && (
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                                {selectedActivity.media_url.endsWith('.mp4') || selectedActivity.media_url.endsWith('.mov') || selectedActivity.media_url.endsWith('.webm') ? (
+                                    <video src={selectedActivity.media_url} controls style={{ width: '100%', maxHeight: '300px', borderRadius: '15px' }} />
+                                ) : (
+                                    <img src={selectedActivity.media_url} alt="Activity" style={{ width: '100%', maxHeight: '300px', borderRadius: '15px', objectFit: 'cover' }} />
+                                )}
+                            </div>
+                        )}
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Context */}
