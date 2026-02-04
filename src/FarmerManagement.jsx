@@ -307,10 +307,10 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                             {/* EDIT/DELETE (Admin Only) */}
                                             {canEdit() && (
                                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button onClick={() => handleEdit(f)} className="btn-primary" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }} title={t.edit}>
+                                                    <button onClick={() => handleEdit(f)} className="btn-primary btn-edit" title={t.edit}>
                                                         <i className="fas fa-edit"></i>
                                                     </button>
-                                                    <button onClick={() => handleDelete(f.id)} className="btn-primary" style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }} title={t.delete}>
+                                                    <button onClick={() => handleDelete(f.id)} className="btn-primary btn-delete" title={t.delete}>
                                                         <i className="fas fa-trash-alt"></i>
                                                     </button>
                                                 </div>
@@ -440,7 +440,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <button type="submit" className="btn-primary" disabled={loading}>
                                     <i className="fas fa-save"></i> {loading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
                                 </button>
-                                <button type="button" className="btn-primary" style={{ background: '#f1f5f9', color: '#475569' }} onClick={handleModalClose}>
+                                <button type="button" className="btn-primary btn-cancel" onClick={handleModalClose}>
                                     <i className="fas fa-undo"></i> {t.cancel.toUpperCase()}
                                 </button>
                             </div>

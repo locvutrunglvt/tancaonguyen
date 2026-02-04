@@ -360,10 +360,10 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
                                                 {canEdit() && (
                                                     <div style={{ display: 'flex', gap: '8px' }}>
-                                                        <button onClick={() => handleEdit(log)} className="btn-primary" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }} title={t.edit}>
+                                                        <button onClick={() => handleEdit(log)} className="btn-primary btn-edit" title={t.edit}>
                                                             <i className="fas fa-edit"></i>
                                                         </button>
-                                                        <button onClick={() => handleDelete(log.id)} className="btn-primary" style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }} title={t.delete}>
+                                                        <button onClick={() => handleDelete(log.id)} className="btn-primary btn-delete" title={t.delete}>
                                                             <i className="fas fa-trash-alt"></i>
                                                         </button>
                                                     </div>

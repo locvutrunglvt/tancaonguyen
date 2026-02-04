@@ -732,6 +732,39 @@ h3 {
     transform: translateY(0);
 }
 
+/* Variant: Edit Button */
+.btn-edit {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fcd34d !important;
+}
+
+.btn-edit:hover {
+    background: #fde68a !important;
+}
+
+/* Variant: Delete Button */
+.btn-delete {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fecaca !important;
+}
+
+.btn-delete:hover {
+    background: #fecaca !important;
+}
+
+/* Variant: Cancel Button */
+.btn-cancel {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0 !important;
+}
+
 /* ============= FORMS ============= */
 .form-container {
     background: white;

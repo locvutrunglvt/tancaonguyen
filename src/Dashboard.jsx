@@ -84,15 +84,11 @@ const UserManagementView = ({
     return (
         <div className="view-container">
             <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <button onClick={onBack} className="btn-back" style={{ padding: '8px 15px', borderRadius: '10px', border: '1px solid var(--sky-200)', background: 'white', fontSize: '12px', cursor: 'pointer' }}>
+                <button onClick={onBack} className="btn-back">
                     <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
                 {currentUser?.role === 'Admin' && (
-                    <button
-                        onClick={onAdd}
-                        className="btn-add-user"
-                        style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-                    >
+                    <button onClick={onAdd} className="btn-add-user">
                         <i className="fas fa-user-plus"></i> {(t.user_add_btn || 'THÊM NGƯỜI DÙNG').toUpperCase()}
                     </button>
                 )}
@@ -252,7 +248,7 @@ const UserManagementView = ({
                                 <button type="submit" className="btn-primary" disabled={isLoading}>
                                     {isLoading ? t.loading : (isEditing ? t.update : t.add)}
                                 </button>
-                                <button type="button" onClick={onModalClose} className="btn-primary" style={{ background: '#f1f5f9', color: '#475569' }}>
+                                <button type="button" onClick={onModalClose} className="btn-primary btn-cancel">
                                     {t.cancel}
                                 </button>
                             </div>
@@ -296,7 +292,7 @@ const UserProfileModal = ({ user, t, onClose, onPasswordClick }) => {
                         <div style={{ fontWeight: 600, color: 'var(--coffee-dark)' }}>{user.phone || '---'}</div>
                     </div>
 
-                    <button onClick={onPasswordClick} className="btn-primary" style={{ width: '100%', background: 'var(--coffee-primary)', justifyContent: 'center' }}>
+                    <button onClick={onPasswordClick} className="btn-primary">
                         <i className="fas fa-key"></i> {t.change_password}
                     </button>
                     <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', marginTop: '20px' }}>
@@ -606,7 +602,7 @@ const Dashboard = ({ devUser, onLogout }) => {
                             <div style={{ fontSize: '64px', color: 'var(--coffee-primary)', marginBottom: '20px' }}><i className="fas fa-chart-line"></i></div>
                             <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)', textTransform: 'uppercase' }}>{t.growth || 'TĂNG TRƯỞNG & PHÁT TRIỂN'}</h2>
                             <p style={{ color: '#64748b', marginTop: '10px' }}>{t.sync_data_msg || 'Chức năng đang được đồng bộ dữ liệu thực địa. Vui lòng quay lại sau.'}</p>
-                            <button onClick={() => setView('home')} className="btn-primary" style={{ marginTop: '30px' }}>{t.back}</button>
+                            <button onClick={() => setView('home')} className="btn-primary">{t.back}</button>
                         </div>
                     )}
                     {view === 'users' && (
