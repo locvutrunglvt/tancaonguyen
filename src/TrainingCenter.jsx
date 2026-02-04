@@ -408,10 +408,10 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
-                                <i className="fas fa-check"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.add.toUpperCase())}
+                                <i className="fas fa-save"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.add.toUpperCase())}
                             </button>
                             <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
-                                {t.cancel.toUpperCase()}
+                                <i className="fas fa-undo"></i> {t.cancel.toUpperCase()}
                             </button>
                         </div>
                     </form>

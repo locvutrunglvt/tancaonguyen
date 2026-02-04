@@ -496,7 +496,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <i className="fas fa-save"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
                             </button>
                             <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
-                                {t.cancel.toUpperCase()}
+                                <i className="fas fa-undo"></i> {t.cancel.toUpperCase()}
                             </button>
                         </div>
                     </form>

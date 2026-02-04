@@ -698,8 +698,7 @@ h3 {
 /* ============= BUTTONS ============= */
 .btn-add-user,
 .btn-primary {
-    padding: 10px 20px;
-    /* Reduced from 14x28 */
+    padding: 8px 16px;
     border-radius: 10px;
     background: linear-gradient(135deg, var(--coffee-primary) 0%, var(--coffee-dark) 100%);
     color: white;
@@ -1053,7 +1052,8 @@ h3 {
 
     .mobile-logout-btn {
         display: flex !important;
-        order: 2;
+        order: 3;
+        margin-left: auto !important;
     }
 
     .in-app-lang {
@@ -1073,8 +1073,8 @@ h3 {
 
     .btn-add-user,
     .btn-primary {
-        padding: 12px 20px;
-        font-size: 14px;
+        padding: 6px 12px !important;
+        font-size: 12px !important;
     }
 
     .menu-card h3 {
