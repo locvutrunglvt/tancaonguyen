@@ -168,11 +168,11 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     return (
         <div className="view-container animate-in">
             <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', gap: '15px' }}>
-                <button onClick={onBack} className="btn-back" style={{ padding: '8px 15px', borderRadius: '10px', border: '1px solid var(--sky-200)', background: 'white', fontSize: '12px', cursor: 'pointer' }}>
+                <button onClick={onBack} className="btn-back">
                     <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
                 <div style={{ flex: 1 }}></div>
-                <button onClick={() => setShowForm(true)} className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>
+                <button onClick={() => setShowForm(true)} className="btn-primary">
                     <i className="fas fa-plus"></i> {(t.fin_add_btn || 'THÊM BẢN GHI').toUpperCase()}
                 </button>
             </div>
@@ -302,11 +302,11 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <textarea className="input-pro" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} rows="3" placeholder={t.notes + '...'}></textarea>
                         </div>
 
-                        <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
-                            <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
+                        <div style={{ marginTop: '30px', display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
+                            <button type="submit" className="btn-primary" disabled={isLoading}>
                                 <i className="fas fa-save"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
                             </button>
-                            <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
+                            <button type="button" className="btn-primary" onClick={handleFormClose} style={{ background: '#f1f5f9', color: '#475569' }}>
                                 <i className="fas fa-undo"></i> {t.cancel.toUpperCase()}
                             </button>
                         </div>

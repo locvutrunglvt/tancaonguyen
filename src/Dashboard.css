@@ -698,7 +698,8 @@ h3 {
 /* ============= BUTTONS ============= */
 .btn-add-user,
 .btn-primary {
-    padding: 8px 16px;
+    padding: 9px 18px;
+    width: auto;
     border-radius: 10px;
     background: linear-gradient(135deg, var(--coffee-primary) 0%, var(--coffee-dark) 100%);
     color: white;
@@ -727,7 +728,8 @@ h3 {
 }
 
 .btn-back {
-    padding: 12px 20px;
+    padding: 9px 18px;
+    width: auto;
     border-radius: 10px;
     border: 2px solid var(--gray-300);
     background: white;
@@ -1038,7 +1040,8 @@ h3 {
     .btn-add-user,
     .btn-primary i {
         font-size: 12px !important;
-        padding: 8px 16px !important;
+        padding: 6px 12px !important;
+        width: auto !important;
     }
 
     .header-controls-group {
@@ -1075,6 +1078,7 @@ h3 {
     .btn-primary {
         padding: 6px 12px !important;
         font-size: 12px !important;
+        width: auto !important;
     }
 
     .menu-card h3 {

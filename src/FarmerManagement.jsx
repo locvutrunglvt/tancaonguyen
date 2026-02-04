@@ -234,7 +234,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     return (
         <div className="view-container animate-in">
             <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <button onClick={onBack} className="btn-back" style={{ padding: '8px 15px', borderRadius: '10px', border: '1px solid var(--sky-200)', background: 'white', fontSize: '12px', cursor: 'pointer' }}>
+                <button onClick={onBack} className="btn-back">
                     <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
                 <button
@@ -243,7 +243,6 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         setShowModal(true);
                     }}
                     className="btn-add-user"
-                    style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
                     <i className="fas fa-user-plus"></i> {t.add} {t.farmers}
                 </button>
@@ -445,11 +444,11 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 />
                             </div>
 
-                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>
+                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
+                                <button type="submit" className="btn-primary" disabled={loading}>
                                     <i className="fas fa-save"></i> {loading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
                                 </button>
-                                <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={handleModalClose}>
+                                <button type="button" className="btn-primary" style={{ background: '#f1f5f9', color: '#475569' }} onClick={handleModalClose}>
                                     <i className="fas fa-undo"></i> {t.cancel.toUpperCase()}
                                 </button>
                             </div>

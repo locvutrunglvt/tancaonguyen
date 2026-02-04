@@ -248,11 +248,11 @@ const UserManagementView = ({
                                 <p style={{ fontSize: '10px', marginTop: '10px', color: '#64748b', fontStyle: 'italic' }}>* {t.user_perm_note || 'Permissions are automatically adjusted by Role'}</p>
                             </div>
 
-                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                <button type="submit" className="btn-primary" style={{ flex: 1 }} disabled={isLoading}>
+                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'flex-end' }}>
+                                <button type="submit" className="btn-primary" disabled={isLoading}>
                                     {isLoading ? t.loading : (isEditing ? t.update : t.add)}
                                 </button>
-                                <button type="button" onClick={onModalClose} className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
+                                <button type="button" onClick={onModalClose} className="btn-primary" style={{ background: '#f1f5f9', color: '#475569' }}>
                                     {t.cancel}
                                 </button>
                             </div>
@@ -296,7 +296,7 @@ const UserProfileModal = ({ user, t, onClose, onPasswordClick }) => {
                         <div style={{ fontWeight: 600, color: 'var(--coffee-dark)' }}>{user.phone || '---'}</div>
                     </div>
 
-                    <button onClick={onPasswordClick} className="btn-primary" style={{ width: '100%', padding: '15px', borderRadius: '16px', background: 'var(--coffee-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: 'none', color: 'white', fontWeight: 700, cursor: 'pointer' }}>
+                    <button onClick={onPasswordClick} className="btn-primary" style={{ width: '100%', background: 'var(--coffee-primary)', justifyContent: 'center' }}>
                         <i className="fas fa-key"></i> {t.change_password}
                     </button>
                     <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', marginTop: '20px' }}>
