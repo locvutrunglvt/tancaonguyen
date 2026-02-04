@@ -240,22 +240,14 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                     </button>
 
                                                     {(canEdit(entry)) && (
-                                                        <>
-                                                            <button onClick={() => handleEdit(entry)} style={{
-                                                                background: '#fef3c7', border: '1px solid #d97706',
-                                                                color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                            }} title={t.edit}>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button onClick={() => handleEdit(entry)} className="btn-primary" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' }} title={t.edit}>
                                                                 <i className="fas fa-edit"></i>
                                                             </button>
-                                                            <button onClick={() => handleDelete(entry.id)} style={{
-                                                                background: '#fef2f2', border: '1px solid #ef4444',
-                                                                color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                            }} title={t.delete}>
-                                                                <i className="fas fa-trash"></i>
+                                                            <button onClick={() => handleDelete(entry.id)} className="btn-primary" style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }} title={t.delete}>
+                                                                <i className="fas fa-trash-alt"></i>
                                                             </button>
-                                                        </>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>

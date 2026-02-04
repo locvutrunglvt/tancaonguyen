@@ -606,7 +606,7 @@ const Dashboard = ({ devUser, onLogout }) => {
                             <div style={{ fontSize: '64px', color: 'var(--coffee-primary)', marginBottom: '20px' }}><i className="fas fa-chart-line"></i></div>
                             <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)', textTransform: 'uppercase' }}>{t.growth || 'TĂNG TRƯỞNG & PHÁT TRIỂN'}</h2>
                             <p style={{ color: '#64748b', marginTop: '10px' }}>{t.sync_data_msg || 'Chức năng đang được đồng bộ dữ liệu thực địa. Vui lòng quay lại sau.'}</p>
-                            <button onClick={() => setView('home')} className="btn-primary" style={{ marginTop: '30px', width: 'auto', padding: '12px 40px' }}>{t.back}</button>
+                            <button onClick={() => setView('home')} className="btn-primary" style={{ marginTop: '30px' }}>{t.back}</button>
                         </div>
                     )}
                     {view === 'users' && (

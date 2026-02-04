@@ -698,21 +698,23 @@ h3 {
 /* ============= BUTTONS ============= */
 .btn-add-user,
 .btn-primary {
-    padding: 9px 18px;
-    width: auto;
-    border-radius: 10px;
+    padding: 9px !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 8px;
     background: linear-gradient(135deg, var(--coffee-primary) 0%, var(--coffee-dark) 100%);
-    color: white;
+    color: white !important;
     border: none;
     font-weight: 700;
-    font-size: 13px;
-    /* Reduced from 15px */
+    font-size: 13px !important;
     cursor: pointer;
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(107, 68, 35, 0.2);
+    box-shadow: 0 4px 10px rgba(107, 68, 35, 0.15);
     transition: all var(--transition-base);
+    line-height: 1;
 }
 
 .btn-add-user:hover,
@@ -728,16 +730,22 @@ h3 {
 }
 
 .btn-back {
-    padding: 9px 18px;
-    width: auto;
-    border-radius: 10px;
-    border: 2px solid var(--gray-300);
+    padding: 9px !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 8px;
+    border: 1px solid var(--sky-200);
     background: white;
-    font-size: 14px;
+    font-size: 13px !important;
     cursor: pointer;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     transition: all var(--transition-base);
     font-weight: 600;
     color: var(--gray-700);
+    line-height: 1;
 }
 
 .btn-back:hover {
@@ -1037,11 +1045,18 @@ h3 {
     }
 
     .btn-primary,
-    .btn-add-user,
-    .btn-primary i {
-        font-size: 12px !important;
-        padding: 6px 12px !important;
+    .btn-back,
+    .btn-add-user {
+        font-size: 11px !important;
+        padding: 6px !important;
         width: auto !important;
+        height: auto !important;
+    }
+
+    .btn-primary i,
+    .btn-back i,
+    .btn-add-user i {
+        font-size: 12px !important;
     }
 
     .header-controls-group {
@@ -1075,10 +1090,12 @@ h3 {
     }
 
     .btn-add-user,
+    .btn-back,
     .btn-primary {
-        padding: 6px 12px !important;
-        font-size: 12px !important;
+        padding: 6px !important;
+        font-size: 10px !important;
         width: auto !important;
+        height: auto !important;
     }
 
     .menu-card h3 {
