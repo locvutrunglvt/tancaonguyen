@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
-const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
+const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [models, setModels] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -111,6 +111,11 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
         });
     };
 
+    const canEdit = () => {
+        if (!currentUser) return false;
+        return currentUser.role === 'Admin';
+    };
+
     return (
         <div className="view-container animate-in">
             <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -142,6 +147,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                             <th>{t.model_coffee_type}</th>
                             <th>{t.model_area}</th>
                             <th>{t.model_status}</th>
+                            <th>{t.model_last_inspection || 'Last Inspection'}</th>
                             <th>{t.actions}</th>
                         </tr>
                     </thead>
@@ -162,20 +168,25 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                                             {m.adaptation_status}
                                         </span>
                                     </td>
+                                    <td>{m.last_inspection || '-'}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '8px' }}>
-                                            <button onClick={() => handleEdit(m)} style={{
-                                                background: 'var(--tcn-light)', border: '1px solid var(--tcn-primary)',
-                                                color: 'var(--tcn-dark)', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
-                                            }} title={t.edit || "Edit"}>
-                                                <i className="fas fa-pen"></i>
-                                            </button>
-                                            <button onClick={() => handleDelete(m.id)} style={{
-                                                background: '#fef2f2', border: '1px solid #fecaca',
-                                                color: '#ef4444', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
-                                            }} title={t.delete || "Delete"}>
-                                                <i className="fas fa-trash"></i>
-                                            </button>
+                                            {canEdit() && (
+                                                <>
+                                                    <button onClick={() => handleEdit(m)} style={{
+                                                        background: 'var(--tcn-light)', border: '1px solid var(--tcn-primary)',
+                                                        color: 'var(--tcn-dark)', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
+                                                    }} title={t.edit || "Edit"}>
+                                                        <i className="fas fa-pen"></i>
+                                                    </button>
+                                                    <button onClick={() => handleDelete(m.id)} style={{
+                                                        background: '#fef2f2', border: '1px solid #fecaca',
+                                                        color: '#ef4444', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
+                                                    }} title={t.delete || "Delete"}>
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

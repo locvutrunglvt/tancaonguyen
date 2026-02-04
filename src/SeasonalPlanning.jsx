@@ -3,11 +3,14 @@ import { supabase } from './supabaseClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
-const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
+const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [isLoading, setIsLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [entries, setEntries] = useState([]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+
     const [formData, setFormData] = useState({
         type: 'Chi phí',
         date: new Date().toISOString().split('T')[0],
@@ -29,14 +32,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
                 .order('record_date', { ascending: false });
 
             if (error) throw error;
-            const mapped = (data || []).map(d => ({
-                id: d.id,
-                category: d.category || 'Cost',
-                item: d.item_name || 'Unnamed',
-                cost: d.amount || 0,
-                date: d.record_date || ''
-            }));
-            setEntries(mapped);
+            setEntries(data || []);
         } catch (err) {
             console.error('Error fetching financial records:', err.message);
         } finally {
@@ -44,8 +40,8 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
         }
     };
 
-    const totalCost = entries.filter(e => e.cost > 0).reduce((sum, e) => sum + e.cost, 0);
-    const totalRevenue = Math.abs(entries.filter(e => e.cost < 0).reduce((sum, e) => sum + e.cost, 0));
+    const totalCost = entries.filter(e => e.amount > 0).reduce((sum, e) => sum + e.amount, 0);
+    const totalRevenue = Math.abs(entries.filter(e => e.amount < 0).reduce((sum, e) => sum + e.amount, 0));
     const profit = totalRevenue - totalCost;
 
     const formatCurrency = (val) => {
@@ -76,18 +72,79 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
             notes: formData.notes
         };
 
-        const { error } = await supabase
-            .from('financial_records')
-            .insert([payload]);
+        if (isEditing) {
+            const { error } = await supabase
+                .from('financial_records')
+                .update(payload)
+                .eq('id', editingId);
 
-        if (error) {
-            alert(t.save_error || 'Error: ' + error.message);
+            if (error) {
+                alert(t.save_error || 'Error: ' + error.message);
+            } else {
+                alert(t.save_success || 'Updated successfully.');
+                handleFormClose();
+                fetchEntries();
+            }
         } else {
-            alert(t.save_success || 'Saved successfully.');
-            setShowForm(false);
-            fetchEntries();
+            const { error } = await supabase
+                .from('financial_records')
+                .insert([payload]);
+
+            if (error) {
+                alert(t.save_error || 'Error: ' + error.message);
+            } else {
+                alert(t.save_success || 'Saved successfully.');
+                handleFormClose();
+                fetchEntries();
+            }
         }
         setIsLoading(false);
+    };
+
+    const handleEdit = (entry) => {
+        setFormData({
+            type: entry.category,
+            date: entry.record_date,
+            item: entry.item_name,
+            amount: Math.abs(entry.amount),
+            notes: entry.notes || ''
+        });
+        setIsEditing(true);
+        setEditingId(entry.id);
+        setShowForm(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm(t.act_confirm_delete || 'Xác nhận xóa?')) return;
+        setIsLoading(true);
+        try {
+            const { error } = await supabase.from('financial_records').delete().eq('id', id);
+            if (error) throw error;
+            alert(t.delete_success || 'Deleted successfully.');
+            fetchEntries();
+        } catch (error) {
+            alert(`DELETE_ERROR: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleFormClose = () => {
+        setShowForm(false);
+        setIsEditing(false);
+        setEditingId(null);
+        setFormData({
+            type: 'Chi phí',
+            date: new Date().toISOString().split('T')[0],
+            item: '',
+            amount: '',
+            notes: ''
+        });
+    };
+
+    const canEdit = (entry) => {
+        if (!currentUser) return false;
+        return currentUser.role === 'Admin' || entry.user_id === currentUser.id;
     };
 
     return (
@@ -98,115 +155,119 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi' }) => {
                 </button>
                 <div style={{ flex: 1 }}></div>
                 <button onClick={() => setShowForm(true)} className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>
-                    <i className="fas fa-file-invoice-dollar"></i> {t.plan_add_btn}
+                    <i className="fas fa-plus"></i> {t.fin_add_btn || 'Add Record'}
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '25px' }}>
-                <div className="kpi-card" style={{ background: 'white', padding: '20px', borderRadius: '20px', borderLeft: '5px solid #ef4444' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>{t.plan_total_cost}</p>
-                    <h3 style={{ color: '#b91c1c' }}>{formatCurrency(totalCost)}</h3>
-                </div>
-                <div className="kpi-card" style={{ background: 'white', padding: '20px', borderRadius: '20px', borderLeft: '5px solid #22c55e' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>{t.plan_total_rev}</p>
-                    <h3 style={{ color: '#15803d' }}>{formatCurrency(totalRevenue)}</h3>
-                </div>
-                <div className="kpi-card" style={{ background: 'white', padding: '20px', borderRadius: '20px', borderLeft: '5px solid #3b82f6', boxShadow: '0 10px 25px rgba(59, 130, 246, 0.1)' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>{t.plan_profit}</p>
-                    <h3 style={{ color: '#1d4ed8' }}>{formatCurrency(profit)}</h3>
-                </div>
-            </div>
-
             {!showForm ? (
-                <div className="data-table-container">
-                    <div className="table-header">
-                        <h3><i className="fas fa-coins" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.plan_title}</h3>
+                <>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+                        <div style={{ background: '#fee2e2', padding: '15px', borderRadius: '15px', border: '2px solid #fca5a5' }}>
+                            <div style={{ fontSize: '11px', color: '#991b1b', fontWeight: 600, marginBottom: '5px' }}>{t.fin_cost || 'Total Cost'}</div>
+                            <div style={{ fontSize: '20px', fontWeight: 700, color: '#dc2626' }}>{formatCurrency(totalCost)}</div>
+                        </div>
+                        <div style={{ background: '#d1fae5', padding: '15px', borderRadius: '15px', border: '2px solid #6ee7b7' }}>
+                            <div style={{ fontSize: '11px', color: '#065f46', fontWeight: 600, marginBottom: '5px' }}>{t.fin_revenue || 'Total Revenue'}</div>
+                            <div style={{ fontSize: '20px', fontWeight: 700, color: '#059669' }}>{formatCurrency(totalRevenue)}</div>
+                        </div>
+                        <div style={{ background: profit >= 0 ? '#dbeafe' : '#fef3c7', padding: '15px', borderRadius: '15px', border: `2px solid ${profit >= 0 ? '#93c5fd' : '#fcd34d'}` }}>
+                            <div style={{ fontSize: '11px', color: profit >= 0 ? '#1e40af' : '#92400e', fontWeight: 600, marginBottom: '5px' }}>{t.fin_profit || 'Profit'}</div>
+                            <div style={{ fontSize: '20px', fontWeight: 700, color: profit >= 0 ? '#2563eb' : '#d97706' }}>{formatCurrency(profit)}</div>
+                        </div>
                     </div>
 
-                    <table className="pro-table">
-                        <thead>
-                            <tr>
-                                <th>{t.plan_date || 'Date'}</th>
-                                <th>{t.plan_cat || 'Category'}</th>
-                                <th>{t.act_detail || 'Detail'}</th>
-                                <th>{t.plan_amount || 'Amount'}</th>
-                                <th>{t.actions || 'Actions'}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {isLoading ? (
-                                <tr><td colSpan="5" style={{ textAlign: 'center', opacity: 0.5 }}>{t.loading}</td></tr>
-                            ) : entries.length === 0 ? (
-                                <tr><td colSpan="5" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data || 'No records found'}</td></tr>
-                            ) : (
-                                entries.map(e => (
-                                    <tr key={e.id}>
-                                        <td>{e.date}</td>
+                    <div className="data-table-container">
+                        <div className="table-header">
+                            <h3><i className="fas fa-coins" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.fin_title || 'Financial Records'}</h3>
+                            <div className="badge">{entries.length} {t.act_count || 'records'}</div>
+                        </div>
+
+                        <table className="pro-table">
+                            <thead>
+                                <tr>
+                                    <th>{t.fin_date || 'Date'}</th>
+                                    <th>{t.fin_category || 'Category'}</th>
+                                    <th>{t.fin_item || 'Item'}</th>
+                                    <th>{t.fin_amount || 'Amount'}</th>
+                                    <th>{t.fin_notes || 'Notes'}</th>
+                                    <th>{t.actions}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {entries.map(entry => (
+                                    <tr key={entry.id}>
+                                        <td>{entry.record_date}</td>
                                         <td>
-                                            <span className="badge" style={{
-                                                background: (e.category === 'Doanh thu' || e.category === 'Revenue') ? '#ecfdf5' : '#f8fafc',
-                                                color: (e.category === 'Doanh thu' || e.category === 'Revenue') ? '#059669' : '#64748b'
-                                            }}>
-                                                {(e.category === 'Doanh thu' || e.category === 'Revenue') ? (t.plan_cats?.revenue || 'Revenue') : (t.plan_cats?.cost || 'Cost')}
+                                            <span className="badge-org" style={{ background: entry.amount < 0 ? '#d1fae5' : '#fee2e2' }}>
+                                                {entry.category}
                                             </span>
                                         </td>
-                                        <td style={{ fontWeight: 600 }}>{e.item}</td>
-                                        <td style={{ color: e.cost < 0 ? '#059669' : '#b91c1c', fontWeight: 700 }}>
-                                            {e.cost < 0 ? '+' : '-'}{formatCurrency(Math.abs(e.cost))}
+                                        <td style={{ fontWeight: 600 }}>{entry.item_name}</td>
+                                        <td style={{ color: entry.amount < 0 ? '#059669' : '#dc2626', fontWeight: 700 }}>
+                                            {formatCurrency(Math.abs(entry.amount))}
                                         </td>
+                                        <td>{entry.notes || '-'}</td>
                                         <td>
-                                            <button onClick={() => { }} style={{
-                                                background: '#fef2f2', border: '1px solid #fecaca',
-                                                color: '#ef4444', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px'
-                                            }} title={t.delete || "Delete"}>
-                                                <i className="fas fa-trash"></i>
-                                            </button>
+                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                                {canEdit(entry) && (
+                                                    <>
+                                                        <button onClick={() => handleEdit(entry)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer' }} title="Edit">
+                                                            <i className="fas fa-edit"></i>
+                                                        </button>
+                                                        <button onClick={() => handleDelete(entry.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Delete">
+                                                            <i className="fas fa-trash"></i>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
             ) : (
                 <div className="form-container" style={{ background: 'white', padding: '30px', borderRadius: '24px' }}>
                     <h2 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '2px solid var(--tcn-light)', paddingBottom: '10px' }}>
-                        <i className="fas fa-plus-circle"></i> {t.plan_form_title}
+                        <i className="fas fa-coins"></i> {isEditing ? (t.edit || 'Edit') : (t.fin_form_title || 'Add Financial Record')}
                     </h2>
 
                     <form onSubmit={handleSave}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="form-group">
-                                <label>{t.plan_type}</label>
-                                <select className="input-pro" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}>
-                                    <option value="Chi phí">{t.plan_cats?.cost || 'Cost'}</option>
-                                    <option value="Doanh thu">{t.plan_cats?.revenue || 'Revenue'}</option>
-                                    <option value="Đầu tư">{t.plan_cats?.investment || 'Investment'}</option>
+                                <label>{t.fin_category || 'Category'}</label>
+                                <select className="input-pro" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })} required>
+                                    <option value="Chi phí">Chi phí</option>
+                                    <option value="Doanh thu">Doanh thu</option>
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label>{t.plan_date}</label>
-                                <input type="date" className="input-pro" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+                                <label>{t.fin_date || 'Date'}</label>
+                                <input className="input-pro" type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} required />
                             </div>
-                            <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                                <label>{t.act_detail}</label>
-                                <input className="input-pro" required value={formData.item} onChange={e => setFormData({ ...formData, item: e.target.value })} placeholder={t.plan_placeholder} />
-                            </div>
-                            <div className="form-group">
-                                <label>{t.plan_amount} (VNĐ)</label>
-                                <input type="number" className="input-pro" required value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} placeholder="0" />
-                            </div>
-                            <div className="form-group">
-                                <label>{t.notes || 'Notes'}</label>
-                                <input className="input-pro" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="..." />
-                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label>{t.fin_item || 'Item'}</label>
+                            <input className="input-pro" value={formData.item} onChange={e => setFormData({ ...formData, item: e.target.value })} required />
+                        </div>
+
+                        <div className="form-group">
+                            <label>{t.fin_amount || 'Amount (VND)'}</label>
+                            <input className="input-pro" type="number" value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} required />
+                        </div>
+
+                        <div className="form-group">
+                            <label>{t.fin_notes || 'Notes'}</label>
+                            <textarea className="input-pro" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} rows="3"></textarea>
                         </div>
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
-                                <i className="fas fa-save"></i> {isLoading ? t.loading : t.save}
+                                <i className="fas fa-check"></i> {isLoading ? t.loading : t.confirm}
                             </button>
-                            <button type="button" className="btn-primary" onClick={() => setShowForm(false)} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
+                            <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
                                 {t.cancel}
                             </button>
                         </div>

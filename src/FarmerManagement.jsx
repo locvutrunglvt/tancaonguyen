@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import './Dashboard.css';
 import { translations } from './translations';
 
-const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
+const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -114,6 +114,11 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
         setFormData({ full_name: '', phone: '' });
     };
 
+    const canEdit = () => {
+        if (!currentUser) return false;
+        return currentUser.role === 'Admin';
+    };
+
     return (
         <div className="view-container animate-in">
             <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -163,20 +168,24 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi' }) => {
                                     <td>{new Date(f.created_at).toLocaleDateString(appLang === 'vi' ? 'vi-VN' : 'en-US')}</td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '8px' }}>
-                                            <button onClick={() => handleEdit(f)} style={{
-                                                background: '#fef3c7', border: '1px solid #d97706',
-                                                color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }} title={t.edit || "Edit"}>
-                                                <i className="fas fa-pen"></i>
-                                            </button>
-                                            <button onClick={() => handleDelete(f.id)} style={{
-                                                background: '#fef2f2', border: '1px solid #ef4444',
-                                                color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }} title={t.delete || "Delete"}>
-                                                <i className="fas fa-trash"></i>
-                                            </button>
+                                            {canEdit() && (
+                                                <>
+                                                    <button onClick={() => handleEdit(f)} style={{
+                                                        background: '#fef3c7', border: '1px solid #d97706',
+                                                        color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }} title={t.edit || "Edit"}>
+                                                        <i className="fas fa-pen"></i>
+                                                    </button>
+                                                    <button onClick={() => handleDelete(f.id)} style={{
+                                                        background: '#fef2f2', border: '1px solid #ef4444',
+                                                        color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }} title={t.delete || "Delete"}>
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

@@ -111,10 +111,12 @@ const Login = ({ onDevLogin }) => {
         }
     }, [formData.org, view]);
 
+    const [manualEntry, setManualEntry] = useState(false); // New state for manual input
+
     const fetchUsers = async (orgId) => {
         setIsFetchingUsers(true);
         try {
-            // Try fetching from 'profiles' first (standard), then 'User'
+            // Try fetching from 'profiles'
             let { data, error } = await supabase
                 .from('profiles')
                 .select('id, email, full_name, role')
@@ -123,13 +125,52 @@ const Login = ({ onDevLogin }) => {
 
             if (error) {
                 console.error('Profiles fetch failed:', error.message);
-                // No fallback to corrupt 'User' table
+                // Fallback: If RLS blocks regular fetch, at least provide the default Admin for TCN
+                if (orgId === 'tcn') {
+                    setUsers([{
+                        id: 'admin_fallback',
+                        email: 'locvutrung@gmail.com',
+                        full_name: 'Đỗ Thành Duy (Admin)',
+                        role: 'Admin'
+                    }]);
+                    return;
+                }
                 throw error;
             }
 
-            setUsers(data || []);
+            // Process data: If TCN, ensure Admin is in the list (merge DB + Default)
+            let finalUsers = data || [];
+            if (orgId === 'tcn') {
+                const adminEmail = 'locvutrung@gmail.com';
+                const hasAdmin = finalUsers.some(u => u.email === adminEmail);
+                if (!hasAdmin) {
+                    // Prepend default admin if not in DB list
+                    finalUsers = [
+                        {
+                            id: 'admin_fallback',
+                            email: adminEmail,
+                            full_name: 'Đỗ Thành Duy',
+                            role: 'Admin'
+                        },
+                        ...finalUsers
+                    ];
+                }
+            }
+
+            setUsers(finalUsers);
         } catch (error) {
             console.error('Error fetching users:', error.message);
+            // On error, enable manual entry or show admin if TCN
+            if (orgId === 'tcn') {
+                setUsers([{
+                    id: 'admin_fallback',
+                    email: 'locvutrung@gmail.com',
+                    full_name: 'Đỗ Thành Duy (Fallback)',
+                    role: 'Admin'
+                }]);
+            } else {
+                setUsers([]);
+            }
         } finally {
             setIsFetchingUsers(false);
         }
@@ -271,23 +312,22 @@ const Login = ({ onDevLogin }) => {
 
     return (
         <div className={`login-container lang-${lang}`}>
-            <div className="lang-selector">
-                <button className={`lang-btn ${lang === 'vi' ? 'active' : ''}`} onClick={() => setLang('vi')}>
-                    <img src="https://flagcdn.com/w40/vn.png" alt="VN" />
-                </button>
-                <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>
-                    <img src="https://flagcdn.com/w40/gb.png" alt="UK" />
-                </button>
-                <button className={`lang-btn ${lang === 'ede' ? 'active' : ''}`} onClick={() => setLang('ede')} style={{ fontSize: '12px', fontWeight: 'bold', color: '#fbbf24', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
-                    Ê Đê
-                </button>
-            </div>
-
             <div className="login-branding">
                 <div className="logo-bar-centered">
                     <img src="https://github.com/locvutrunglvt/Tancaonguyen/blob/main/Logo.png?raw=true" alt="TCN - Tchibo - NKG" className="logo-2x" />
                 </div>
                 <h1 className="login-project-title-top">{t.title}</h1>
+                <div className="lang-selector">
+                    <button className={`lang-btn ${lang === 'vi' ? 'active' : ''}`} onClick={() => setLang('vi')}>
+                        <img src="https://flagcdn.com/w40/vn.png" alt="VN" />
+                    </button>
+                    <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>
+                        <img src="https://flagcdn.com/w40/gb.png" alt="UK" />
+                    </button>
+                    <button className={`lang-btn ${lang === 'ede' ? 'active' : ''}`} onClick={() => setLang('ede')} style={{ fontSize: '12px', fontWeight: 'bold', color: '#fbbf24', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                        Ê Đê
+                    </button>
+                </div>
             </div>
 
             <div className="auth-card">
@@ -306,11 +346,30 @@ const Login = ({ onDevLogin }) => {
                         {formData.org && (
                             <div className="animate-in">
                                 <div className="form-group">
-                                    <label>{t.username}</label>
-                                    <select className="input-pro" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}>
-                                        <option value="">{isFetchingUsers ? 'LOADING...' : (users.length === 0 ? 'CHƯA CÓ NHÂN VIÊN' : t.selectUser)}</option>
-                                        {users.map((u, i) => <option key={i} value={u.email}>{u.full_name}</option>)}
-                                    </select>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <label>{t.username}</label>
+                                        <span
+                                            onClick={() => setManualEntry(!manualEntry)}
+                                            style={{ fontSize: '11px', color: '#fbbf24', cursor: 'pointer', textDecoration: 'underline' }}
+                                        >
+                                            {manualEntry ? (lang === 'vi' ? 'Chọn từ danh sách' : 'Select from list') : (lang === 'vi' ? 'Nhập email thủ công' : 'Type email manually')}
+                                        </span>
+                                    </div>
+                                    {manualEntry ? (
+                                        <input
+                                            className="input-pro"
+                                            type="email"
+                                            required
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            placeholder="email@example.com"
+                                        />
+                                    ) : (
+                                        <select className="input-pro" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}>
+                                            <option value="">{isFetchingUsers ? 'LOADING...' : (users.length === 0 ? 'CHƯA CÓ NHÂN VIÊN' : t.selectUser)}</option>
+                                            {users.map((u, i) => <option key={i} value={u.email}>{u.full_name}</option>)}
+                                        </select>
+                                    )}
                                 </div>
                                 <div className="form-group">
                                     <label>{t.password}</label>

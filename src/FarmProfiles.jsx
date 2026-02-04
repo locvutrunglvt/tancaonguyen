@@ -74,12 +74,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi' }) => {
         e.preventDefault();
         setIsLoading(true);
 
-        const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id || devUser?.id;
-
         const payload = {
             ...formData,
-            user_id: userId,
             soil_ph: parseFloat(formData.soil_ph) || 0,
             gps_lat: parseFloat(formData.gps_lat) || 0,
             gps_long: parseFloat(formData.gps_long) || 0,
