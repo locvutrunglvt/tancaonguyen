@@ -697,8 +697,9 @@ h3 {
 
 /* ============= BUTTONS ============= */
 .btn-add-user,
-.btn-primary {
-    padding: 9px !important;
+.btn-primary,
+.btn-back {
+    padding: 9px 15px !important;
     width: auto !important;
     height: auto !important;
     border-radius: 8px;
@@ -706,7 +707,7 @@ h3 {
     color: white !important;
     border: none;
     font-weight: 700;
-    font-size: 13px !important;
+    font-size: 12px !important;
     cursor: pointer;
     display: inline-flex !important;
     align-items: center;
@@ -718,40 +719,17 @@ h3 {
 }
 
 .btn-add-user:hover,
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-back:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(107, 68, 35, 0.4);
     background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-primary) 100%);
 }
 
 .btn-add-user:active,
-.btn-primary:active {
+.btn-primary:active,
+.btn-back:active {
     transform: translateY(0);
-}
-
-.btn-back {
-    padding: 9px !important;
-    width: auto !important;
-    height: auto !important;
-    border-radius: 8px;
-    border: 1px solid var(--sky-200);
-    background: white;
-    font-size: 13px !important;
-    cursor: pointer;
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all var(--transition-base);
-    font-weight: 600;
-    color: var(--gray-700);
-    line-height: 1;
-}
-
-.btn-back:hover {
-    border-color: var(--coffee-medium);
-    background: var(--cream-light);
-    color: var(--coffee-dark);
 }
 
 /* ============= FORMS ============= */
@@ -1047,8 +1025,8 @@ h3 {
     .btn-primary,
     .btn-back,
     .btn-add-user {
-        font-size: 11px !important;
-        padding: 6px !important;
+        font-size: 10px !important;
+        padding: 6px 12px !important;
         width: auto !important;
         height: auto !important;
     }
@@ -1056,7 +1034,7 @@ h3 {
     .btn-primary i,
     .btn-back i,
     .btn-add-user i {
-        font-size: 12px !important;
+        font-size: 10px !important;
     }
 
     .header-controls-group {
@@ -1092,7 +1070,7 @@ h3 {
     .btn-add-user,
     .btn-back,
     .btn-primary {
-        padding: 6px !important;
+        padding: 6px 10px !important;
         font-size: 10px !important;
         width: auto !important;
         height: auto !important;
