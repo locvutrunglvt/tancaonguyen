@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
-const TrainingCenter = ({ onBack, devUser, appLang = 'vi' }) => {
+const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('training'); // training, support
@@ -153,6 +153,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi' }) => {
                                     <th>{t.train_topic}</th>
                                     <th>{t.train_loc}</th>
                                     <th>{t.train_level}</th>
+                                    <th>{t.actions}</th>
                                 </tr>
                             ) : (
                                 <tr>
@@ -161,6 +162,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi' }) => {
                                     <th>{t.train_quantity}</th>
                                     <th>{t.train_survival}</th>
                                     <th>{t.train_status}</th>
+                                    <th>{t.actions}</th>
                                 </tr>
                             )}
                         </thead>

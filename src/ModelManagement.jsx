@@ -223,6 +223,20 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         <input className="input-pro" type="number" step="0.1" value={currentModel.area} onChange={e => setCurrentModel({ ...currentModel, area: e.target.value })} />
                                     </div>
                                 </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div className="form-group">
+                                        <label>{t.model_status || 'Adaptation Status'}</label>
+                                        <select className="input-pro" value={currentModel.adaptation_status} onChange={e => setCurrentModel({ ...currentModel, adaptation_status: e.target.value })}>
+                                            <option value="Planning">Planning</option>
+                                            <option value="Active">Active</option>
+                                            <option value="Completed">Completed</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>{t.model_last_inspection || 'Last Inspection'}</label>
+                                        <input className="input-pro" type="date" value={currentModel.last_inspection} onChange={e => setCurrentModel({ ...currentModel, last_inspection: e.target.value })} />
+                                    </div>
+                                </div>
                                 <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                                     <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>{loading ? t.loading : t.save}</button>
                                     <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={() => setShowModal(false)}>{t.cancel}</button>
