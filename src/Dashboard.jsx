@@ -27,7 +27,7 @@ const HomeView = ({ menuItems, t }) => (
             ))}
         </div>
         <footer className="dashboard-footer-branding">
-            Bản quyền và phát triển bởi Tân Cao Nguyên, 2026
+            {t.footer_copyright || 'Bản quyền và phát triển bởi Tân Cao Nguyên, 2026'}
         </footer>
     </div>
 );
@@ -93,7 +93,7 @@ const UserManagementView = ({
                         className="btn-add-user"
                         style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
-                        <i className="fas fa-user-plus"></i> {t.add} {t.farmers}
+                        <i className="fas fa-user-plus"></i> {(t.user_add_btn || 'THÊM NGƯỜI DÙNG').toUpperCase()}
                     </button>
                 )}
             </div>
@@ -101,6 +101,7 @@ const UserManagementView = ({
             <div className="data-table-container">
                 <div className="table-header">
                     <h3><i className="fas fa-users-cog" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.user_list_title}</h3>
+                    <div className="badge">{users.length} {t.users?.toLowerCase()}</div>
                 </div>
                 <table className="pro-table">
                     <thead>
@@ -113,43 +114,49 @@ const UserManagementView = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(u => (
-                            <tr key={u.id}>
-                                <td>
-                                    <div style={{ fontWeight: 700 }}>{u.full_name}</div>
-                                    <div style={{ fontSize: '11px', opacity: 0.6 }}>{u.employee_code || 'N/A'}</div>
-                                </td>
-                                <td>{u.email}</td>
-                                <td><span className="badge-org">{u.organization?.toUpperCase()}</span></td>
-                                <td>
-                                    <span className={`role-badge role-${u.role?.toLowerCase()}`}>
-                                        {u.role}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        {canManageUser(u.organization) && (
-                                            <>
-                                                <button onClick={() => onEdit(u)} style={{
-                                                    background: '#fef3c7', border: '1px solid #d97706',
-                                                    color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }} title={t.edit || "Edit"}>
-                                                    <i className="fas fa-pen"></i>
-                                                </button>
-                                                <button onClick={() => onDelete(u.id)} style={{
-                                                    background: '#fef2f2', border: '1px solid #ef4444',
-                                                    color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }} title={t.delete || "Delete"}>
-                                                    <i className="fas fa-trash"></i>
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                        {isLoading ? (
+                            <tr><td colSpan="5" style={{ textAlign: 'center' }}>{t.loading}</td></tr>
+                        ) : users.length === 0 ? (
+                            <tr><td colSpan="5" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data}</td></tr>
+                        ) : (
+                            users.map(u => (
+                                <tr key={u.id}>
+                                    <td>
+                                        <div style={{ fontWeight: 700 }}>{u.full_name}</div>
+                                        <div style={{ fontSize: '11px', opacity: 0.6 }}>{u.employee_code || '---'}</div>
+                                    </td>
+                                    <td>{u.email}</td>
+                                    <td><span className="badge-org">{u.organization?.toUpperCase()}</span></td>
+                                    <td>
+                                        <span className={`role-badge role-${u.role?.toLowerCase()}`}>
+                                            {u.role}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            {canManageUser(u.organization) && (
+                                                <>
+                                                    <button onClick={() => onEdit(u)} style={{
+                                                        background: '#fef3c7', border: '1px solid #d97706',
+                                                        color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }} title={t.edit}>
+                                                        <i className="fas fa-pen"></i>
+                                                    </button>
+                                                    <button onClick={() => onDelete(u.id)} style={{
+                                                        background: '#fef2f2', border: '1px solid #ef4444',
+                                                        color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }} title={t.delete}>
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -158,7 +165,7 @@ const UserManagementView = ({
                 <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}>
                     <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '24px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                         <h3 style={{ marginBottom: '20px', color: 'var(--coffee-dark)', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-                            {isEditing ? t.update + ' ' + t.users?.toLowerCase() : t.user_add_btn}
+                            {isEditing ? (t.update + ' ' + t.users?.toLowerCase()) : t.user_add_btn}
                         </h3>
                         <form onSubmit={onSave} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             <div className="form-group">
@@ -192,14 +199,14 @@ const UserManagementView = ({
                                 <div className="form-group">
                                     {!isEditing ? (
                                         <>
-                                            <label>{t.password || 'Mật khẩu'}</label>
+                                            <label>{t.password}</label>
                                             <input className="input-pro" type="password" value={userForm.password || ''} onChange={e => onFormChange({ ...userForm, password: e.target.value })} required minLength="6" />
                                         </>
                                     ) : (
                                         <>
                                             <label>{t.user_role}</label>
                                             <select className="input-pro" value={userForm.role} onChange={e => onFormChange({ ...userForm, role: e.target.value })}>
-                                                <option value="Guest">Khách (Guest)</option>
+                                                <option value="Guest">Guest</option>
                                                 <option value="Viewer">Viewer</option>
                                                 <option value="Farmer">Farmer</option>
                                                 <option value="Admin">Admin</option>
@@ -212,7 +219,7 @@ const UserManagementView = ({
                                 <div className="form-group">
                                     <label>{t.user_role}</label>
                                     <select className="input-pro" value={userForm.role} onChange={e => onFormChange({ ...userForm, role: e.target.value })}>
-                                        <option value="Guest">Khách (Guest)</option>
+                                        <option value="Guest">Guest</option>
                                         <option value="Viewer">Viewer</option>
                                         <option value="Farmer">Farmer</option>
                                         <option value="Admin">Admin</option>
@@ -226,19 +233,19 @@ const UserManagementView = ({
                                 </label>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.view} onChange={() => { }} /> {t.user_perm_view}
+                                        <input type="checkbox" checked={perms.view} readOnly /> {t.user_perm_view}
                                     </label>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.add} onChange={() => onFormChange({ ...userForm, role: 'Admin' })} /> {t.user_perm_add}
+                                        <input type="checkbox" checked={perms.add} readOnly /> {t.user_perm_add}
                                     </label>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.edit} onChange={() => onFormChange({ ...userForm, role: userForm.role === 'Admin' ? 'Farmer' : 'Admin' })} /> {t.user_perm_edit}
+                                        <input type="checkbox" checked={perms.edit} readOnly /> {t.user_perm_edit}
                                     </label>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.delete} onChange={() => onFormChange({ ...userForm, role: 'Admin' })} /> {t.user_perm_delete}
+                                        <input type="checkbox" checked={perms.delete} readOnly /> {t.user_perm_delete}
                                     </label>
                                 </div>
-                                <p style={{ fontSize: '10px', marginTop: '10px', color: '#64748b', fontStyle: 'italic' }}>* {t.lang === 'vi' ? 'Quyền hạn được tự động điều chỉnh theo Vai trò' : 'Permissions are automatically adjusted by Role'}</p>
+                                <p style={{ fontSize: '10px', marginTop: '10px', color: '#64748b', fontStyle: 'italic' }}>* {t.user_perm_note || 'Permissions are automatically adjusted by Role'}</p>
                             </div>
 
                             <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -292,7 +299,9 @@ const UserProfileModal = ({ user, t, onClose, onPasswordClick }) => {
                     <button onClick={onPasswordClick} className="btn-primary" style={{ width: '100%', padding: '15px', borderRadius: '16px', background: 'var(--coffee-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: 'none', color: 'white', fontWeight: 700, cursor: 'pointer' }}>
                         <i className="fas fa-key"></i> {t.change_password}
                     </button>
-                    <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', marginTop: '20px' }}>Cập nhật thông tin chi tiết qua Quản trị viên hệ thống.</p>
+                    <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', marginTop: '20px' }}>
+                        {appLang === 'vi' ? 'Cập nhật thông tin chi tiết qua Quản trị viên hệ thống.' : appLang === 'en' ? 'Update details via System Administrator.' : 'Klei hơ mơ mdrâng hŏ qua Khua mdrông.'}
+                    </p>
                 </div>
             </div>
         </div>
@@ -348,14 +357,14 @@ const Dashboard = ({ devUser, onLogout }) => {
         setLoading(true);
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) throw new Error("Vui lòng đăng nhập lại để thực hiện tính năng này.");
+            if (!session) throw new Error(t.login_required || "Please login again.");
 
             const { error } = await supabase.auth.updateUser({ password: newPassword });
             if (error) throw error;
             alert(t.password_success);
             setShowPwModal(false);
         } catch (error) {
-            alert(`LỖI: ${error.message}`);
+            alert(`ERROR: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -437,7 +446,7 @@ const Dashboard = ({ devUser, onLogout }) => {
 
                 if (signUpError) throw signUpError;
 
-                // CRITICAL: Manual insert into 'profiles' as fallback if trigger is not set
+                // Manual insert into 'profiles' as fallback
                 if (data?.user) {
                     const { error: profError } = await supabase
                         .from('profiles')
@@ -452,10 +461,10 @@ const Dashboard = ({ devUser, onLogout }) => {
                         }]);
                     if (profError) {
                         console.error("METADATA_SYNC_FAIL: ", profError.message);
-                        // We don't throw because the account IS created, but we log it.
                     }
                 }
             }
+            alert(t.save_success);
             setShowUserModal(false);
             fetchUsersList();
         } catch (error) {
@@ -466,11 +475,12 @@ const Dashboard = ({ devUser, onLogout }) => {
     };
 
     const handleDeleteUser = async (id) => {
-        if (!window.confirm(t.act_confirm_delete)) return;
+        if (!window.confirm(t.delete_confirm)) return;
         setLoading(true);
         try {
             const { error } = await supabase.from('profiles').delete().eq('id', id);
             if (error) throw error;
+            alert(t.delete_success);
             fetchUsersList();
         } catch (error) {
             alert(`DELETE_ERROR: ${error.message}`);
@@ -491,7 +501,7 @@ const Dashboard = ({ devUser, onLogout }) => {
         { id: 'planning', title: t.planning, desc: t.planning_desc, icon: 'fas fa-clipboard-list', action: () => setView('planning') },
         { id: 'training', title: t.training, desc: t.training_desc, icon: 'fas fa-graduation-cap', action: () => setView('training') },
         { id: 'model', title: t.model, desc: t.model_desc, icon: 'fas fa-seedling', action: () => setView('model') },
-        { id: 'growth', title: 'Tăng trưởng', desc: 'Theo dõi sự tăng trưởng và phát triển của mô hình.', icon: 'fas fa-chart-line', action: () => setView('growth') },
+        { id: 'growth', title: t.growth || 'Tăng trưởng', desc: t.growth_desc || 'Theo dõi sự tăng trưởng và phát triển của mô hình.', icon: 'fas fa-chart-line', action: () => setView('growth') },
     ];
 
     // Security check: Is current user an Admin?
@@ -509,7 +519,7 @@ const Dashboard = ({ devUser, onLogout }) => {
                         <i className="fas fa-home"></i> <span>{t.home}</span>
                     </a>
                     <a className={`nav-item ${view === 'growth' ? 'active' : ''}`} onClick={() => setView('growth')}>
-                        <i className="fas fa-chart-line"></i> <span>Tăng trưởng</span>
+                        <i className="fas fa-chart-line"></i> <span>{t.growth || 'Tăng trưởng'}</span>
                     </a>
                     <a className={`nav-item ${view === 'farmers' ? 'active' : ''}`} onClick={() => setView('farmers')}>
                         <i className="fas fa-id-card"></i> <span>{t.farmers}</span>
@@ -559,17 +569,17 @@ const Dashboard = ({ devUser, onLogout }) => {
 
                     <div className="header-row header-title-row">
                         <h1 className="header-project-title">
-                            MÔ HÌNH CÀ PHÊ BỀN VỮNG<br />
-                            THÍCH ỨNG BIẾN ĐỔI KHÍ HẬU
+                            {t.app_title_1}<br />
+                            {t.app_title_2}
                         </h1>
                     </div>
 
                     <div className="header-row header-controls-row">
                         <div className="header-controls-group">
                             <div className="in-app-lang">
-                                <button className={`lang-mini-btn ${appLang === 'vi' ? 'active' : ''}`} onClick={() => setAppLang('vi')}><img src="https://flagcdn.com/w20/vn.png" alt="VI" /></button>
-                                <button className={`lang-mini-btn ${appLang === 'en' ? 'active' : ''}`} onClick={() => setAppLang('en')}><img src="https://flagcdn.com/w20/gb.png" alt="EN" /></button>
-                                <button className={`lang-mini-btn ${appLang === 'ede' ? 'active' : ''}`} onClick={() => setAppLang('ede')} style={{ border: 'none', background: appLang === 'ede' ? 'var(--coffee-dark)' : 'none', color: appLang === 'ede' ? 'white' : 'var(--coffee-dark)', cursor: 'pointer', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>EĐ</button>
+                                <button className={`lang-mini-btn ${appLang === 'vi' ? 'active' : ''}`} onClick={() => { setAppLang('vi'); localStorage.setItem('app_lang', 'vi'); }}><img src="https://flagcdn.com/w20/vn.png" alt="VI" /></button>
+                                <button className={`lang-mini-btn ${appLang === 'en' ? 'active' : ''}`} onClick={() => { setAppLang('en'); localStorage.setItem('app_lang', 'en'); }}><img src="https://flagcdn.com/w20/gb.png" alt="EN" /></button>
+                                <button className={`lang-mini-btn ${appLang === 'ede' ? 'active' : ''}`} onClick={() => { setAppLang('ede'); localStorage.setItem('app_lang', 'ede'); }} style={{ border: 'none', background: appLang === 'ede' ? 'var(--coffee-dark)' : 'none', color: appLang === 'ede' ? 'white' : 'var(--coffee-dark)', cursor: 'pointer', padding: '2px 6px', borderRadius: '5px', fontSize: '10px', fontWeight: 'bold' }}>EĐ</button>
                             </div>
                         </div>
                     </div>
@@ -580,8 +590,8 @@ const Dashboard = ({ devUser, onLogout }) => {
                     {view === 'growth' && (
                         <div className="view-container" style={{ textAlign: 'center', padding: '100px 20px', background: 'white', borderRadius: '24px' }}>
                             <div style={{ fontSize: '64px', color: 'var(--coffee-primary)', marginBottom: '20px' }}><i className="fas fa-chart-line"></i></div>
-                            <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)' }}>TĂNG TRƯỞNG & PHÁT TRIỂN</h2>
-                            <p style={{ color: '#64748b', marginTop: '10px' }}>Chức năng đang được đồng bộ dữ liệu thực địa. Vui lòng quay lại sau.</p>
+                            <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)', textTransform: 'uppercase' }}>{t.growth || 'TĂNG TRƯỞNG & PHÁT TRIỂN'}</h2>
+                            <p style={{ color: '#64748b', marginTop: '10px' }}>{t.sync_data_msg || 'Chức năng đang được đồng bộ dữ liệu thực địa. Vui lòng quay lại sau.'}</p>
                             <button onClick={() => setView('home')} className="btn-primary" style={{ marginTop: '30px', width: 'auto', padding: '12px 40px' }}>{t.back}</button>
                         </div>
                     )}

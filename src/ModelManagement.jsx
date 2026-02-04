@@ -131,13 +131,13 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm(t.delete_confirm || 'Bạn có chắc chắn muốn xóa mô hình này?')) return;
+        if (!confirm(t.delete_confirm)) return;
         setLoading(true);
         const { error } = await supabase.from('coffee_models').delete().eq('id', id);
         if (error) {
-            alert((t.delete_error || 'Lỗi: ') + error.message);
+            alert(t.delete_error + ': ' + error.message);
         } else {
-            alert(t.delete_success || 'Đã xóa thành công.');
+            alert(t.delete_success);
             fetchModels();
         }
         setLoading(false);
@@ -171,20 +171,20 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     .eq('id', editingId);
 
                 if (error) throw error;
-                alert(t.save_success || 'Cập nhật thành công.');
+                alert(t.save_success);
             } else {
                 const { error } = await supabase
                     .from('coffee_models')
                     .insert([payload]);
 
                 if (error) throw error;
-                alert(t.save_success || 'Lưu thành công.');
+                alert(t.save_success);
             }
 
             handleModalClose();
             fetchModels();
         } catch (error) {
-            alert((t.save_error || 'Lỗi: ') + error.message);
+            alert(t.save_error + ': ' + error.message);
         } finally {
             setLoading(false);
         }
@@ -220,11 +220,11 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const getStatusBadge = (status) => {
         const styles = {
-            planning: { bg: '#fef3c7', color: '#92400e', text: 'Lập kế hoạch' },
-            implementing: { bg: '#dbeafe', color: '#1e40af', text: 'Đang triển khai' },
-            monitoring: { bg: '#e0e7ff', color: '#4338ca', text: 'Giám sát' },
-            completed: { bg: '#dcfce7', color: '#166534', text: 'Hoàn thành' },
-            suspended: { bg: '#fee2e2', color: '#991b1b', text: 'Tạm ngưng' }
+            planning: { bg: '#fef3c7', color: '#92400e', text: t.model_status_planning },
+            implementing: { bg: '#dbeafe', color: '#1e40af', text: t.model_status_implementing },
+            monitoring: { bg: '#e0e7ff', color: '#4338ca', text: t.model_status_monitoring },
+            completed: { bg: '#dcfce7', color: '#166534', text: t.model_status_completed },
+            suspended: { bg: '#fee2e2', color: '#991b1b', text: t.model_status_suspended }
         };
         const style = styles[status] || styles.planning;
         return (
@@ -255,24 +255,24 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     className="btn-add-user"
                     style={{ padding: '10px 20px', borderRadius: '12px', background: 'var(--tcn-dark)', color: 'white', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                    <i className="fas fa-plus"></i> {t.model_add_btn || 'THÊM MÔ HÌNH'}
+                    <i className="fas fa-plus"></i> {(t.model_add_btn || 'THÊM MÔ HÌNH').toUpperCase()}
                 </button>
             </div>
 
             <div className="data-table-container">
                 <div className="table-header">
-                    <h3><i className="fas fa-project-diagram" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.model_title || 'Quản lý mô hình cà phê'}</h3>
-                    <div className="badge">{models.length} mô hình</div>
+                    <h3><i className="fas fa-project-diagram" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.model_title}</h3>
+                    <div className="badge">{models.length} {t.models?.toLowerCase()}</div>
                 </div>
                 <table className="pro-table">
                     <thead>
                         <tr>
-                            <th>Mã nông dân</th>
-                            <th>{t.model_name || 'Tên mô hình'}</th>
-                            <th>Loại cà phê</th>
-                            <th>Diện tích (ha)</th>
-                            <th>Tuổi cây</th>
-                            <th>Trạng thái</th>
+                            <th>{t.farmer_code}</th>
+                            <th>{t.model_name}</th>
+                            <th>{t.coffee_type}</th>
+                            <th>{t.model_area}</th>
+                            <th>{appLang === 'vi' ? 'Tuổi cây' : appLang === 'en' ? 'Tree Age' : 'Klei mdréng kyâ'}</th>
+                            <th>{t.adaptation_status}</th>
                             <th>{t.actions}</th>
                         </tr>
                     </thead>
@@ -293,7 +293,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     <td><div style={{ fontWeight: 700 }}>{m.name}</div></td>
                                     <td>{m.coffee_type}</td>
                                     <td>{m.area || '-'}</td>
-                                    <td>{m.tree_age ? `${m.tree_age} năm` : '-'}</td>
+                                    <td>{m.tree_age ? `${m.tree_age} ${appLang === 'vi' ? 'năm' : 'years'}` : '-'}</td>
                                     <td>{getStatusBadge(m.adaptation_status)}</td>
                                     <td onClick={(e) => e.stopPropagation()}>
                                         <div style={{ display: 'flex', gap: '8px' }}>
@@ -302,7 +302,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                 background: '#e0f2fe', border: '1px solid #7dd3fc',
                                                 color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }} title="Xem chi tiết">
+                                            }} title={t.details}>
                                                 <i className="fas fa-eye"></i>
                                             </button>
 
@@ -312,14 +312,14 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                         background: '#fef3c7', border: '1px solid #d97706',
                                                         color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                    }} title={t.edit || "Sửa"}>
+                                                    }} title={t.edit}>
                                                         <i className="fas fa-pen"></i>
                                                     </button>
                                                     <button onClick={() => handleDelete(m.id)} style={{
                                                         background: '#fef2f2', border: '1px solid #ef4444',
                                                         color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                    }} title={t.delete || "Xóa"}>
+                                                    }} title={t.delete}>
                                                         <i className="fas fa-trash"></i>
                                                     </button>
                                                 </>
@@ -335,25 +335,26 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
             {showModal && (
                 <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <div className="modal-content" style={{ background: 'white', padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
-                        <h3 style={{ marginBottom: '25px', color: 'var(--tcn-dark)' }}>
-                            {isEditing ? 'Cập nhật mô hình cà phê' : 'Thêm mô hình cà phê mới'}
+                    <div className="modal-content" style={{ background: 'white', padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '750px', maxHeight: '90vh', overflowY: 'auto' }}>
+                        <h3 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <i className="fas fa-project-diagram" style={{ marginRight: '10px' }}></i>
+                            {isEditing ? (t.update + ' ' + t.model_title?.toLowerCase()) : t.model_add_btn}
                         </h3>
                         <form onSubmit={handleSave}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
                                 {/* Column 1 */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>Thông tin chủ sở hữu</h4>
+                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '5px', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.general_info}</h4>
 
                                     <div className="form-group">
-                                        <label>Chọn nông dân *</label>
+                                        <label>{appLang === 'vi' ? 'Chọn nông dân' : appLang === 'en' ? 'Select Farmer' : 'Hriêng nông dân'} *</label>
                                         <select
                                             className="input-pro"
                                             required
                                             value={currentModel.farmer_id}
                                             onChange={e => handleFarmerChange(e.target.value)}
                                         >
-                                            <option value="">-- Chọn nông dân --</option>
+                                            <option value="">-- {appLang === 'vi' ? 'Chọn nông dân' : appLang === 'en' ? 'Select Farmer' : 'Hriêng nông dân'} --</option>
                                             {farmers.map(f => (
                                                 <option key={f.id} value={f.id}>
                                                     {f.farmer_code} - {f.full_name}
@@ -363,14 +364,14 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Chọn trang trại (tùy chọn)</label>
+                                        <label>{t.farm} ({t.optional})</label>
                                         <select
                                             className="input-pro"
                                             value={currentModel.farm_id}
                                             onChange={e => setCurrentModel({ ...currentModel, farm_id: e.target.value })}
                                             disabled={!currentModel.farmer_id}
                                         >
-                                            <option value="">-- Không chọn --</option>
+                                            <option value="">-- {t.no_selection} --</option>
                                             {farms.map(f => (
                                                 <option key={f.id} value={f.id}>
                                                     {f.farm_code} - {f.total_area} ha
@@ -380,87 +381,87 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Tên mô hình *</label>
-                                        <input className="input-pro" required value={currentModel.name} onChange={e => setCurrentModel({ ...currentModel, name: e.target.value })} placeholder="Mô hình cà phê bền vững..." />
+                                        <label>{t.model_name} *</label>
+                                        <input className="input-pro" required value={currentModel.name} onChange={e => setCurrentModel({ ...currentModel, name: e.target.value })} placeholder={t.search_placeholder} />
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                         <div className="form-group">
-                                            <label>Loại cà phê</label>
+                                            <label>{t.coffee_type}</label>
                                             <select className="input-pro" value={currentModel.coffee_type} onChange={e => setCurrentModel({ ...currentModel, coffee_type: e.target.value })}>
                                                 <option value="Robusta">Robusta</option>
                                                 <option value="Arabica">Arabica</option>
-                                                <option value="Mixed">Hỗn hợp</option>
-                                                <option value="Other">Khác</option>
+                                                <option value="Mixed">{appLang === 'vi' ? 'Hỗn hợp' : 'Mixed'}</option>
+                                                <option value="Other">{t.act_type_other}</option>
                                             </select>
                                         </div>
                                         <div className="form-group">
-                                            <label>Giống</label>
+                                            <label>{appLang === 'vi' ? 'Giống' : 'Variety'}</label>
                                             <input className="input-pro" value={currentModel.variety} onChange={e => setCurrentModel({ ...currentModel, variety: e.target.value })} placeholder="TR4, Catimor..." />
                                         </div>
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Vị trí</label>
-                                        <input className="input-pro" value={currentModel.location} onChange={e => setCurrentModel({ ...currentModel, location: e.target.value })} placeholder="Thôn, xã..." />
+                                        <label>{t.location}</label>
+                                        <input className="input-pro" value={currentModel.location} onChange={e => setCurrentModel({ ...currentModel, location: e.target.value })} placeholder={t.location + '...'} />
                                     </div>
                                 </div>
 
                                 {/* Column 2 */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>Thông tin kỹ thuật</h4>
+                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '5px', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.act_detail}</h4>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                         <div className="form-group">
-                                            <label>Diện tích (ha)</label>
+                                            <label>{t.model_area}</label>
                                             <input className="input-pro" type="number" step="0.1" value={currentModel.area} onChange={e => setCurrentModel({ ...currentModel, area: e.target.value })} />
                                         </div>
                                         <div className="form-group">
-                                            <label>Số cây</label>
+                                            <label>{t.quantity} ({appLang === 'vi' ? 'cây' : 'trees'})</label>
                                             <input className="input-pro" type="number" value={currentModel.tree_count} onChange={e => setCurrentModel({ ...currentModel, tree_count: e.target.value })} />
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                         <div className="form-group">
-                                            <label>Năm trồng</label>
+                                            <label>{appLang === 'vi' ? 'Năm trồng' : 'Planting Year'}</label>
                                             <input className="input-pro" type="number" min="1900" max="2100" value={currentModel.planting_year} onChange={e => setCurrentModel({ ...currentModel, planting_year: e.target.value })} placeholder="2020" />
                                         </div>
                                         <div className="form-group">
-                                            <label>Tuổi cây (năm)</label>
+                                            <label>{appLang === 'vi' ? 'Tuổi cây' : 'Tree Age'}</label>
                                             <input className="input-pro" type="number" value={currentModel.tree_age} onChange={e => setCurrentModel({ ...currentModel, tree_age: e.target.value })} />
                                         </div>
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Trạng thái thích ứng</label>
+                                        <label>{t.adaptation_status}</label>
                                         <select className="input-pro" value={currentModel.adaptation_status} onChange={e => setCurrentModel({ ...currentModel, adaptation_status: e.target.value })}>
-                                            <option value="planning">Lập kế hoạch</option>
-                                            <option value="implementing">Đang triển khai</option>
-                                            <option value="monitoring">Giám sát</option>
-                                            <option value="completed">Hoàn thành</option>
-                                            <option value="suspended">Tạm ngưng</option>
+                                            <option value="planning">{t.model_status_planning}</option>
+                                            <option value="implementing">{t.model_status_implementing}</option>
+                                            <option value="monitoring">{t.model_status_monitoring}</option>
+                                            <option value="completed">{t.model_status_completed}</option>
+                                            <option value="suspended">{t.model_status_suspended}</option>
                                         </select>
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Ngày kiểm tra cuối</label>
+                                        <label>{appLang === 'vi' ? 'Ngày kiểm tra cuối' : 'Last Inspection'}</label>
                                         <input className="input-pro" type="date" value={currentModel.last_inspection} onChange={e => setCurrentModel({ ...currentModel, last_inspection: e.target.value })} />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="form-group" style={{ marginTop: '15px' }}>
-                                <label>Ghi chú</label>
-                                <textarea className="input-pro" rows="3" value={currentModel.notes} onChange={e => setCurrentModel({ ...currentModel, notes: e.target.value })} placeholder="Ghi chú thêm về mô hình..."></textarea>
+                                <label>{t.notes}</label>
+                                <textarea className="input-pro" rows="3" value={currentModel.notes} onChange={e => setCurrentModel({ ...currentModel, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                             </div>
 
-                            <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <div className="modal-actions" style={{ display: 'flex', gap: '15px', marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
                                 <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>
-                                    {loading ? t.loading : (isEditing ? 'CẬP NHẬT' : 'THÊM MÔ HÌNH')}
+                                    <i className="fas fa-check"></i> {loading ? t.loading : (isEditing ? t.update.toUpperCase() : t.add.toUpperCase())}
                                 </button>
                                 <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={handleModalClose}>
-                                    {t.cancel}
+                                    {t.cancel.toUpperCase()}
                                 </button>
                             </div>
                         </form>
@@ -474,8 +475,8 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
-                                <i className="fas fa-project-diagram" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
-                                Chi tiết mô hình
+                                <i className="fas fa-microscope" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
+                                {t.model_title}
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
@@ -483,77 +484,97 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Overview */}
                             <div className="detail-section" style={{ gridColumn: 'span 2' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Tổng quan</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.general_info}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tên mô hình</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.model_name}</label>
                                 <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedModel.name}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Chủ sở hữu</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer}</label>
                                 <div style={{ fontWeight: 600 }}>{selectedModel.farmer?.full_name} ({selectedModel.farmer?.farmer_code})</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Trang trại</label>
-                                <div>{selectedModel.farm ? `${selectedModel.farm.farm_code} (${selectedModel.farm.total_area} ha)` : 'Không liên kết'}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm}</label>
+                                <div>{selectedModel.farm ? `${selectedModel.farm.farm_code} (${selectedModel.farm.total_area} ha)` : t.no_selection}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Trạng thái</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.adaptation_status}</label>
                                 <div>{getStatusBadge(selectedModel.adaptation_status)}</div>
                             </div>
 
                             {/* Section 2: Technical */}
                             <div className="detail-section" style={{ gridColumn: 'span 2', marginTop: '10px' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Thông số kỹ thuật</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.act_detail}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Loại cà phê</label>
-                                <div>{selectedModel.coffee_type} - {selectedModel.variety}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.coffee_type}</label>
+                                <div>{selectedModel.coffee_type} {selectedModel.variety ? `- ${selectedModel.variety}` : ''}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Diện tích</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.model_area}</label>
                                 <div>{selectedModel.area} ha</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số lượng cây</label>
-                                <div>{selectedModel.tree_count} cây</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.quantity}</label>
+                                <div>{selectedModel.tree_count} {appLang === 'vi' ? 'cây' : 'trees'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mật độ (ước tính)</label>
-                                <div>{selectedModel.area && selectedModel.tree_count ? Math.round(selectedModel.tree_count / selectedModel.area) : '---'} cây/ha</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Mật độ' : 'Density'}</label>
+                                <div>{selectedModel.area && selectedModel.tree_count ? Math.round(selectedModel.tree_count / selectedModel.area) : '---'} {appLang === 'vi' ? 'cây/ha' : 'trees/ha'}</div>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Năm trồng</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Năm trồng' : 'Planting Year'}</label>
                                 <div>{selectedModel.planting_year || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tuổi cây</label>
-                                <div>{selectedModel.tree_age ? `${selectedModel.tree_age} năm` : '---'}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Tuổi cây' : 'Tree Age'}</label>
+                                <div>{selectedModel.tree_age ? `${selectedModel.tree_age} ${appLang === 'vi' ? 'năm' : 'years'}` : '---'}</div>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Vị trí</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.location}</label>
                                 <div>{selectedModel.location || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Kiểm tra lần cuối</label>
-                                <div>{selectedModel.last_inspection ? new Date(selectedModel.last_inspection).toLocaleDateString('vi-VN') : '---'}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Kiểm tra lần cuối' : 'Last Inspection'}</label>
+                                <div>{selectedModel.last_inspection ? new Date(selectedModel.last_inspection).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN') : '---'}</div>
                             </div>
 
                             {selectedModel.notes && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.notes}</label>
                                     <div style={{ fontStyle: 'italic' }}>{selectedModel.notes}</div>
                                 </div>
                             )}
                         </div>
 
-                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {canEdit() && (
+                                    <>
+                                        <button onClick={() => { setShowDetailModal(false); handleEdit(selectedModel); }} style={{
+                                            background: '#fef3c7', border: '1px solid #d97706',
+                                            color: '#92400e', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-pen"></i> {t.edit}
+                                        </button>
+                                        <button onClick={() => { setShowDetailModal(false); handleDelete(selectedModel.id); }} style={{
+                                            background: '#fef2f2', border: '1px solid #ef4444',
+                                            color: '#b91c1c', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-trash"></i> {t.delete}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                             <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
-                                Đóng
+                                {t.close}
                             </button>
                         </div>
                     </div>

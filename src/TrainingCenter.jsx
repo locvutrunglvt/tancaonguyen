@@ -93,20 +93,20 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     .eq('id', editingId);
 
                 if (error) throw error;
-                alert(t.save_success || 'Cập nhật thành công.');
+                alert(t.save_success);
             } else {
                 const { error } = await supabase
                     .from('training_records')
                     .insert([payload]);
 
                 if (error) throw error;
-                alert(t.save_success || 'Lưu thành công.');
+                alert(t.save_success);
             }
 
             handleFormClose();
             fetchTrainings();
         } catch (error) {
-            alert((t.save_error || 'Lỗi: ') + error.message);
+            alert(t.save_error + ': ' + error.message);
         } finally {
             setIsLoading(false);
         }
@@ -131,15 +131,15 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm(t.delete_confirm || 'Xác nhận xóa?')) return;
+        if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
             const { error } = await supabase.from('training_records').delete().eq('id', id);
             if (error) throw error;
-            alert(t.delete_success || 'Đã xóa thành công.');
+            alert(t.delete_success);
             fetchTrainings();
         } catch (error) {
-            alert(`Lỗi: ${error.message}`);
+            alert(`Error: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -173,11 +173,26 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         return currentUser.role === 'Admin';
     };
 
+    const getTrainingTopicText = (topic) => {
+        const topicsMap = {
+            'Kỹ thuật bón phân tiết kiệm': t.train_topic_1,
+            'Quản lý rầy rệp mùa khô': t.train_topic_2,
+            'Kỹ thuật ghép cải tạo': t.train_topic_3,
+            'Thu hoạch & bảo quản sau thu hoạch': t.train_topic_4,
+            'Quản lý dịch hại tổng hợp (IPM)': t.train_topic_5,
+            'Kỹ thuật tưới tiết kiệm nước': t.train_topic_6,
+            'Chứng nhận bền vững (UTZ, 4C, Organic)': t.train_topic_7,
+            'Quản lý tài chính trang trại': t.train_topic_8,
+            'Thích ứng biến đổi khí hậu': t.train_topic_9
+        };
+        return topicsMap[topic] || topic;
+    };
+
     const getApplicationLevelBadge = (level) => {
         const styles = {
-            none: { bg: '#fee2e2', color: '#991b1b', text: 'Chưa áp dụng' },
-            partial: { bg: '#fef3c7', color: '#92400e', text: 'Một phần' },
-            full: { bg: '#dcfce7', color: '#166534', text: 'Toàn bộ' }
+            none: { bg: '#fee2e2', color: '#991b1b', text: t.train_app_none },
+            partial: { bg: '#fef3c7', color: '#92400e', text: t.train_app_partial },
+            full: { bg: '#dcfce7', color: '#166534', text: t.train_app_full }
         };
         const style = styles[level] || styles.partial;
         return (
@@ -202,7 +217,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 </button>
                 <div style={{ flex: 1 }}></div>
                 <button onClick={() => setShowForm(true)} className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>
-                    <i className="fas fa-plus-circle"></i> {t.train_add_btn || 'THÊM ĐÀO TẠO'}
+                    <i className="fas fa-plus-circle"></i> {(t.train_add_btn || 'THÊM ĐÀO TẠO').toUpperCase()}
                 </button>
             </div>
 
@@ -211,21 +226,21 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     <div className="table-header">
                         <h3>
                             <i className="fas fa-chalkboard-teacher" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>
-                            {t.train_history_title || 'Lịch sử đào tạo'}
+                            {t.train_history_title}
                         </h3>
-                        <div className="badge">{trainings.length} buổi đào tạo</div>
+                        <div className="badge">{trainings.length} {t.trainings?.toLowerCase()}</div>
                     </div>
 
                     <table className="pro-table">
                         <thead>
                             <tr>
-                                <th>Mã nông dân</th>
-                                <th>Tên nông dân</th>
-                                <th>Ngày đào tạo</th>
-                                <th>Chủ đề</th>
-                                <th>Địa điểm</th>
-                                <th>Thời lượng (h)</th>
-                                <th>Mức độ áp dụng</th>
+                                <th>{t.farmer_code}</th>
+                                <th>{t.farmer}</th>
+                                <th>{t.date}</th>
+                                <th>{t.topic}</th>
+                                <th>{t.location}</th>
+                                <th>{t.duration_hours}</th>
+                                <th>{t.application_level}</th>
                                 <th>{t.actions}</th>
                             </tr>
                         </thead>
@@ -233,14 +248,14 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             {isLoading ? (
                                 <tr><td colSpan="8" style={{ textAlign: 'center' }}>{t.loading}</td></tr>
                             ) : trainings.length === 0 ? (
-                                <tr><td colSpan="8" style={{ textAlign: 'center', opacity: 0.5 }}>Chưa có buổi đào tạo nào</td></tr>
+                                <tr><td colSpan="8" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data}</td></tr>
                             ) : (
                                 trainings.map(training => (
                                     <tr key={training.id} onClick={() => handleView(training)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
                                         <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{training.farmer?.farmer_code}</span></td>
                                         <td style={{ fontWeight: 600 }}>{training.farmer?.full_name}</td>
                                         <td>{training.training_date}</td>
-                                        <td><strong>{training.topic}</strong></td>
+                                        <td><strong>{getTrainingTopicText(training.topic)}</strong></td>
                                         <td>{training.location || '-'}</td>
                                         <td>{training.duration_hours || '-'}</td>
                                         <td>{getApplicationLevelBadge(training.application_level)}</td>
@@ -251,7 +266,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                     background: '#e0f2fe', border: '1px solid #7dd3fc',
                                                     color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }} title="Xem chi tiết">
+                                                }} title={t.details}>
                                                     <i className="fas fa-eye"></i>
                                                 </button>
 
@@ -261,14 +276,14 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                             background: '#fef3c7', border: '1px solid #d97706',
                                                             color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.edit || "Sửa"}>
+                                                        }} title={t.edit}>
                                                             <i className="fas fa-pen"></i>
                                                         </button>
                                                         <button onClick={() => handleDelete(training.id)} style={{
                                                             background: '#fef2f2', border: '1px solid #ef4444',
                                                             color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.delete || "Xóa"}>
+                                                        }} title={t.delete}>
                                                             <i className="fas fa-trash"></i>
                                                         </button>
                                                     </>
@@ -284,20 +299,20 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             ) : (
                 <div className="form-container" style={{ background: 'white', padding: '30px', borderRadius: '24px' }}>
                     <h2 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '2px solid var(--tcn-light)', paddingBottom: '10px' }}>
-                        <i className="fas fa-graduation-cap"></i> {isEditing ? 'Cập nhật đào tạo' : 'Thêm buổi đào tạo mới'}
+                        <i className="fas fa-graduation-cap"></i> {isEditing ? (t.update + ' ' + t.training?.toLowerCase()) : t.train_add_btn}
                     </h2>
 
                     <form onSubmit={handleSave}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="form-group">
-                                <label>Chọn nông dân *</label>
+                                <label>{appLang === 'vi' ? 'Chọn nông dân' : appLang === 'en' ? 'Select Farmer' : 'Hriêng nông dân'} *</label>
                                 <select
                                     className="input-pro"
                                     required
                                     value={trainingForm.farmer_id}
                                     onChange={e => setTrainingForm({ ...trainingForm, farmer_id: e.target.value })}
                                 >
-                                    <option value="">-- Chọn nông dân --</option>
+                                    <option value="">-- {appLang === 'vi' ? 'Chọn nông dân' : appLang === 'en' ? 'Select Farmer' : 'Hriêng nông dân'} --</option>
                                     {farmers.map(f => (
                                         <option key={f.id} value={f.id}>
                                             {f.farmer_code} - {f.full_name} ({f.village})
@@ -307,74 +322,74 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </div>
 
                             <div className="form-group">
-                                <label>Ngày đào tạo *</label>
+                                <label>{t.date} *</label>
                                 <input className="input-pro" type="date" value={trainingForm.training_date} onChange={e => setTrainingForm({ ...trainingForm, training_date: e.target.value })} required />
                             </div>
                         </div>
 
                         <div className="form-group">
-                            <label>Chủ đề đào tạo *</label>
+                            <label>{t.topic} *</label>
                             <select className="input-pro" value={trainingForm.topic} onChange={e => setTrainingForm({ ...trainingForm, topic: e.target.value })} required>
-                                <option>Kỹ thuật bón phân tiết kiệm</option>
-                                <option>Quản lý rầy rệp mùa khô</option>
-                                <option>Kỹ thuật ghép cải tạo</option>
-                                <option>Thu hoạch & bảo quản sau thu hoạch</option>
-                                <option>Quản lý dịch hại tổng hợp (IPM)</option>
-                                <option>Kỹ thuật tưới tiết kiệm nước</option>
-                                <option>Chứng nhận bền vững (UTZ, 4C, Organic)</option>
-                                <option>Quản lý tài chính trang trại</option>
-                                <option>Thích ứng biến đổi khí hậu</option>
-                                <option>Khác</option>
+                                <option value="Kỹ thuật bón phân tiết kiệm">{t.train_topic_1}</option>
+                                <option value="Quản lý rầy rệp mùa khô">{t.train_topic_2}</option>
+                                <option value="Kỹ thuật ghép cải tạo">{t.train_topic_3}</option>
+                                <option value="Thu hoạch & bảo quản sau thu hoạch">{t.train_topic_4}</option>
+                                <option value="Quản lý dịch hại tổng hợp (IPM)">{t.train_topic_5}</option>
+                                <option value="Kỹ thuật tưới tiết kiệm nước">{t.train_topic_6}</option>
+                                <option value="Chứng nhận bền vững (UTZ, 4C, Organic)">{t.train_topic_7}</option>
+                                <option value="Quản lý tài chính trang trại">{t.train_topic_8}</option>
+                                <option value="Thích ứng biến đổi khí hậu">{t.train_topic_9}</option>
+                                <option value="Khác">{t.act_type_other}</option>
                             </select>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
                             <div className="form-group">
-                                <label>Địa điểm</label>
-                                <input className="input-pro" value={trainingForm.location} onChange={e => setTrainingForm({ ...trainingForm, location: e.target.value })} placeholder="Nhà văn hóa thôn..." />
+                                <label>{t.location}</label>
+                                <input className="input-pro" value={trainingForm.location} onChange={e => setTrainingForm({ ...trainingForm, location: e.target.value })} placeholder={t.location + '...'} />
                             </div>
                             <div className="form-group">
-                                <label>Thời lượng (giờ)</label>
+                                <label>{t.duration_hours}</label>
                                 <input className="input-pro" type="number" step="0.5" value={trainingForm.duration_hours} onChange={e => setTrainingForm({ ...trainingForm, duration_hours: e.target.value })} placeholder="2" />
                             </div>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="form-group">
-                                <label>Giảng viên</label>
-                                <input className="input-pro" value={trainingForm.trainer} onChange={e => setTrainingForm({ ...trainingForm, trainer: e.target.value })} placeholder="Tên giảng viên..." />
+                                <label>{appLang === 'vi' ? 'Giảng viên' : appLang === 'en' ? 'Trainer' : 'Khua mdrông'} </label>
+                                <input className="input-pro" value={trainingForm.trainer} onChange={e => setTrainingForm({ ...trainingForm, trainer: e.target.value })} placeholder={t.search_placeholder} />
                             </div>
                             <div className="form-group">
-                                <label>Số người tham gia</label>
+                                <label>{appLang === 'vi' ? 'Số người tham gia' : appLang === 'en' ? 'Participants Count' : 'Sô phung tham gia'}</label>
                                 <input className="input-pro" type="number" value={trainingForm.participants_count} onChange={e => setTrainingForm({ ...trainingForm, participants_count: e.target.value })} />
                             </div>
                         </div>
 
                         <div className="form-group">
-                            <label>Mức độ áp dụng *</label>
+                            <label>{t.application_level} *</label>
                             <select className="input-pro" value={trainingForm.application_level} onChange={e => setTrainingForm({ ...trainingForm, application_level: e.target.value })} required>
-                                <option value="none">Chưa áp dụng</option>
-                                <option value="partial">Một phần (Đang thử nghiệm)</option>
-                                <option value="full">Toàn bộ (Đã triển khai)</option>
+                                <option value="none">{t.train_app_none}</option>
+                                <option value="partial">{t.train_app_partial}</option>
+                                <option value="full">{t.train_app_full}</option>
                             </select>
                         </div>
 
                         <div className="form-group">
-                            <label>Phản hồi của nông dân</label>
-                            <textarea className="input-pro" rows="2" value={trainingForm.feedback} onChange={e => setTrainingForm({ ...trainingForm, feedback: e.target.value })} placeholder="Phản hồi về buổi đào tạo..."></textarea>
+                            <label>{appLang === 'vi' ? 'Phản hồi của nông dân' : appLang === 'en' ? 'Farmer Feedback' : 'Klei hơ mơ nông dân'}</label>
+                            <textarea className="input-pro" rows="2" value={trainingForm.feedback} onChange={e => setTrainingForm({ ...trainingForm, feedback: e.target.value })} placeholder={t.notes + '...'}></textarea>
                         </div>
 
                         <div className="form-group">
-                            <label>Ghi chú</label>
-                            <textarea className="input-pro" rows="2" value={trainingForm.notes} onChange={e => setTrainingForm({ ...trainingForm, notes: e.target.value })} placeholder="Ghi chú thêm..."></textarea>
+                            <label>{t.notes}</label>
+                            <textarea className="input-pro" rows="2" value={trainingForm.notes} onChange={e => setTrainingForm({ ...trainingForm, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                         </div>
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
-                                {isLoading ? t.loading : (isEditing ? 'CẬP NHẬT' : 'THÊM ĐÀO TẠO')}
+                                <i className="fas fa-check"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.add.toUpperCase())}
                             </button>
                             <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
-                                {t.cancel}
+                                {t.cancel.toUpperCase()}
                             </button>
                         </div>
                     </form>
@@ -388,7 +403,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
                                 <i className="fas fa-graduation-cap" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
-                                Chi tiết đào tạo
+                                {t.train_title}
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
@@ -396,76 +411,96 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Session Info */}
                             <div className="detail-section" style={{ gridColumn: 'span 2' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Thông tin buổi học</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.general_info}</h4>
                             </div>
 
                             <div className="detail-item" style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Chủ đề</label>
-                                <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)', fontSize: '16px' }}>{selectedTraining.topic}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.topic}</label>
+                                <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)', fontSize: '16px' }}>{getTrainingTopicText(selectedTraining.topic)}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ngày thực hiện</label>
-                                <div>{new Date(selectedTraining.training_date).toLocaleDateString('vi-VN')}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.date}</label>
+                                <div>{new Date(selectedTraining.training_date).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN')}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Địa điểm</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.location}</label>
                                 <div>{selectedTraining.location || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Giảng viên</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Giảng viên' : appLang === 'en' ? 'Trainer' : 'Khua mdrông'}</label>
                                 <div>{selectedTraining.trainer || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Thời lượng</label>
-                                <div>{selectedTraining.duration_hours ? `${selectedTraining.duration_hours} giờ` : '---'}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.duration_hours}</label>
+                                <div>{selectedTraining.duration_hours ? `${selectedTraining.duration_hours} ${appLang === 'vi' ? 'giờ' : 'hours'}` : '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số người tham gia</label>
-                                <div>{selectedTraining.participants_count} người</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Số người tham gia' : appLang === 'en' ? 'Participants' : 'Sô phung tham gia'}</label>
+                                <div>{selectedTraining.participants_count} {appLang === 'vi' ? 'người' : 'people'}</div>
                             </div>
 
                             {/* Section 2: Trainee Info */}
                             <div className="detail-section" style={{ gridColumn: 'span 2', marginTop: '10px' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Người tham gia</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.farmer}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tên nông dân</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_name}</label>
                                 <div style={{ fontWeight: 600 }}>{selectedTraining.farmer?.full_name}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mã nông dân</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_code}</label>
                                 <div style={{ fontFamily: 'monospace' }}>{selectedTraining.farmer?.farmer_code}</div>
                             </div>
 
                             {/* Section 3: Result */}
                             <div className="detail-section" style={{ gridColumn: 'span 2', marginTop: '10px' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Kết quả & Đánh giá</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.act_detail}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mức độ áp dụng</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.application_level}</label>
                                 <div>{getApplicationLevelBadge(selectedTraining.application_level)}</div>
                             </div>
 
                             {selectedTraining.feedback && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Phản hồi của học viên</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Phản hồi' : 'Feedback'}</label>
                                     <div style={{ fontStyle: 'italic', background: '#f8fafc', padding: '8px', borderRadius: '6px' }}>"{selectedTraining.feedback}"</div>
                                 </div>
                             )}
 
                             {selectedTraining.notes && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.notes}</label>
                                     <div style={{ fontStyle: 'italic' }}>{selectedTraining.notes}</div>
                                 </div>
                             )}
                         </div>
 
-                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {canEdit() && (
+                                    <>
+                                        <button onClick={() => { setShowDetailModal(false); handleEdit(selectedTraining); }} style={{
+                                            background: '#fef3c7', border: '1px solid #d97706',
+                                            color: '#92400e', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-pen"></i> {t.edit}
+                                        </button>
+                                        <button onClick={() => { setShowDetailModal(false); handleDelete(selectedTraining.id); }} style={{
+                                            background: '#fef2f2', border: '1px solid #ef4444',
+                                            color: '#b91c1c', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-trash"></i> {t.delete}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                             <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
-                                Đóng
+                                {t.close}
                             </button>
                         </div>
                     </div>

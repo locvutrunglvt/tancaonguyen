@@ -75,8 +75,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const handleEdit = (farmer) => {
         setFormData({
-            farmer_code: farmer.farmer_code,
-            full_name: farmer.full_name,
+            farmer_code: farmer.farmer_code || '',
+            full_name: farmer.full_name || '',
             gender: farmer.gender || 'Nam',
             date_of_birth: farmer.date_of_birth || '',
             id_card: farmer.id_card || '',
@@ -97,13 +97,13 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm(t.delete_confirm || 'Bạn có chắc chắn muốn xóa nông dân này?')) return;
+        if (!confirm(t.delete_confirm)) return;
         setLoading(true);
         const { error } = await supabase.from('farmers').delete().eq('id', id);
         if (error) {
-            alert((t.delete_error || 'Lỗi: ') + error.message);
+            alert((t.save_error || 'Lỗi: ') + error.message);
         } else {
-            alert(t.delete_success || 'Đã xóa thành công.');
+            alert(t.delete_success);
             fetchFarmers();
         }
         setLoading(false);
@@ -142,7 +142,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     .eq('id', editingId);
 
                 if (error) throw error;
-                alert(t.save_success || 'Cập nhật thành công.');
+                alert(t.save_success);
             } else {
                 // Create new farmer
                 const newCode = await generateFarmerCode();
@@ -165,7 +165,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 }]);
 
                 if (error) throw error;
-                alert(t.save_success || 'Đăng ký nông dân thành công.');
+                alert(t.save_success);
             }
             handleModalClose();
             fetchFarmers();
@@ -206,9 +206,9 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const getStatusBadge = (status) => {
         const styles = {
-            active: { bg: '#dcfce7', color: '#166534', text: 'Hoạt động' },
-            inactive: { bg: '#f3f4f6', color: '#6b7280', text: 'Không hoạt động' },
-            suspended: { bg: '#fee2e2', color: '#991b1b', text: 'Tạm ngưng' }
+            active: { bg: '#dcfce7', color: '#166534', text: t.status_active },
+            inactive: { bg: '#f3f4f6', color: '#6b7280', text: t.status_inactive },
+            suspended: { bg: '#fee2e2', color: '#991b1b', text: t.status_suspended }
         };
         const style = styles[status] || styles.active;
         return (
@@ -245,18 +245,18 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
             <div className="data-table-container">
                 <div className="table-header">
-                    <h3><i className="fas fa-users" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.farmer_list_title || 'Danh sách nông dân'}</h3>
-                    <div className="badge">{farmers.length} nông dân</div>
+                    <h3><i className="fas fa-users" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.farmer_list_title}</h3>
+                    <div className="badge">{farmers.length} {t.farmers?.toLowerCase()}</div>
                 </div>
                 <table className="pro-table">
                     <thead>
                         <tr>
-                            <th>Mã nông dân</th>
+                            <th>{t.farmer_code}</th>
                             <th>{t.farmer_name}</th>
-                            <th>Thôn/Buôn</th>
+                            <th>{t.farmer_village}</th>
                             <th>{t.farmer_phone}</th>
-                            <th>Thành viên HH</th>
-                            <th>Trạng thái</th>
+                            <th>{t.household_members}</th>
+                            <th>{t.status}</th>
                             <th>{t.actions}</th>
                         </tr>
                     </thead>
@@ -271,7 +271,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{f.farmer_code}</span></td>
                                     <td>
                                         <div style={{ fontWeight: 700 }}>{f.full_name}</div>
-                                        <div style={{ fontSize: '10px', opacity: 0.6 }}>{f.gender}</div>
+                                        <div style={{ fontSize: '10px', opacity: 0.6 }}>{f.gender === 'Nam' ? t.gender_male : f.gender === 'Nữ' ? t.gender_female : t.gender_other}</div>
                                     </td>
                                     <td>{f.village || 'N/A'}</td>
                                     <td>{f.phone}</td>
@@ -284,7 +284,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                 background: '#e0f2fe', border: '1px solid #7dd3fc',
                                                 color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                            }} title="Xem chi tiết">
+                                            }} title={t.details}>
                                                 <i className="fas fa-eye"></i>
                                             </button>
 
@@ -295,14 +295,14 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                         background: '#fef3c7', border: '1px solid #d97706',
                                                         color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                    }} title={t.edit || "Sửa"}>
+                                                    }} title={t.edit}>
                                                         <i className="fas fa-pen"></i>
                                                     </button>
                                                     <button onClick={() => handleDelete(f.id)} style={{
                                                         background: '#fef2f2', border: '1px solid #ef4444',
                                                         color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                    }} title={t.delete || "Xóa"}>
+                                                    }} title={t.delete}>
                                                         <i className="fas fa-trash"></i>
                                                     </button>
                                                 </>
@@ -320,85 +320,85 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
                     <div className="modal-content" style={{ background: 'white', padding: '40px', borderRadius: '30px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
                         <h3 style={{ marginBottom: '25px', color: 'var(--tcn-dark)' }}>
-                            {isEditing ? 'Cập nhật thông tin nông dân' : 'Đăng ký nông dân mới'}
+                            {isEditing ? (t.update + ' ' + t.farmers?.toLowerCase()) : t.farmer_add_title}
                         </h3>
                         <form onSubmit={handleSave}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                 {/* Column 1 */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>Thông tin cơ bản</h4>
+                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>{t.general_info}</h4>
 
                                     <div className="form-group">
-                                        <label>Họ và tên *</label>
-                                        <input className="input-pro" required value={formData.full_name} onChange={e => setFormData({ ...formData, full_name: e.target.value })} placeholder="Nguyễn Văn A" />
+                                        <label>{t.farmer_name} *</label>
+                                        <input className="input-pro" required value={formData.full_name} onChange={e => setFormData({ ...formData, full_name: e.target.value })} placeholder={t.search_placeholder} />
                                     </div>
 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                         <div className="form-group">
-                                            <label>Giới tính</label>
+                                            <label>{t.farmer_gender}</label>
                                             <select className="input-pro" value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
-                                                <option value="Nam">Nam</option>
-                                                <option value="Nữ">Nữ</option>
-                                                <option value="Khác">Khác</option>
+                                                <option value="Nam">{t.gender_male}</option>
+                                                <option value="Nữ">{t.gender_female}</option>
+                                                <option value="Khác">{t.gender_other}</option>
                                             </select>
                                         </div>
                                         <div className="form-group">
-                                            <label>Ngày sinh</label>
+                                            <label>{t.farmer_dob}</label>
                                             <input className="input-pro" type="date" value={formData.date_of_birth} onChange={e => setFormData({ ...formData, date_of_birth: e.target.value })} />
                                         </div>
                                     </div>
 
                                     <div className="form-group">
-                                        <label>CMND/CCCD</label>
+                                        <label>{t.farmer_id_card}</label>
                                         <input className="input-pro" value={formData.id_card} onChange={e => setFormData({ ...formData, id_card: e.target.value })} placeholder="001234567890" />
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Số điện thoại *</label>
+                                        <label>{t.farmer_phone} *</label>
                                         <input className="input-pro" required value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="09xx xxx xxx" />
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Email</label>
+                                        <label>{t.farmer_email}</label>
                                         <input className="input-pro" type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
                                     </div>
                                 </div>
 
                                 {/* Column 2 */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>Địa chỉ & Hộ gia đình</h4>
+                                    <h4 style={{ color: 'var(--coffee-dark)', fontSize: '14px', marginBottom: '-5px' }}>{t.farmer_address}</h4>
 
                                     <div className="form-group">
-                                        <label>Thôn/Buôn *</label>
+                                        <label>{t.farmer_village} *</label>
                                         <input className="input-pro" required value={formData.village} onChange={e => setFormData({ ...formData, village: e.target.value })} placeholder="Buôn Ea Kmát" />
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Xã/Phường</label>
+                                        <label>{t.farmer_commune}</label>
                                         <input className="input-pro" value={formData.commune} onChange={e => setFormData({ ...formData, commune: e.target.value })} placeholder="Ea Kmát" />
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Huyện/Thị xã</label>
+                                        <label>{t.farmer_district}</label>
                                         <input className="input-pro" value={formData.district} onChange={e => setFormData({ ...formData, district: e.target.value })} placeholder="Ea Kar" />
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Tỉnh/Thành phố</label>
+                                        <label>{t.farmer_province}</label>
                                         <input className="input-pro" value={formData.province} onChange={e => setFormData({ ...formData, province: e.target.value })} />
                                     </div>
 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                         <div className="form-group">
-                                            <label>Số thành viên HH</label>
+                                            <label>{t.household_members}</label>
                                             <input className="input-pro" type="number" min="1" value={formData.household_members} onChange={e => setFormData({ ...formData, household_members: e.target.value })} />
                                         </div>
                                         <div className="form-group">
-                                            <label>Trạng thái</label>
+                                            <label>{t.status}</label>
                                             <select className="input-pro" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                                                <option value="active">Hoạt động</option>
-                                                <option value="inactive">Không hoạt động</option>
-                                                <option value="suspended">Tạm ngưng</option>
+                                                <option value="active">{t.status_active}</option>
+                                                <option value="inactive">{t.status_inactive}</option>
+                                                <option value="suspended">{t.status_suspended}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -406,20 +406,20 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     <div className="form-group">
                                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                             <input type="checkbox" checked={formData.household_head} onChange={e => setFormData({ ...formData, household_head: e.target.checked })} />
-                                            Chủ hộ
+                                            {t.household_head}
                                         </label>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="form-group" style={{ marginTop: '15px' }}>
-                                <label>Ghi chú</label>
-                                <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="Ghi chú thêm về nông dân..."></textarea>
+                                <label>{t.notes}</label>
+                                <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                             </div>
 
                             <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                                 <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1 }}>
-                                    {loading ? t.loading : (isEditing ? 'CẬP NHẬT' : 'ĐĂNG KÝ')}
+                                    {loading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
                                 </button>
                                 <button type="button" className="btn-primary" style={{ flex: 1, background: '#f1f5f9', color: '#475569' }} onClick={handleModalClose}>
                                     {t.cancel}
@@ -437,75 +437,95 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
                                 <i className="fas fa-id-card" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
-                                Thông tin nông dân
+                                {t.user_info}
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mã nông dân</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_code}</label>
                                 <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedFarmer.farmer_code}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Trạng thái</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.status}</label>
                                 <div>{getStatusBadge(selectedFarmer.status)}</div>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Họ và tên</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_name}</label>
                                 <div style={{ fontWeight: 600 }}>{selectedFarmer.full_name}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Giới tính</label>
-                                <div>{selectedFarmer.gender}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_gender}</label>
+                                <div>{selectedFarmer.gender === 'Nam' ? t.gender_male : selectedFarmer.gender === 'Nữ' ? t.gender_female : t.gender_other}</div>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ngày sinh</label>
-                                <div>{selectedFarmer.date_of_birth ? new Date(selectedFarmer.date_of_birth).toLocaleDateString('vi-VN') : '---'}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_dob}</label>
+                                <div>{selectedFarmer.date_of_birth ? new Date(selectedFarmer.date_of_birth).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN') : '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>CMND/CCCD</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_id_card}</label>
                                 <div>{selectedFarmer.id_card || '---'}</div>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số điện thoại</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_phone}</label>
                                 <div>{selectedFarmer.phone || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Email</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_email}</label>
                                 <div>{selectedFarmer.email || '---'}</div>
                             </div>
 
                             <div className="detail-item" style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Địa chỉ</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_address}</label>
                                 <div>
                                     {selectedFarmer.village}, {selectedFarmer.commune ? `${selectedFarmer.commune}, ` : ''}{selectedFarmer.district ? `${selectedFarmer.district}, ` : ''}{selectedFarmer.province}
                                 </div>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Thành viên hộ</label>
-                                <div>{selectedFarmer.household_members} người</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.household_members}</label>
+                                <div>{selectedFarmer.household_members} {appLang === 'vi' ? 'người' : appLang === 'en' ? 'members' : 'mnuih'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Vai trò</label>
-                                <div>{selectedFarmer.household_head ? 'Chủ hộ' : 'Thành viên'}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.household_head}</label>
+                                <div>{selectedFarmer.household_head ? t.household_head : (appLang === 'vi' ? 'Thành viên' : appLang === 'en' ? 'Member' : 'Mnuih')}</div>
                             </div>
 
                             {selectedFarmer.notes && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.notes}</label>
                                     <div style={{ fontStyle: 'italic' }}>{selectedFarmer.notes}</div>
                                 </div>
                             )}
                         </div>
 
-                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {canEdit() && (
+                                    <>
+                                        <button onClick={() => { setShowDetailModal(false); handleEdit(selectedFarmer); }} style={{
+                                            background: '#fef3c7', border: '1px solid #d97706',
+                                            color: '#92400e', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-pen"></i> {t.edit}
+                                        </button>
+                                        <button onClick={() => { setShowDetailModal(false); handleDelete(selectedFarmer.id); }} style={{
+                                            background: '#fef2f2', border: '1px solid #ef4444',
+                                            color: '#b91c1c', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-trash"></i> {t.delete}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                             <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
-                                Đóng
+                                {t.close}
                             </button>
                         </div>
                     </div>

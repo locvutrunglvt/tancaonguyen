@@ -141,20 +141,20 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     .eq('id', editingId);
 
                 if (error) throw error;
-                alert(t.save_success || 'Cập nhật thành công.');
+                alert(t.save_success);
             } else {
                 const { error } = await supabase
                     .from('annual_activities')
                     .insert([payload]);
 
                 if (error) throw error;
-                alert(t.save_success || 'Lưu thành công.');
+                alert(t.save_success);
             }
 
             handleFormClose();
             fetchLogs();
         } catch (error) {
-            alert((t.save_error || 'Lỗi: ') + error.message);
+            alert((t.save_error || 'Error: ') + error.message);
         } finally {
             setIsLoading(false);
         }
@@ -185,15 +185,15 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm(t.act_confirm_delete || 'Xác nhận xóa?')) return;
+        if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
             const { error } = await supabase.from('annual_activities').delete().eq('id', id);
             if (error) throw error;
-            alert(t.delete_success || 'Đã xóa thành công.');
+            alert(t.delete_success);
             fetchLogs();
         } catch (error) {
-            alert(`Lỗi: ${error.message}`);
+            alert(`Error: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -236,15 +236,15 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const getActivityTypeBadge = (type) => {
         const styles = {
-            fertilizer: { bg: '#dcfce7', color: '#166534', icon: 'fa-seedling', text: 'Phân bón' },
-            pesticide: { bg: '#fee2e2', color: '#991b1b', icon: 'fa-spray-can', text: 'Thuốc BVTV' },
-            pruning: { bg: '#fef3c7', color: '#92400e', icon: 'fa-cut', text: 'Tỉa cành' },
-            harvesting: { bg: '#e0e7ff', color: '#4338ca', icon: 'fa-apple-alt', text: 'Thu hoạch' },
-            tree_support: { bg: '#d1fae5', color: '#065f46', icon: 'fa-tree', text: 'Hỗ trợ cây giống' },
-            weeding: { bg: '#fef3c7', color: '#78350f', icon: 'fa-leaf', text: 'Làm cỏ' },
-            irrigation: { bg: '#dbeafe', color: '#1e40af', icon: 'fa-tint', text: 'Tưới nước' },
-            soil_management: { bg: '#f3e8ff', color: '#6b21a8', icon: 'fa-mountain', text: 'Quản lý đất' },
-            other: { bg: '#f1f5f9', color: '#475569', icon: 'fa-ellipsis-h', text: 'Khác' }
+            fertilizer: { bg: '#dcfce7', color: '#166534', icon: 'fa-seedling', text: t.act_type_fertilizer },
+            pesticide: { bg: '#fee2e2', color: '#991b1b', icon: 'fa-spray-can', text: t.act_type_pesticide },
+            pruning: { bg: '#fef3c7', color: '#92400e', icon: 'fa-cut', text: t.act_type_pruning },
+            harvesting: { bg: '#e0e7ff', color: '#4338ca', icon: 'fa-apple-alt', text: t.act_type_harvesting },
+            tree_support: { bg: '#d1fae5', color: '#065f46', icon: 'fa-tree', text: t.act_type_tree_support },
+            weeding: { bg: '#fef3c7', color: '#78350f', icon: 'fa-leaf', text: t.act_type_weeding },
+            irrigation: { bg: '#dbeafe', color: '#1e40af', icon: 'fa-tint', text: t.act_type_irrigation },
+            soil_management: { bg: '#f3e8ff', color: '#6b21a8', icon: 'fa-mountain', text: t.act_type_soil_mgmt },
+            other: { bg: '#f1f5f9', color: '#475569', icon: 'fa-ellipsis-h', text: t.act_type_other }
         };
         const style = styles[type] || styles.other;
         return (
@@ -273,7 +273,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 <div style={{ flex: 1 }}></div>
                 {!showForm && (
                     <button onClick={() => setShowForm(true)} className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>
-                        <i className="fas fa-plus"></i> {t.act_add_btn || 'THÊM HOẠT ĐỘNG'}
+                        <i className="fas fa-plus"></i> {(t.act_add_btn || 'THÊM HOẠT ĐỘNG').toUpperCase()}
                     </button>
                 )}
             </div>
@@ -281,25 +281,25 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             {!showForm ? (
                 <div className="data-table-container">
                     <div className="table-header">
-                        <h3><i className="fas fa-calendar-alt" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.act_title || 'Hoạt động hàng năm'}</h3>
-                        <div className="badge">{logs.length} hoạt động</div>
+                        <h3><i className="fas fa-calendar-alt" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.act_title}</h3>
+                        <div className="badge">{logs.length} {t.act_title?.toLowerCase()}</div>
                     </div>
 
                     <table className="pro-table">
                         <thead>
                             <tr>
-                                <th>Mã mô hình</th>
-                                <th>Nông dân</th>
-                                <th>Ngày</th>
-                                <th>Loại hoạt động</th>
-                                <th>Chi tiết</th>
-                                <th>Số lượng</th>
+                                <th>{t.model_code}</th>
+                                <th>{t.farmer || t.owner}</th>
+                                <th>{t.date}</th>
+                                <th>{t.act_type}</th>
+                                <th>{t.act_detail}</th>
+                                <th>{t.quantity}</th>
                                 <th>{t.actions}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {logs.length === 0 ? (
-                                <tr><td colSpan="7" style={{ textAlign: 'center', opacity: 0.5 }}>Chưa có hoạt động nào</td></tr>
+                                <tr><td colSpan="7" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data}</td></tr>
                             ) : (
                                 logs.map(log => (
                                     <tr key={log.id} onClick={() => handleView(log)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
@@ -314,14 +314,14 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                             {log.activity_type === 'tree_support' ? (
                                                 <div>
                                                     <strong>{log.tree_species}</strong>
-                                                    {log.survival_rate && <div style={{ fontSize: '10px', opacity: 0.6 }}>Tỷ lệ sống: {log.survival_rate}%</div>}
+                                                    {log.survival_rate && <div style={{ fontSize: '10px', opacity: 0.6 }}>{t.train_survival}: {log.survival_rate}%</div>}
                                                 </div>
                                             ) : (
                                                 <div>
                                                     <strong>{log.material_name || log.description || '-'}</strong>
                                                     {log.activity_type === 'pesticide' && !log.gcp_compliant && (
                                                         <div style={{ fontSize: '10px', color: '#ef4444' }}>
-                                                            <i className="fas fa-exclamation-triangle"></i> Không GCP
+                                                            <i className="fas fa-exclamation-triangle"></i> {appLang === 'vi' ? 'Không GCP' : appLang === 'en' ? 'Non-GCP' : 'Añ dơu GCP'}
                                                         </div>
                                                     )}
                                                 </div>
@@ -329,7 +329,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         </td>
                                         <td>
                                             {log.activity_type === 'tree_support' ? (
-                                                `${log.tree_quantity || 0} cây`
+                                                `${log.tree_quantity || 0} ${appLang === 'vi' ? 'cây' : appLang === 'en' ? 'trees' : 'kyâ'}`
                                             ) : (
                                                 `${log.amount || '-'} ${log.unit || ''}`
                                             )}
@@ -341,7 +341,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                     background: '#e0f2fe', border: '1px solid #7dd3fc',
                                                     color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }} title="Xem chi tiết">
+                                                }} title={t.details}>
                                                     <i className="fas fa-eye"></i>
                                                 </button>
 
@@ -351,14 +351,14 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                             background: '#fef3c7', border: '1px solid #d97706',
                                                             color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.edit || "Sửa"}>
+                                                        }} title={t.edit}>
                                                             <i className="fas fa-pen"></i>
                                                         </button>
                                                         <button onClick={() => handleDelete(log.id)} style={{
                                                             background: '#fef2f2', border: '1px solid #ef4444',
                                                             color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.delete || "Xóa"}>
+                                                        }} title={t.delete}>
                                                             <i className="fas fa-trash"></i>
                                                         </button>
                                                     </>
@@ -374,20 +374,20 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             ) : (
                 <div className="form-container" style={{ background: 'white', padding: '30px', borderRadius: '24px' }}>
                     <h2 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '2px solid var(--tcn-light)', paddingBottom: '10px' }}>
-                        <i className="fas fa-pen-nib"></i> {isEditing ? 'Cập nhật hoạt động' : 'Thêm hoạt động mới'}
+                        <i className="fas fa-pen-nib"></i> {isEditing ? (t.update + ' ' + t.act_title?.toLowerCase()) : (t.add + ' ' + t.act_title?.toLowerCase())}
                     </h2>
 
                     <form onSubmit={handleSave}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="form-group">
-                                <label>Chọn mô hình cà phê *</label>
+                                <label>{appLang === 'vi' ? 'Chọn mô hình cà phê' : appLang === 'en' ? 'Select Coffee Model' : 'Hriêng mô hình'} *</label>
                                 <select
                                     className="input-pro"
                                     required
                                     value={formData.model_id}
                                     onChange={e => setFormData({ ...formData, model_id: e.target.value })}
                                 >
-                                    <option value="">-- Chọn mô hình --</option>
+                                    <option value="">-- {appLang === 'vi' ? 'Chọn mô hình' : appLang === 'en' ? 'Select Model' : 'Hriêng mô hình'} --</option>
                                     {models.map(m => (
                                         <option key={m.id} value={m.id}>
                                             {m.model_code} - {m.name} ({m.farmer?.full_name})
@@ -397,28 +397,28 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </div>
 
                             <div className="form-group">
-                                <label>Ngày thực hiện *</label>
+                                <label>{t.date} *</label>
                                 <input className="input-pro" type="date" value={formData.activity_date} onChange={e => setFormData({ ...formData, activity_date: e.target.value })} required />
                             </div>
                         </div>
 
                         <div className="form-group">
-                            <label>Loại hoạt động *</label>
+                            <label>{t.act_type} *</label>
                             <select
                                 className="input-pro"
                                 value={formData.activity_type}
                                 onChange={e => setFormData({ ...formData, activity_type: e.target.value, material_name: '', gcpWarning: false })}
                                 required
                             >
-                                <option value="fertilizer">Phân bón</option>
-                                <option value="pesticide">Thuốc BVTV</option>
-                                <option value="pruning">Tỉa cành</option>
-                                <option value="harvesting">Thu hoạch</option>
-                                <option value="tree_support">Hỗ trợ cây giống</option>
-                                <option value="weeding">Làm cỏ</option>
-                                <option value="irrigation">Tưới nước</option>
-                                <option value="soil_management">Quản lý đất</option>
-                                <option value="other">Khác</option>
+                                <option value="fertilizer">{t.act_type_fertilizer}</option>
+                                <option value="pesticide">{t.act_type_pesticide}</option>
+                                <option value="pruning">{t.act_type_pruning}</option>
+                                <option value="harvesting">{t.act_type_harvesting}</option>
+                                <option value="tree_support">{t.act_type_tree_support}</option>
+                                <option value="weeding">{t.act_type_weeding}</option>
+                                <option value="irrigation">{t.act_type_irrigation}</option>
+                                <option value="soil_management">{t.act_type_soil_mgmt}</option>
+                                <option value="other">{t.act_type_other}</option>
                             </select>
                         </div>
 
@@ -426,28 +426,28 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         {['fertilizer', 'pesticide'].includes(formData.activity_type) && (
                             <>
                                 <div className="form-group">
-                                    <label>{formData.activity_type === 'pesticide' ? 'Tên thuốc BVTV' : 'Tên phân bón'} *</label>
-                                    <input className="input-pro" value={formData.material_name} onChange={handleMaterialChange} placeholder="Nhập tên..." required />
+                                    <label>{formData.activity_type === 'pesticide' ? (appLang === 'vi' ? 'Tên thuốc BVTV' : appLang === 'en' ? 'Pesticide Name' : 'Anàng thuốc BVTV') : (appLang === 'vi' ? 'Tên phân bón' : appLang === 'en' ? 'Fertilizer Name' : 'Anàng phân bón')} *</label>
+                                    <input className="input-pro" value={formData.material_name} onChange={handleMaterialChange} placeholder={t.search_placeholder} required />
 
                                     {gcpWarning && (
                                         <div style={{ marginTop: '10px', padding: '12px', background: '#fee2e2', color: '#991b1b', borderRadius: '10px', fontSize: '12px', border: '1px solid #fca5a5' }}>
-                                            <i className="fas fa-skull-crossbones"></i> <strong>CẢNH BÁO: Thuốc không nằm trong danh sách GCP!</strong>
+                                            <i className="fas fa-skull-crossbones"></i> <strong>{appLang === 'vi' ? 'CẢNH BÁO: Thuốc không nằm trong danh sách GCP!' : appLang === 'en' ? 'WARNING: Material is not in GCP list!' : 'DLÊÑ: Thuốc añ dơu GCP!'}</strong>
                                         </div>
                                     )}
                                     {!gcpWarning && formData.activity_type === 'pesticide' && formData.material_name && (
                                         <div style={{ marginTop: '10px', padding: '12px', background: '#ecfdf5', color: '#065f46', borderRadius: '10px', fontSize: '12px', border: '1px solid #a7f3d0' }}>
-                                            <i className="fas fa-shield-alt"></i> Thuốc tuân thủ GCP
+                                            <i className="fas fa-shield-alt"></i> {appLang === 'vi' ? 'Thuốc tuân thủ GCP' : appLang === 'en' ? 'GCP compliant material' : 'Thuốc dơu GCP'}
                                         </div>
                                     )}
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                     <div className="form-group">
-                                        <label>Số lượng *</label>
+                                        <label>{t.quantity} *</label>
                                         <input className="input-pro" type="number" step="0.01" value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} required />
                                     </div>
                                     <div className="form-group">
-                                        <label>Đơn vị *</label>
+                                        <label>{t.unit} *</label>
                                         <input className="input-pro" value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} required />
                                     </div>
                                 </div>
@@ -455,11 +455,11 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 {formData.activity_type === 'pesticide' && (
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                         <div className="form-group">
-                                            <label>Lý do sử dụng</label>
-                                            <input className="input-pro" value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })} placeholder="Phòng trừ sâu bệnh..." />
+                                            <label>{appLang === 'vi' ? 'Lý do sử dụng' : appLang === 'en' ? 'Reason for use' : 'Lý do dưng'} </label>
+                                            <input className="input-pro" value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })} placeholder={appLang === 'vi' ? "Phòng trừ sâu bệnh..." : "Pest control..."} />
                                         </div>
                                         <div className="form-group">
-                                            <label>PHI (ngày)</label>
+                                            <label>PHI ({t.act_phi_days})</label>
                                             <input className="input-pro" type="number" value={formData.phi_days} onChange={e => setFormData({ ...formData, phi_days: e.target.value })} placeholder="7" />
                                         </div>
                                     </div>
@@ -472,31 +472,31 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <>
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
                                     <div className="form-group">
-                                        <label>Loại cây giống *</label>
+                                        <label>{appLang === 'vi' ? 'Loại cây giống' : appLang === 'en' ? 'Tree Species' : 'Anàng kyâ'} *</label>
                                         <input className="input-pro" value={formData.tree_species} onChange={e => setFormData({ ...formData, tree_species: e.target.value })} placeholder="Bơ, Sầu riêng, Macadamia..." required />
                                     </div>
                                     <div className="form-group">
-                                        <label>Số lượng cây *</label>
+                                        <label>{appLang === 'vi' ? 'Số lượng cây' : appLang === 'en' ? 'Tree Quantity' : 'Số lượng kyâ'} *</label>
                                         <input className="input-pro" type="number" value={formData.tree_quantity} onChange={e => setFormData({ ...formData, tree_quantity: e.target.value })} required />
                                     </div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                                     <div className="form-group">
-                                        <label>Chất lượng cây</label>
+                                        <label>{appLang === 'vi' ? 'Chất lượng cây' : appLang === 'en' ? 'Tree Quality' : 'Klei jăp kyâ'}</label>
                                         <select className="input-pro" value={formData.tree_quality} onChange={e => setFormData({ ...formData, tree_quality: e.target.value })}>
-                                            <option value="excellent">Xuất sắc</option>
-                                            <option value="good">Tốt</option>
-                                            <option value="fair">Trung bình</option>
-                                            <option value="poor">Kém</option>
+                                            <option value="excellent">{appLang === 'vi' ? 'Xuất sắc' : appLang === 'en' ? 'Excellent' : 'Jăp hniêr'}</option>
+                                            <option value="good">{appLang === 'vi' ? 'Tốt' : appLang === 'en' ? 'Good' : 'Jăp'}</option>
+                                            <option value="fair">{appLang === 'vi' ? 'Trung bình' : appLang === 'en' ? 'Fair' : 'Gơ lă'}</option>
+                                            <option value="poor">{appLang === 'vi' ? 'Kém' : appLang === 'en' ? 'Poor' : 'Dơu jăp'}</option>
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label>Tỷ lệ sống (%)</label>
+                                        <label>{t.train_survival} (%)</label>
                                         <input className="input-pro" type="number" step="0.01" min="0" max="100" value={formData.survival_rate} onChange={e => setFormData({ ...formData, survival_rate: e.target.value })} placeholder="95.5" />
                                     </div>
                                     <div className="form-group">
-                                        <label>Giá trị ước tính (VNĐ)</label>
+                                        <label>{appLang === 'vi' ? 'Giá trị ước tính (VNĐ)' : appLang === 'en' ? 'Estimated Value' : 'Klei kơ prăk'}</label>
                                         <input className="input-pro" type="number" value={formData.estimated_value} onChange={e => setFormData({ ...formData, estimated_value: e.target.value })} placeholder="5000000" />
                                     </div>
                                 </div>
@@ -505,21 +505,21 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
                         {/* Common Fields */}
                         <div className="form-group">
-                            <label>Mô tả</label>
-                            <input className="input-pro" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder="Mô tả ngắn gọn..." />
+                            <label>{t.description}</label>
+                            <input className="input-pro" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} placeholder={t.description + '...'} />
                         </div>
 
                         <div className="form-group">
-                            <label>Ghi chú</label>
-                            <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="Ghi chú thêm..."></textarea>
+                            <label>{t.notes}</label>
+                            <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                         </div>
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
-                                <i className="fas fa-check"></i> {isLoading ? t.loading : (isEditing ? 'CẬP NHẬT' : 'THÊM HOẠT ĐỘNG')}
+                                <i className="fas fa-check"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.add.toUpperCase())}
                             </button>
                             <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
-                                {t.cancel}
+                                {t.cancel.toUpperCase()}
                             </button>
                         </div>
                     </form>
@@ -531,9 +531,9 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
                     <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '600px', maxHeight: '85vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                            <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                {getActivityTypeBadge(selectedActivity.activity_type)}
-                                <span style={{ fontSize: '16px', color: '#666' }}>({selectedActivity.activity_date})</span>
+                            <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
+                                <i className="fas fa-calendar-check" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
+                                {t.act_form_title}
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
@@ -541,58 +541,58 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Context */}
                             <div className="detail-section" style={{ gridColumn: 'span 2' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Thông tin chung</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.general_info}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mô hình</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Mô hình' : appLang === 'en' ? 'Model' : 'Mô hình'}</label>
                                 <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedActivity.model?.name} ({selectedActivity.model?.model_code})</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Nông dân</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer}</label>
                                 <div style={{ fontWeight: 600 }}>{selectedActivity.model?.farmer?.full_name}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Loại hoạt động</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.act_type}</label>
                                 <div>{getActivityTypeBadge(selectedActivity.activity_type)}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ngày thực hiện</label>
-                                <div>{new Date(selectedActivity.activity_date).toLocaleDateString('vi-VN')}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.date}</label>
+                                <div>{new Date(selectedActivity.activity_date).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN')}</div>
                             </div>
 
                             {/* Section 2: Specific Details */}
                             <div className="detail-section" style={{ gridColumn: 'span 2', marginTop: '10px' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Chi tiết hoạt động</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.act_detail}</h4>
                             </div>
 
                             {['fertilizer', 'pesticide'].includes(selectedActivity.activity_type) && (
                                 <>
                                     <div className="detail-item">
-                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tên vật tư</label>
+                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Tên vật tư' : appLang === 'en' ? 'Material Name' : 'Anàng vật tư'}</label>
                                         <div style={{ fontWeight: 'bold' }}>{selectedActivity.material_name}</div>
                                     </div>
                                     <div className="detail-item">
-                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số lượng</label>
+                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.quantity}</label>
                                         <div>{selectedActivity.amount} {selectedActivity.unit}</div>
                                     </div>
                                     {selectedActivity.activity_type === 'pesticide' && (
                                         <>
                                             <div className="detail-item">
-                                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tuân thủ GCP</label>
+                                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Tuân thủ GCP' : appLang === 'en' ? 'GCP Compliant' : 'Dơu GCP'}</label>
                                                 <div>
                                                     {selectedActivity.gcp_compliant ?
-                                                        <span style={{ color: 'green' }}><i className="fas fa-check-circle"></i> Đạt chuẩn</span> :
-                                                        <span style={{ color: 'red' }}><i className="fas fa-exclamation-triangle"></i> Không đạt</span>
+                                                        <span style={{ color: 'green' }}><i className="fas fa-check-circle"></i> {appLang === 'vi' ? 'Đạt chuẩn' : appLang === 'en' ? 'Compliant' : 'Dơu'}</span> :
+                                                        <span style={{ color: 'red' }}><i className="fas fa-exclamation-triangle"></i> {appLang === 'vi' ? 'Không đạt' : appLang === 'en' ? 'Non-compliant' : 'Añ dơu'}</span>
                                                     }
                                                 </div>
                                             </div>
                                             <div className="detail-item">
-                                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>PHI (Ngày cách ly)</label>
-                                                <div>{selectedActivity.phi_days || '---'} ngày</div>
+                                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.act_phi_days}</label>
+                                                <div>{selectedActivity.phi_days || '---'} {appLang === 'vi' ? 'ngày' : appLang === 'en' ? 'days' : 'hrơi'}</div>
                                             </div>
                                             <div className="detail-item" style={{ gridColumn: 'span 2' }}>
-                                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Lý do sử dụng</label>
+                                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Lý do sử dụng' : appLang === 'en' ? 'Reason' : 'Lý do'}</label>
                                                 <div>{selectedActivity.reason || '---'}</div>
                                             </div>
                                         </>
@@ -603,46 +603,66 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             {selectedActivity.activity_type === 'tree_support' && (
                                 <>
                                     <div className="detail-item">
-                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Loại cây</label>
+                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Loại cây' : appLang === 'en' ? 'Species' : 'Anàng kyâ'}</label>
                                         <div style={{ fontWeight: 'bold' }}>{selectedActivity.tree_species}</div>
                                     </div>
                                     <div className="detail-item">
-                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số lượng</label>
-                                        <div>{selectedActivity.tree_quantity} cây</div>
+                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.quantity}</label>
+                                        <div>{selectedActivity.tree_quantity} {appLang === 'vi' ? 'cây' : appLang === 'en' ? 'trees' : 'kyâ'}</div>
                                     </div>
                                     <div className="detail-item">
-                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Chất lượng</label>
+                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Chất lượng' : appLang === 'en' ? 'Quality' : 'Klei hniêr'}</label>
                                         <div>{selectedActivity.tree_quality}</div>
                                     </div>
                                     <div className="detail-item">
-                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tỷ lệ sống</label>
+                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.train_survival}</label>
                                         <div>{selectedActivity.survival_rate ? `${selectedActivity.survival_rate}%` : '---'}</div>
                                     </div>
                                     <div className="detail-item">
-                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Giá trị ước tính</label>
-                                        <div>{selectedActivity.estimated_value ? selectedActivity.estimated_value.toLocaleString('vi-VN') + ' đ' : '---'}</div>
+                                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Giá trị ước tính' : appLang === 'en' ? 'Estimated Value' : 'Klei kơ prăk'}</label>
+                                        <div>{selectedActivity.estimated_value ? selectedActivity.estimated_value.toLocaleString(appLang === 'en' ? 'en-US' : 'vi-VN') + ' đ' : '---'}</div>
                                     </div>
                                 </>
                             )}
 
                             {selectedActivity.description && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mô tả</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.description}</label>
                                     <div>{selectedActivity.description}</div>
                                 </div>
                             )}
 
                             {selectedActivity.notes && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.notes}</label>
                                     <div style={{ fontStyle: 'italic' }}>{selectedActivity.notes}</div>
                                 </div>
                             )}
                         </div>
 
-                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {canEdit() && (
+                                    <>
+                                        <button onClick={() => { setShowDetailModal(false); handleEdit(selectedActivity); }} style={{
+                                            background: '#fef3c7', border: '1px solid #d97706',
+                                            color: '#92400e', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-pen"></i> {t.edit}
+                                        </button>
+                                        <button onClick={() => { setShowDetailModal(false); handleDelete(selectedActivity.id); }} style={{
+                                            background: '#fef2f2', border: '1px solid #ef4444',
+                                            color: '#b91c1c', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-trash"></i> {t.delete}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                             <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
-                                Đóng
+                                {t.close}
                             </button>
                         </div>
                     </div>

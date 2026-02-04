@@ -49,7 +49,11 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const formatCurrency = (val) => {
         if (isNaN(val) || val === undefined) return '0 ₫';
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+        return new Intl.NumberFormat(appLang === 'en' ? 'en-US' : 'vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            maximumFractionDigits: 0
+        }).format(val);
     };
 
     const handleSave = async (e) => {
@@ -82,9 +86,9 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 .eq('id', editingId);
 
             if (error) {
-                alert(t.save_error || 'Error: ' + error.message);
+                alert(t.save_error + ': ' + error.message);
             } else {
-                alert(t.save_success || 'Updated successfully.');
+                alert(t.save_success);
                 handleFormClose();
                 fetchEntries();
             }
@@ -94,9 +98,9 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 .insert([payload]);
 
             if (error) {
-                alert(t.save_error || 'Error: ' + error.message);
+                alert(t.save_error + ': ' + error.message);
             } else {
-                alert(t.save_success || 'Saved successfully.');
+                alert(t.save_success);
                 handleFormClose();
                 fetchEntries();
             }
@@ -123,15 +127,15 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm(t.act_confirm_delete || 'Xác nhận xóa?')) return;
+        if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
             const { error } = await supabase.from('financial_records').delete().eq('id', id);
             if (error) throw error;
-            alert(t.delete_success || 'Deleted successfully.');
+            alert(t.delete_success);
             fetchEntries();
         } catch (error) {
-            alert(`DELETE_ERROR: ${error.message} `);
+            alert(`Error: ${error.message} `);
         } finally {
             setIsLoading(false);
         }
@@ -155,6 +159,12 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         return currentUser.role === 'Admin' || entry.user_id === currentUser.id;
     };
 
+    const getCategoryText = (cat) => {
+        if (cat === 'Chi phí') return t.fin_cost;
+        if (cat === 'Doanh thu') return t.fin_revenue;
+        return cat;
+    };
+
     return (
         <div className="view-container animate-in">
             <div className="table-actions" style={{ marginBottom: '20px', display: 'flex', gap: '15px' }}>
@@ -163,7 +173,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 </button>
                 <div style={{ flex: 1 }}></div>
                 <button onClick={() => setShowForm(true)} className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }}>
-                    <i className="fas fa-plus"></i> {t.fin_add_btn || 'Add Record'}
+                    <i className="fas fa-plus"></i> {(t.fin_add_btn || 'THÊM BẢN GHI').toUpperCase()}
                 </button>
             </div>
 
@@ -171,83 +181,87 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 <>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                         <div style={{ background: '#fee2e2', padding: '15px', borderRadius: '15px', border: '2px solid #fca5a5' }}>
-                            <div style={{ fontSize: '11px', color: '#991b1b', fontWeight: 600, marginBottom: '5px' }}>{t.fin_cost || 'Total Cost'}</div>
+                            <div style={{ fontSize: '11px', color: '#991b1b', fontWeight: 600, marginBottom: '5px' }}>{t.fin_cost}</div>
                             <div style={{ fontSize: '20px', fontWeight: 700, color: '#dc2626' }}>{formatCurrency(totalCost)}</div>
                         </div>
                         <div style={{ background: '#d1fae5', padding: '15px', borderRadius: '15px', border: '2px solid #6ee7b7' }}>
-                            <div style={{ fontSize: '11px', color: '#065f46', fontWeight: 600, marginBottom: '5px' }}>{t.fin_revenue || 'Total Revenue'}</div>
+                            <div style={{ fontSize: '11px', color: '#065f46', fontWeight: 600, marginBottom: '5px' }}>{t.fin_revenue}</div>
                             <div style={{ fontSize: '20px', fontWeight: 700, color: '#059669' }}>{formatCurrency(totalRevenue)}</div>
                         </div>
                         <div style={{ background: profit >= 0 ? '#dbeafe' : '#fef3c7', padding: '15px', borderRadius: '15px', border: `2px solid ${profit >= 0 ? '#93c5fd' : '#fcd34d'} ` }}>
-                            <div style={{ fontSize: '11px', color: profit >= 0 ? '#1e40af' : '#92400e', fontWeight: 600, marginBottom: '5px' }}>{t.fin_profit || 'Profit'}</div>
+                            <div style={{ fontSize: '11px', color: profit >= 0 ? '#1e40af' : '#92400e', fontWeight: 600, marginBottom: '5px' }}>{t.fin_profit}</div>
                             <div style={{ fontSize: '20px', fontWeight: 700, color: profit >= 0 ? '#2563eb' : '#d97706' }}>{formatCurrency(profit)}</div>
                         </div>
                     </div>
 
                     <div className="data-table-container">
                         <div className="table-header">
-                            <h3><i className="fas fa-coins" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.fin_title || 'Financial Records'}</h3>
-                            <div className="badge">{entries.length} {t.act_count || 'records'}</div>
+                            <h3><i className="fas fa-coins" style={{ color: 'var(--coffee-medium)', marginRight: '10px' }}></i>{t.fin_title}</h3>
+                            <div className="badge">{entries.length} {t.financial_records?.toLowerCase()}</div>
                         </div>
 
                         <table className="pro-table">
                             <thead>
                                 <tr>
-                                    <th>{t.fin_date || 'Date'}</th>
-                                    <th>{t.fin_category || 'Category'}</th>
-                                    <th>{t.fin_item || 'Item'}</th>
-                                    <th>{t.fin_amount || 'Amount'}</th>
-                                    <th>{t.fin_notes || 'Notes'}</th>
+                                    <th>{t.date}</th>
+                                    <th>{t.fin_category}</th>
+                                    <th>{t.fin_item}</th>
+                                    <th>{t.fin_amount}</th>
+                                    <th>{t.notes}</th>
                                     <th>{t.actions}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {entries.map(entry => (
-                                    <tr key={entry.id} onClick={() => handleView(entry)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
-                                        <td>{entry.record_date}</td>
-                                        <td>
-                                            <span className="badge-org" style={{ background: entry.amount < 0 ? '#d1fae5' : '#fee2e2' }}>
-                                                {entry.category}
-                                            </span>
-                                        </td>
-                                        <td style={{ fontWeight: 600 }}>{entry.item_name}</td>
-                                        <td style={{ color: entry.amount < 0 ? '#059669' : '#dc2626', fontWeight: 700 }}>
-                                            {formatCurrency(Math.abs(entry.amount))}
-                                        </td>
-                                        <td>{entry.notes || '-'}</td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: '8px' }}>
-                                                {/* VIEW BUTTON (Always visible) */}
-                                                <button onClick={() => handleView(entry)} style={{
-                                                    background: '#e0f2fe', border: '1px solid #7dd3fc',
-                                                    color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }} title="Xem chi tiết">
-                                                    <i className="fas fa-eye"></i>
-                                                </button>
+                                {entries.length === 0 ? (
+                                    <tr><td colSpan="6" style={{ textAlign: 'center', opacity: 0.5 }}>{t.no_data}</td></tr>
+                                ) : (
+                                    entries.map(entry => (
+                                        <tr key={entry.id} onClick={() => handleView(entry)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
+                                            <td>{entry.record_date}</td>
+                                            <td>
+                                                <span className="badge-org" style={{ background: entry.amount < 0 ? '#d1fae5' : '#fee2e2' }}>
+                                                    {getCategoryText(entry.category)}
+                                                </span>
+                                            </td>
+                                            <td style={{ fontWeight: 600 }}>{entry.item_name}</td>
+                                            <td style={{ color: entry.amount < 0 ? '#059669' : '#dc2626', fontWeight: 700 }}>
+                                                {formatCurrency(Math.abs(entry.amount))}
+                                            </td>
+                                            <td>{entry.notes || '-'}</td>
+                                            <td onClick={(e) => e.stopPropagation()}>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    {/* VIEW BUTTON (Always visible) */}
+                                                    <button onClick={() => handleView(entry)} style={{
+                                                        background: '#e0f2fe', border: '1px solid #7dd3fc',
+                                                        color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    }} title={t.details}>
+                                                        <i className="fas fa-eye"></i>
+                                                    </button>
 
-                                                {(canEdit(entry)) && (
-                                                    <>
-                                                        <button onClick={() => handleEdit(entry)} style={{
-                                                            background: '#fef3c7', border: '1px solid #d97706',
-                                                            color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.edit || "Sửa"}>
-                                                            <i className="fas fa-edit"></i>
-                                                        </button>
-                                                        <button onClick={() => handleDelete(entry.id)} style={{
-                                                            background: '#fef2f2', border: '1px solid #ef4444',
-                                                            color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.delete || "Xóa"}>
-                                                            <i className="fas fa-trash"></i>
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                                    {(canEdit(entry)) && (
+                                                        <>
+                                                            <button onClick={() => handleEdit(entry)} style={{
+                                                                background: '#fef3c7', border: '1px solid #d97706',
+                                                                color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                            }} title={t.edit}>
+                                                                <i className="fas fa-edit"></i>
+                                                            </button>
+                                                            <button onClick={() => handleDelete(entry.id)} style={{
+                                                                background: '#fef2f2', border: '1px solid #ef4444',
+                                                                color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                            }} title={t.delete}>
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -255,45 +269,45 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             ) : (
                 <div className="form-container" style={{ background: 'white', padding: '30px', borderRadius: '24px' }}>
                     <h2 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '2px solid var(--tcn-light)', paddingBottom: '10px' }}>
-                        <i className="fas fa-coins"></i> {isEditing ? (t.edit || 'Edit') : (t.fin_form_title || 'Add Financial Record')}
+                        <i className="fas fa-coins"></i> {isEditing ? (t.update + ' ' + t.financial_records?.toLowerCase()) : t.fin_form_title}
                     </h2>
 
                     <form onSubmit={handleSave}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="form-group">
-                                <label>{t.fin_category || 'Category'}</label>
+                                <label>{t.fin_category}</label>
                                 <select className="input-pro" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })} required>
-                                    <option value="Chi phí">Chi phí</option>
-                                    <option value="Doanh thu">Doanh thu</option>
+                                    <option value="Chi phí">{t.fin_cost}</option>
+                                    <option value="Doanh thu">{t.fin_revenue}</option>
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label>{t.fin_date || 'Date'}</label>
+                                <label>{t.date}</label>
                                 <input className="input-pro" type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} required />
                             </div>
                         </div>
 
                         <div className="form-group">
-                            <label>{t.fin_item || 'Item'}</label>
-                            <input className="input-pro" value={formData.item} onChange={e => setFormData({ ...formData, item: e.target.value })} required />
+                            <label>{t.fin_item}</label>
+                            <input className="input-pro" value={formData.item} onChange={e => setFormData({ ...formData, item: e.target.value })} required placeholder={t.search_placeholder} />
                         </div>
 
                         <div className="form-group">
-                            <label>{t.fin_amount || 'Amount (VND)'}</label>
-                            <input className="input-pro" type="number" value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} required />
+                            <label>{t.fin_amount} (VND)</label>
+                            <input className="input-pro" type="number" value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} required placeholder="1,000,000" />
                         </div>
 
                         <div className="form-group">
-                            <label>{t.fin_notes || 'Notes'}</label>
-                            <textarea className="input-pro" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} rows="3"></textarea>
+                            <label>{t.notes}</label>
+                            <textarea className="input-pro" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} rows="3" placeholder={t.notes + '...'}></textarea>
                         </div>
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
-                                <i className="fas fa-check"></i> {isLoading ? t.loading : t.confirm}
+                                <i className="fas fa-check"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
                             </button>
                             <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
-                                {t.cancel}
+                                {t.cancel.toUpperCase()}
                             </button>
                         </div>
                     </form>
@@ -306,33 +320,33 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '500px', maxHeight: '80vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
-                                <i className="fas fa-file-invoice-dollar" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
-                                Chi tiết bản ghi
+                                <i className="fas fa-info-circle" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
+                                {t.plan_group}
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ngày ghi chép</label>
-                                <div style={{ fontWeight: 600 }}>{new Date(selectedEntry.record_date).toLocaleDateString('vi-VN')}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.date}</label>
+                                <div style={{ fontWeight: 600 }}>{new Date(selectedEntry.record_date).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN')}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Phân loại</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.fin_category}</label>
                                 <div>
                                     <span className="badge-org" style={{ background: selectedEntry.amount < 0 ? '#d1fae5' : '#fee2e2' }}>
-                                        {selectedEntry.category}
+                                        {getCategoryText(selectedEntry.category)}
                                     </span>
                                 </div>
                             </div>
 
                             <div className="detail-item" style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Nội dung</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.fin_item}</label>
                                 <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{selectedEntry.item_name}</div>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Số tiền</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.fin_amount}</label>
                                 <div style={{ fontSize: '18px', fontWeight: 700, color: selectedEntry.amount < 0 ? '#059669' : '#dc2626' }}>
                                     {formatCurrency(Math.abs(selectedEntry.amount))}
                                 </div>
@@ -340,15 +354,35 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
                             {selectedEntry.notes && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.notes}</label>
                                     <div style={{ fontStyle: 'italic' }}>{selectedEntry.notes}</div>
                                 </div>
                             )}
                         </div>
 
-                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {canEdit(selectedEntry) && (
+                                    <>
+                                        <button onClick={() => { setShowDetailModal(false); handleEdit(selectedEntry); }} style={{
+                                            background: '#fef3c7', border: '1px solid #d97706',
+                                            color: '#92400e', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-edit"></i> {t.edit}
+                                        </button>
+                                        <button onClick={() => { setShowDetailModal(false); handleDelete(selectedEntry.id); }} style={{
+                                            background: '#fef2f2', border: '1px solid #ef4444',
+                                            color: '#b91c1c', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-trash"></i> {t.delete}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                             <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
-                                Đóng
+                                {t.close}
                             </button>
                         </div>
                     </div>

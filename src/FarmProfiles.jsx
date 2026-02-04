@@ -66,8 +66,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             const { data, error } = await supabase
                 .from('farm_baselines')
                 .select(`
-    *,
-    farmer: farmers(farmer_code, full_name, village)
+                    *,
+                    farmer: farmers(farmer_code, full_name, village)
                 `)
                 .order('created_at', { ascending: false });
 
@@ -118,14 +118,14 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     .eq('id', editingId);
 
                 if (error) throw error;
-                alert(t.save_success || 'Cập nhật thành công.');
+                alert(t.save_success);
             } else {
                 const { error } = await supabase
                     .from('farm_baselines')
                     .insert([payload]);
 
                 if (error) throw error;
-                alert(t.save_success || 'Saved successfully.');
+                alert(t.save_success);
             }
             handleFormClose();
             fetchBaselines();
@@ -164,12 +164,12 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm(t.act_confirm_delete || 'Xác nhận xóa?')) return;
+        if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
             const { error } = await supabase.from('farm_baselines').delete().eq('id', id);
             if (error) throw error;
-            alert(t.delete_success || 'Deleted successfully.');
+            alert(t.delete_success);
             fetchBaselines();
         } catch (error) {
             alert(`DELETE_ERROR: ${error.message} `);
@@ -241,11 +241,11 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     <table className="pro-table">
                         <thead>
                             <tr>
-                                <th>Mã nông dân</th>
-                                <th>{t.farm_owner || 'Chủ trang trại'}</th>
-                                <th>Thôn/Buôn</th>
-                                <th>{t.farm_total_area || 'Tổng diện tích (ha)'}</th>
-                                <th>Diện tích cà phê (ha)</th>
+                                <th>{t.farmer_code}</th>
+                                <th>{t.farm_owner}</th>
+                                <th>{t.village || t.farmer_village}</th>
+                                <th>{t.farm_total_area}</th>
+                                <th>{t.farm_coffee_area}</th>
                                 <th>{t.farm_soil_ph}</th>
                                 <th>{t.actions}</th>
                             </tr>
@@ -254,7 +254,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             {baselines.length === 0 ? (
                                 <tr>
                                     <td colSpan="7" style={{ textAlign: 'center', padding: '30px', opacity: 0.5 }}>
-                                        {t.no_data || 'Chưa có dữ liệu trang trại.'}
+                                        {t.no_data}
                                     </td>
                                 </tr>
                             ) : (
@@ -280,7 +280,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                     background: '#e0f2fe', border: '1px solid #7dd3fc',
                                                     color: '#0369a1', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }} title="Xem chi tiết">
+                                                }} title={t.details}>
                                                     <i className="fas fa-eye"></i>
                                                 </button>
 
@@ -291,14 +291,14 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                                             background: '#fef3c7', border: '1px solid #d97706',
                                                             color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.edit || "Sửa"}>
+                                                        }} title={t.edit}>
                                                             <i className="fas fa-pen"></i>
                                                         </button>
                                                         <button onClick={() => handleDelete(b.id)} style={{
                                                             background: '#fef2f2', border: '1px solid #ef4444',
                                                             color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                        }} title={t.delete || "Xóa"}>
+                                                        }} title={t.delete}>
                                                             <i className="fas fa-trash"></i>
                                                         </button>
                                                     </>
@@ -314,23 +314,23 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             ) : (
                 <div className="form-container" style={{ background: 'white', padding: '30px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
                     <h2 style={{ marginBottom: '25px', color: 'var(--tcn-dark)', borderBottom: '2px solid var(--tcn-light)', paddingBottom: '10px' }}>
-                        <i className="fas fa-clipboard-check"></i> {isEditing ? 'Cập nhật trang trại' : (t.farm_form_title || 'Thông tin trang trại')}
+                        <i className="fas fa-clipboard-check"></i> {isEditing ? (t.update + ' ' + t.farms?.toLowerCase()) : t.farm_form_title}
                     </h2>
 
                     <form onSubmit={handleSave}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
                             <div className="form-section">
-                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>A. Thông tin chủ sở hữu</h4>
+                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>{t.general_info}</h4>
 
                                 <div className="form-group">
-                                    <label>Chọn nông dân *</label>
+                                    <label>{appLang === 'vi' ? 'Chọn nông dân' : appLang === 'en' ? 'Select Farmer' : 'Hriêng mnuih'} *</label>
                                     <select
                                         className="input-pro"
                                         required
                                         value={formData.farmer_id}
                                         onChange={e => setFormData({ ...formData, farmer_id: e.target.value })}
                                     >
-                                        <option value="">-- Chọn nông dân --</option>
+                                        <option value="">-- {appLang === 'vi' ? 'Chọn nông dân' : appLang === 'en' ? 'Select Farmer' : 'Hriêng mnuih'} --</option>
                                         {farmers.map(f => (
                                             <option key={f.id} value={f.id}>
                                                 {f.farmer_code} - {f.full_name} ({f.village})
@@ -340,76 +340,76 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Tên trang trại</label>
-                                    <input className="input-pro" value={formData.farm_name} onChange={e => setFormData({ ...formData, farm_name: e.target.value })} placeholder="Trang trại cà phê..." />
+                                    <label>{t.farm_name}</label>
+                                    <input className="input-pro" value={formData.farm_name} onChange={e => setFormData({ ...formData, farm_name: e.target.value })} placeholder={appLang === 'vi' ? "Trang trại cà phê..." : "Coffee farm..."} />
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                     <div className="form-group">
-                                        <label>{t.farm_gps_lat || 'GPS Lat'}</label>
+                                        <label>{t.farm_gps_lat}</label>
                                         <input className="input-pro" type="number" step="0.000001" value={formData.gps_lat} onChange={e => setFormData({ ...formData, gps_lat: e.target.value })} placeholder="12.6..." />
                                     </div>
                                     <div className="form-group">
-                                        <label>{t.farm_gps_long || 'GPS Long'}</label>
+                                        <label>{t.farm_gps_long}</label>
                                         <input className="input-pro" type="number" step="0.000001" value={formData.gps_long} onChange={e => setFormData({ ...formData, gps_long: e.target.value })} placeholder="108.0..." />
                                     </div>
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Độ cao (m)</label>
+                                    <label>{t.farm_elevation}</label>
                                     <input className="input-pro" type="number" step="0.1" value={formData.elevation} onChange={e => setFormData({ ...formData, elevation: e.target.value })} placeholder="500" />
                                 </div>
                             </div>
 
                             <div className="form-section">
-                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>B. Diện tích canh tác</h4>
+                                <h4 style={{ color: 'var(--primary-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>B. {appLang === 'vi' ? 'Diện tích canh tác' : appLang === 'en' ? 'Cultivation Area' : 'Diện tích hma'}</h4>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                     <div className="form-group">
-                                        <label>{t.farm_total_area || 'Tổng diện tích (ha)'} *</label>
+                                        <label>{t.farm_total_area} *</label>
                                         <input className="input-pro" type="number" step="0.1" required value={formData.total_area} onChange={e => setFormData({ ...formData, total_area: e.target.value })} />
                                     </div>
                                     <div className="form-group">
-                                        <label>{t.farm_coffee_area || 'Diện tích cà phê (ha)'}</label>
+                                        <label>{t.farm_coffee_area}</label>
                                         <input className="input-pro" type="number" step="0.1" value={formData.coffee_area} onChange={e => setFormData({ ...formData, coffee_area: e.target.value })} />
                                     </div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                     <div className="form-group">
-                                        <label>{t.farm_intercrop_area || 'Diện tích xen canh (ha)'}</label>
+                                        <label>{t.farm_intercrop_area}</label>
                                         <input className="input-pro" type="number" step="0.1" value={formData.intercrop_area} onChange={e => setFormData({ ...formData, intercrop_area: e.target.value })} />
                                     </div>
                                     <div className="form-group">
-                                        <label>Số cây bóng mát</label>
+                                        <label>{t.train_survival || 'Số cây che bóng'}</label>
                                         <input className="input-pro" type="number" value={formData.shade_trees} onChange={e => setFormData({ ...formData, shade_trees: e.target.value })} />
                                     </div>
                                 </div>
 
                                 <div className="form-group">
-                                    <label>{t.farm_intercrop_details || 'Chi tiết xen canh'}</label>
+                                    <label>{t.farm_intercrop_details}</label>
                                     <input className="input-pro" value={formData.intercrop_details} onChange={e => setFormData({ ...formData, intercrop_details: e.target.value })} />
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                     <div className="form-group">
-                                        <label>{t.farm_water_source || 'Nguồn nước'}</label>
+                                        <label>{t.farm_water_source}</label>
                                         <select className="input-pro" value={formData.water_source} onChange={e => setFormData({ ...formData, water_source: e.target.value })}>
-                                            <option value="Giếng đào">{t.water_gieng_dao || 'Giếng đào'}</option>
-                                            <option value="Giếng khoan">{t.water_gieng_khoan || 'Giếng khoan'}</option>
-                                            <option value="Hồ/Suối">{t.water_ho_suoi || 'Hồ/Suối'}</option>
+                                            <option value="Giếng đào">{t.water_gieng_dao}</option>
+                                            <option value="Giếng khoan">{t.water_gieng_khoan}</option>
+                                            <option value="Hồ/Suối">{t.water_ho_suoi}</option>
                                         </select>
                                     </div>
                                     <div className="form-group">
-                                        <label>Hệ thống tưới</label>
-                                        <input className="input-pro" value={formData.irrigation_system} onChange={e => setFormData({ ...formData, irrigation_system: e.target.value })} placeholder="Tưới nhỏ giọt..." />
+                                        <label>{t.farm_irrigation_system}</label>
+                                        <input className="input-pro" value={formData.irrigation_system} onChange={e => setFormData({ ...formData, irrigation_system: e.target.value })} placeholder={appLang === 'vi' ? "Tưới nhỏ giọt..." : "Drip irrigation..."} />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div style={{ marginTop: '25px', padding: '20px', background: 'var(--tcn-light)', borderRadius: '15px' }}>
-                            <h4 style={{ color: 'var(--tcn-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>C. Chỉ số đất đai</h4>
+                            <h4 style={{ color: 'var(--tcn-dark)', marginBottom: '15px', textTransform: 'uppercase', fontSize: '12px' }}>C. {appLang === 'vi' ? 'Chỉ số đất đai' : appLang === 'en' ? 'Soil Indicators' : 'Klei kơ đất'}</h4>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '20px', alignItems: 'start' }}>
                                 <div className="form-group">
@@ -439,40 +439,40 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 )}
 
                                 <div className="form-group">
-                                    <label>Độ dốc</label>
+                                    <label>{t.farm_slope}</label>
                                     <select className="input-pro" value={formData.slope} onChange={e => setFormData({ ...formData, slope: e.target.value })}>
-                                        <option value="flat">Bằng phẳng</option>
-                                        <option value="gentle">Dốc nhẹ</option>
-                                        <option value="moderate">Dốc vừa</option>
-                                        <option value="steep">Dốc cao</option>
+                                        <option value="flat">{t.slope_flat}</option>
+                                        <option value="gentle">{t.slope_gentle}</option>
+                                        <option value="moderate">{t.slope_moderate}</option>
+                                        <option value="steep">{t.slope_steep}</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '15px' }}>
                                 <div className="form-group">
-                                    <label>Loại đất</label>
-                                    <input className="input-pro" value={formData.soil_type} onChange={e => setFormData({ ...formData, soil_type: e.target.value })} placeholder="Đất bazan..." />
+                                    <label>{t.farm_soil_type}</label>
+                                    <input className="input-pro" value={formData.soil_type} onChange={e => setFormData({ ...formData, soil_type: e.target.value })} placeholder={appLang === 'vi' ? "Đất bazan..." : "Basalt soil..."} />
                                 </div>
                                 <div className="form-group">
-                                    <label>{t.farm_grass_cover || 'Độ phủ cỏ'}</label>
+                                    <label>{t.farm_grass_cover}</label>
                                     <select className="input-pro" value={formData.grass_cover} onChange={e => setFormData({ ...formData, grass_cover: e.target.value })}>
-                                        <option value="Low">{t.grass_low || 'Thấp (< 30%)'}</option>
-                                        <option value="Medium">{t.grass_medium || 'Trung bình (30 - 60%)'}</option>
-                                        <option value="High">{t.grass_high || 'Cao (> 60%)'}</option>
+                                        <option value="Low">{t.grass_low}</option>
+                                        <option value="Medium">{t.grass_medium}</option>
+                                        <option value="High">{t.grass_high}</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
                         <div className="form-group" style={{ marginTop: '20px' }}>
-                            <label>Ghi chú</label>
-                            <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="Ghi chú thêm về trang trại..."></textarea>
+                            <label>{t.notes}</label>
+                            <textarea className="input-pro" rows="3" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder={t.notes + '...'}></textarea>
                         </div>
 
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading} style={{ flex: 1 }}>
-                                <i className="fas fa-save"></i> {isLoading ? t.loading : (isEditing ? 'CẬP NHẬT' : (t.farm_save_btn || 'LƯU THÔNG TIN'))}
+                                <i className="fas fa-save"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
                             </button>
                             <button type="button" className="btn-primary" onClick={handleFormClose} style={{ flex: 1, background: '#f1f5f9', color: '#475569' }}>
                                 {t.cancel.toUpperCase()}
@@ -488,8 +488,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '700px', maxHeight: '85vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                             <h3 style={{ margin: 0, color: 'var(--tcn-dark)', fontSize: '18px' }}>
-                                <i className="fas fa-map" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
-                                Chi tiết trang trại
+                                <i className="fas fa-map-marked-alt" style={{ marginRight: '10px', color: 'var(--coffee-primary)' }}></i>
+                                {t.farm_title}
                             </h3>
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
@@ -497,41 +497,41 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             {/* Section 1: Basic Info */}
                             <div className="detail-section" style={{ gridColumn: 'span 2' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Thông tin chung</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{t.general_info}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Mã trang trại</label>
-                                <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedFarm.farm_code}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_code}</label>
+                                <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedFarm.farm_code || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Chủ sở hữu</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.owner}</label>
                                 <div style={{ fontWeight: 600 }}>{selectedFarm.farmer?.full_name} ({selectedFarm.farmer?.farmer_code})</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Địa chỉ</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_address}</label>
                                 <div>{selectedFarm.farmer?.village}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tên trang trại</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_name}</label>
                                 <div>{selectedFarm.farm_name || '---'}</div>
                             </div>
 
                             {/* Section 2: Area & Soil */}
                             <div className="detail-section" style={{ gridColumn: 'span 2', marginTop: '10px' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Đất đai & Diện tích</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{appLang === 'vi' ? 'Đất đai & Diện tích' : appLang === 'en' ? 'Soil & Area' : 'Đất hồ DT'}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Tổng diện tích</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_total_area}</label>
                                 <div>{selectedFarm.total_area} ha</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Diện tích cà phê</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_coffee_area}</label>
                                 <div>{selectedFarm.coffee_area} ha</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Độ pH đất</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_soil_ph}</label>
                                 <div style={{
                                     color: selectedFarm.soil_ph < 4 || selectedFarm.soil_ph > 7 ? '#ef4444' : '#059669',
                                     fontWeight: 'bold'
@@ -540,51 +540,71 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 </div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Loại đất</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_soil_type}</label>
                                 <div>{selectedFarm.soil_type || '---'}</div>
                             </div>
 
                             {/* Section 3: Technical */}
                             <div className="detail-section" style={{ gridColumn: 'span 2', marginTop: '10px' }}>
-                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>Kỹ thuật & Canh tác</h4>
+                                <h4 style={{ fontSize: '14px', color: 'var(--coffee-dark)', borderBottom: '1px dashed #eee', paddingBottom: '5px' }}>{appLang === 'vi' ? 'Kỹ thuật & Canh tác' : appLang === 'en' ? 'Technical & Cultivation' : 'Kỹ thuật hma'}</h4>
                             </div>
 
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Xen canh</label>
-                                <div>{selectedFarm.intercrop_details || 'Không'}</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_intercrop_details}</label>
+                                <div>{selectedFarm.intercrop_details || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Cây che bóng</label>
-                                <div>{selectedFarm.shade_trees} cây</div>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.train_survival || 'Số cây che bóng'}</label>
+                                <div>{selectedFarm.shade_trees}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Nguồn nước</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_water_source}</label>
                                 <div>{selectedFarm.water_source || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Hệ thống tưới</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_irrigation_system}</label>
                                 <div>{selectedFarm.irrigation_system || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Độ dốc</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_slope}</label>
                                 <div>{selectedFarm.slope || '---'}</div>
                             </div>
                             <div className="detail-item">
-                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Độ cao</label>
+                                <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_elevation}</label>
                                 <div>{selectedFarm.elevation ? `${selectedFarm.elevation} m` : '---'}</div>
                             </div>
 
                             {selectedFarm.notes && (
                                 <div className="detail-item" style={{ gridColumn: 'span 2', background: '#f9f9f9', padding: '10px', borderRadius: '8px' }}>
-                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>Ghi chú</label>
+                                    <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.notes}</label>
                                     <div style={{ fontStyle: 'italic' }}>{selectedFarm.notes}</div>
                                 </div>
                             )}
                         </div>
 
-                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {canEdit() && (
+                                    <>
+                                        <button onClick={() => { setShowDetailModal(false); handleEdit(selectedFarm); }} style={{
+                                            background: '#fef3c7', border: '1px solid #d97706',
+                                            color: '#92400e', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-pen"></i> {t.edit}
+                                        </button>
+                                        <button onClick={() => { setShowDetailModal(false); handleDelete(selectedFarm.id); }} style={{
+                                            background: '#fef2f2', border: '1px solid #ef4444',
+                                            color: '#b91c1c', cursor: 'pointer', padding: '8px 15px', borderRadius: '8px',
+                                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600
+                                        }}>
+                                            <i className="fas fa-trash"></i> {t.delete}
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                             <button onClick={() => setShowDetailModal(false)} style={{ padding: '8px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
-                                Đóng
+                                {t.close}
                             </button>
                         </div>
                     </div>
