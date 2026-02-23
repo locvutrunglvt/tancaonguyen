@@ -196,7 +196,7 @@ const UserManagementView = ({
                                     {!isEditing ? (
                                         <>
                                             <label>{t.password}</label>
-                                            <input className="input-pro" type="password" value={userForm.password || ''} onChange={e => onFormChange({ ...userForm, password: e.target.value })} required minLength="6" />
+                                            <input className="input-pro" type="password" value={userForm.password || ''} onChange={e => onFormChange({ ...userForm, password: e.target.value })} required minLength="8" placeholder="Min 8 ký tự" />
                                         </>
                                     ) : (
                                         <>

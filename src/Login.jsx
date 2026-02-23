@@ -82,10 +82,15 @@ const Login = ({ onDevLogin }) => {
         setIsLoading(true);
         try {
             await pb.collection('users').requestPasswordReset(formData.email);
-            alert(t.reset_sent || 'Email sent!');
+            alert(t.reset_sent || 'Yêu cầu đã được gửi! Vui lòng kiểm tra email.');
             setView('login');
         } catch (error) {
-            alert(error.message);
+            // SMTP not configured or other error
+            alert(lang === 'vi'
+                ? 'Chức năng đặt lại mật khẩu qua email chưa sẵn sàng. Vui lòng liên hệ Quản trị viên để được hỗ trợ.'
+                : lang === 'en'
+                ? 'Password reset via email is not available. Please contact the Administrator for assistance.'
+                : 'Klei mblang password qua email ka dưm jing. Bi mơ khua mdrông.');
         } finally {
             setIsLoading(false);
         }
@@ -138,10 +143,10 @@ const Login = ({ onDevLogin }) => {
                 password: formData.password,
                 passwordConfirm: formData.password,
                 full_name: formData.fullName,
-                organization: 'gus',
+                organization: formData.org || 'gus',
                 phone: formData.phone,
                 role: 'Guest',
-                employee_code: `GUS-${Math.floor(Math.random() * 900) + 100}`,
+                employee_code: `${(formData.org || 'GUS').toUpperCase()}-${Math.floor(Math.random() * 9000) + 1000}`,
             });
 
             alert(t.reg_success || 'REGISTRATION SUCCESS!');
