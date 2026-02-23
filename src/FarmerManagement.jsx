@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import './Dashboard.css';
 import { translations } from './translations';
-import MediaUpload from './MediaUpload';
+import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 
 const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
@@ -11,11 +11,10 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    // Detail View State
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedFarmer, setSelectedFarmer] = useState(null);
+    const [pendingFile, setPendingFile] = useState(null);
 
-    // Form state - using new farmers table fields
     const [formData, setFormData] = useState({
         farmer_code: '',
         full_name: '',
@@ -32,7 +31,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         household_head: true,
         status: 'active',
         notes: '',
-        photo_url: ''
+        photo_preview: ''
     });
 
     useEffect(() => {
@@ -88,8 +87,9 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             household_head: farmer.household_head !== undefined ? farmer.household_head : true,
             status: farmer.status || 'active',
             notes: farmer.notes || '',
-            photo_url: farmer.photo_url || ''
+            photo_preview: getFileUrl(farmer, farmer.photo) || ''
         });
+        setPendingFile(null);
         setEditingId(farmer.id);
         setIsEditing(true);
         setShowModal(true);
@@ -118,51 +118,40 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         setLoading(true);
 
         try {
+            const payload = {
+                full_name: formData.full_name,
+                gender: formData.gender,
+                date_of_birth: formData.date_of_birth || null,
+                id_card: formData.id_card,
+                phone: formData.phone,
+                email: formData.email,
+                village: formData.village,
+                commune: formData.commune,
+                district: formData.district,
+                province: formData.province,
+                household_members: parseInt(formData.household_members) || 1,
+                household_head: formData.household_head,
+                status: formData.status,
+                notes: formData.notes
+            };
+
+            let recordId;
             if (isEditing) {
-                // Update existing farmer
-                await pb.collection('farmers').update(editingId, {
-                    full_name: formData.full_name,
-                    gender: formData.gender,
-                    date_of_birth: formData.date_of_birth || null,
-                    id_card: formData.id_card,
-                    phone: formData.phone,
-                    email: formData.email,
-                    village: formData.village,
-                    commune: formData.commune,
-                    district: formData.district,
-                    province: formData.province,
-                    household_members: parseInt(formData.household_members) || 1,
-                    household_head: formData.household_head,
-                    status: formData.status,
-                    notes: formData.notes,
-                    photo_url: formData.photo_url
-                });
-
-                alert(t.save_success);
+                await pb.collection('farmers').update(editingId, payload);
+                recordId = editingId;
             } else {
-                // Create new farmer
                 const newCode = await generateFarmerCode();
-                await pb.collection('farmers').create({
-                    farmer_code: newCode,
-                    full_name: formData.full_name,
-                    gender: formData.gender,
-                    date_of_birth: formData.date_of_birth || null,
-                    id_card: formData.id_card,
-                    phone: formData.phone,
-                    email: formData.email,
-                    village: formData.village,
-                    commune: formData.commune,
-                    district: formData.district,
-                    province: formData.province,
-                    household_members: parseInt(formData.household_members) || 1,
-                    household_head: formData.household_head,
-                    status: formData.status,
-                    notes: formData.notes,
-                    photo_url: formData.photo_url
-                });
-
-                alert(t.save_success);
+                payload.farmer_code = newCode;
+                const record = await pb.collection('farmers').create(payload);
+                recordId = record.id;
             }
+
+            // Upload photo file if selected
+            if (pendingFile && recordId) {
+                await uploadFileToPB('farmers', recordId, 'photo', pendingFile);
+            }
+
+            alert(t.save_success);
             handleModalClose();
             fetchFarmers();
         } catch (error) {
@@ -176,6 +165,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         setShowModal(false);
         setIsEditing(false);
         setEditingId(null);
+        setPendingFile(null);
         setFormData({
             farmer_code: '',
             full_name: '',
@@ -192,7 +182,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             household_head: true,
             status: 'active',
             notes: '',
-            photo_url: ''
+            photo_preview: ''
         });
     };
 
@@ -267,8 +257,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{f.farmer_code}</span></td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            {f.photo_url ? (
-                                                <img src={f.photo_url} alt="Ava" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+                                            {getFileUrl(f, f.photo) ? (
+                                                <img src={getFileUrl(f, f.photo)} alt="Ava" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
                                             ) : (
                                                 <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <i className="fas fa-user" style={{ fontSize: '14px', color: '#94a3b8' }}></i>
@@ -417,8 +407,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <MediaUpload
                                     entityType="farmers"
                                     entityId={isEditing ? editingId : 'new'}
-                                    currentUrl={formData.photo_url}
-                                    onUploadSuccess={(url) => setFormData({ ...formData, photo_url: url })}
+                                    currentUrl={formData.photo_preview}
+                                    onUploadSuccess={(url, file) => { setFormData({ ...formData, photo_preview: url }); setPendingFile(file); }}
                                     appLang={appLang}
                                 />
                             </div>
@@ -448,9 +438,9 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
-                        {selectedFarmer.photo_url && (
+                        {getFileUrl(selectedFarmer, selectedFarmer.photo) && (
                             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <img src={selectedFarmer.photo_url} alt="Farmer" style={{ width: '150px', height: '150px', borderRadius: '20px', objectFit: 'cover', border: '4px solid #f8fafc', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                                <img src={getFileUrl(selectedFarmer, selectedFarmer.photo)} alt="Farmer" style={{ width: '150px', height: '150px', borderRadius: '20px', objectFit: 'cover', border: '4px solid #f8fafc', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
                             </div>
                         )}
 

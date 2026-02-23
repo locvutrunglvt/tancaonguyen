@@ -1119,6 +1119,43 @@ h3 {
     }
 }
 
+/* Mobile form/modal fixes */
+@media (max-width: 768px) {
+    /* ALL inline grid layouts inside forms/modals -> single column */
+    .form-container div[style*="grid-template-columns"],
+    .modal-content div[style*="grid-template-columns"],
+    .view-container div[style*="grid-template-columns"] {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    /* Modal sizing for mobile */
+    .modal-content {
+        max-height: 92vh !important;
+        max-width: 98vw !important;
+        padding: 16px !important;
+        border-radius: 16px !important;
+        margin: 4px;
+    }
+
+    /* Form container on mobile */
+    .form-container {
+        padding: 16px !important;
+        border-radius: 16px !important;
+    }
+
+    .form-container h2 {
+        font-size: 16px !important;
+    }
+
+    /* Table action bar */
+    .table-actions {
+        flex-wrap: wrap;
+        gap: 8px !important;
+    }
+}
+
 /* Small Mobile - Extra Compact */
 @media (max-width: 480px) {
     .main-content {

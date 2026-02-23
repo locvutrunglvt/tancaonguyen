@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
-import MediaUpload from './MediaUpload';
+import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
 const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -13,9 +13,9 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    // Detail View State
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedModel, setSelectedModel] = useState(null);
+    const [pendingFile, setPendingFile] = useState(null);
 
     const [currentModel, setCurrentModel] = useState({
         farmer_id: '',
@@ -32,7 +32,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         adaptation_status: 'planning',
         last_inspection: '',
         notes: '',
-        photo_url: ''
+        photo_preview: ''
     });
 
     useEffect(() => {
@@ -96,8 +96,9 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             adaptation_status: model.adaptation_status || 'planning',
             last_inspection: model.last_inspection || '',
             notes: model.notes || '',
-            photo_url: model.photo_url || ''
+            photo_preview: getFileUrl(model, model.photo) || ''
         });
+        setPendingFile(null);
         setEditingId(model.id);
         setIsEditing(true);
         setShowModal(true);
@@ -144,18 +145,23 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 location: currentModel.location,
                 adaptation_status: currentModel.adaptation_status,
                 last_inspection: currentModel.last_inspection || null,
-                notes: currentModel.notes,
-                photo_url: currentModel.photo_url
+                notes: currentModel.notes
             };
 
+            let recordId;
             if (isEditing) {
                 await pb.collection('coffee_models').update(editingId, payload);
-                alert(t.save_success);
+                recordId = editingId;
             } else {
-                await pb.collection('coffee_models').create(payload);
-                alert(t.save_success);
+                const record = await pb.collection('coffee_models').create(payload);
+                recordId = record.id;
             }
 
+            if (pendingFile && recordId) {
+                await uploadFileToPB('coffee_models', recordId, 'photo', pendingFile);
+            }
+
+            alert(t.save_success);
             handleModalClose();
             fetchModels();
         } catch (error) {
@@ -170,6 +176,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         setIsEditing(false);
         setEditingId(null);
         setFarms([]);
+        setPendingFile(null);
         setCurrentModel({
             farmer_id: '',
             farm_id: '',
@@ -185,7 +192,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             adaptation_status: 'planning',
             last_inspection: '',
             notes: '',
-            photo_url: ''
+            photo_preview: ''
         });
     };
 
@@ -267,7 +274,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     </td>
                                     <td style={{ fontWeight: 600 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {m.photo_url && <img src={m.photo_url} alt="M" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                            {m.photo && <img src={getFileUrl(m, m.photo)} alt="M" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
                                             {m.name}
                                         </div>
                                     </td>
@@ -429,8 +436,8 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <MediaUpload
                                     entityType="models"
                                     entityId={isEditing ? editingId : 'new'}
-                                    currentUrl={currentModel.photo_url}
-                                    onUploadSuccess={(url) => setCurrentModel({ ...currentModel, photo_url: url })}
+                                    currentUrl={currentModel.photo_preview}
+                                    onUploadSuccess={(url, file) => { setCurrentModel({ ...currentModel, photo_preview: url }); setPendingFile(file); }}
                                     appLang={appLang}
                                 />
                             </div>
@@ -460,9 +467,9 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
-                        {selectedModel.photo_url && (
+                        {selectedModel.photo && (
                             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <img src={selectedModel.photo_url} alt="Model" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
+                                <img src={getFileUrl(selectedModel, selectedModel.photo)} alt="Model" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
                             </div>
                         )}
 

@@ -1,6 +1,28 @@
 import React, { useState, useRef } from 'react';
 import pb from './pbClient';
 
+/**
+ * Get file URL from a PocketBase record's file field
+ */
+export const getFileUrl = (record, filename) => {
+    if (!record || !filename) return null;
+    return pb.files.getUrl(record, filename);
+};
+
+/**
+ * Upload file(s) to a PocketBase record's file field after create/update
+ */
+export const uploadFileToPB = async (collectionName, recordId, fieldName, files) => {
+    if (!files || !recordId) return;
+    const fd = new FormData();
+    if (Array.isArray(files)) {
+        files.forEach(f => { if (f) fd.append(fieldName, f); });
+    } else {
+        fd.append(fieldName, files);
+    }
+    await pb.collection(collectionName).update(recordId, fd);
+};
+
 const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder = 'general', appLang = 'vi', allowMultiple = false }) => {
     const [uploading, setUploading] = useState(false);
     const [previewUrls, setPreviewUrls] = useState(allowMultiple ? (currentUrl ? currentUrl.split(',').filter(u => u) : []) : (currentUrl ? [currentUrl] : []));
@@ -22,11 +44,7 @@ const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder
             }
 
             const file = event.target.files[0];
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${entityType}_${entityId}_${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-            // Upload to PocketBase via a temporary approach:
-            // Store file as a data URL for preview, pass the File object for later record update
             const reader = new FileReader();
             reader.onload = (e) => {
                 const dataUrl = e.target.result;

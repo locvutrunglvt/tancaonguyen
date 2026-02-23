@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
-import MediaUpload from './MediaUpload';
+import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
 const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -15,6 +15,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     // Detail View State
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedTraining, setSelectedTraining] = useState(null);
+    const [pendingFiles, setPendingFiles] = useState([]);
 
     const [trainingForm, setTrainingForm] = useState({
         farmer_id: '',
@@ -27,7 +28,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         application_level: 'partial',
         feedback: '',
         notes: '',
-        photo_url: ''
+        photo_preview: ''
     });
 
     useEffect(() => {
@@ -71,18 +72,23 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 participants_count: parseInt(trainingForm.participants_count) || 1,
                 application_level: trainingForm.application_level,
                 feedback: trainingForm.feedback,
-                notes: trainingForm.notes,
-                photo_url: trainingForm.photo_url
+                notes: trainingForm.notes
             };
 
+            let recordId;
             if (isEditing) {
                 await pb.collection('training_records').update(editingId, payload);
-                alert(t.save_success);
+                recordId = editingId;
             } else {
-                await pb.collection('training_records').create(payload);
-                alert(t.save_success);
+                const record = await pb.collection('training_records').create(payload);
+                recordId = record.id;
             }
 
+            if (pendingFiles.length > 0 && recordId) {
+                await uploadFileToPB('training_records', recordId, 'photo', pendingFiles);
+            }
+
+            alert(t.save_success);
             handleFormClose();
             fetchTrainings();
         } catch (error) {
@@ -104,8 +110,9 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             application_level: training.application_level || 'partial',
             feedback: training.feedback || '',
             notes: training.notes || '',
-            photo_url: training.photo_url || ''
+            photo_preview: training.photo && training.photo.length > 0 ? training.photo.map(f => getFileUrl(training, f)).join(',') : ''
         });
+        setPendingFiles([]);
         setIsEditing(true);
         setEditingId(training.id);
         setShowForm(true);
@@ -145,8 +152,9 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             application_level: 'partial',
             feedback: '',
             notes: '',
-            photo_url: ''
+            photo_preview: ''
         });
+        setPendingFiles([]);
     };
 
     const canEdit = () => {
@@ -238,7 +246,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         <td>{training.training_date}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                {training.photo_url && <img src={training.photo_url} alt="Training" style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                {training.photo && training.photo.length > 0 && <img src={getFileUrl(training, training.photo[0])} alt="Training" style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }} />}
                                                 {getTrainingTopicText(training.topic)}
                                             </div>
                                         </td>
@@ -363,8 +371,8 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <MediaUpload
                                 entityType="training"
                                 entityId={isEditing ? editingId : 'new'}
-                                currentUrl={trainingForm.photo_url}
-                                onUploadSuccess={(url) => setTrainingForm({ ...trainingForm, photo_url: url })}
+                                currentUrl={trainingForm.photo_preview}
+                                onUploadSuccess={(url, file) => { setTrainingForm({ ...trainingForm, photo_preview: url }); if (file) setPendingFiles(prev => [...prev, file]); }}
                                 appLang={appLang}
                                 allowMultiple={true}
                             />
@@ -394,17 +402,21 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
-                        {selectedTraining.photo_url && (
+                        {selectedTraining.photo && selectedTraining.photo.length > 0 && (
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
-                                {selectedTraining.photo_url.split(',').map((url, idx) => (
-                                    <div key={idx} style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
-                                        {url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm') ? (
-                                            <video src={url} controls style={{ width: '100%', maxHeight: '200px', borderRadius: '15px' }} />
-                                        ) : (
-                                            <img src={url} alt={`Training ${idx}`} style={{ width: '100%', maxHeight: '200px', borderRadius: '15px', objectFit: 'cover' }} />
-                                        )}
-                                    </div>
-                                ))}
+                                {selectedTraining.photo.map((filename, idx) => {
+                                    const url = getFileUrl(selectedTraining, filename);
+                                    const fname = filename.toLowerCase();
+                                    return (
+                                        <div key={idx} style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
+                                            {fname.endsWith('.mp4') || fname.endsWith('.mov') || fname.endsWith('.webm') ? (
+                                                <video src={url} controls style={{ width: '100%', maxHeight: '200px', borderRadius: '15px' }} />
+                                            ) : (
+                                                <img src={url} alt={`Training ${idx}`} style={{ width: '100%', maxHeight: '200px', borderRadius: '15px', objectFit: 'cover' }} />
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
 

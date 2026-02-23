@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { getPHRecommendation } from './agronomyUtils';
 import { translations } from './translations';
-import MediaUpload from './MediaUpload';
+import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
 const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -14,9 +14,9 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    // Detail View State
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedFarm, setSelectedFarm] = useState(null);
+    const [pendingFile, setPendingFile] = useState(null);
 
     const [formData, setFormData] = useState({
         farmer_id: '',
@@ -37,7 +37,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         grass_cover: 'Medium',
         shade_trees: 0,
         notes: '',
-        photo_url: ''
+        photo_preview: ''
     });
 
     const [phFeedback, setPhFeedback] = useState(null);
@@ -95,18 +95,24 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             irrigation_system: formData.irrigation_system,
             grass_cover: formData.grass_cover,
             shade_trees: parseInt(formData.shade_trees) || 0,
-            notes: formData.notes,
-            photo_url: formData.photo_url
+            notes: formData.notes
         };
 
         try {
+            let recordId;
             if (isEditing) {
                 await pb.collection('farm_baselines').update(editingId, payload);
-                alert(t.save_success);
+                recordId = editingId;
             } else {
-                await pb.collection('farm_baselines').create(payload);
-                alert(t.save_success);
+                const record = await pb.collection('farm_baselines').create(payload);
+                recordId = record.id;
             }
+
+            if (pendingFile && recordId) {
+                await uploadFileToPB('farm_baselines', recordId, 'photo', pendingFile);
+            }
+
+            alert(t.save_success);
             handleFormClose();
             fetchBaselines();
         } catch (error) {
@@ -137,8 +143,9 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             grass_cover: farm.grass_cover || 'Medium',
             shade_trees: farm.shade_trees || 0,
             notes: farm.notes || '',
-            photo_url: farm.photo_url || ''
+            photo_preview: getFileUrl(farm, farm.photo) || ''
         });
+        setPendingFile(null);
         setIsEditing(true);
         setEditingId(farm.id);
         setShowForm(true);
@@ -181,8 +188,9 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             grass_cover: 'Medium',
             shade_trees: 0,
             notes: '',
-            photo_url: ''
+            photo_preview: ''
         });
+        setPendingFile(null);
     };
 
     const handleView = (farm) => {
@@ -244,7 +252,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{b.expand?.farmer_id?.farmer_code}</span></td>
                                         <td style={{ fontWeight: 600 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                {b.photo_url && <img src={b.photo_url} alt="Farm" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
+                                                {getFileUrl(b, b.photo) && <img src={getFileUrl(b, b.photo)} alt="Farm" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
                                                 {b.expand?.farmer_id?.full_name}
                                             </div>
                                         </td>
@@ -449,8 +457,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <MediaUpload
                                 entityType="farms"
                                 entityId={isEditing ? editingId : 'new'}
-                                currentUrl={formData.photo_url}
-                                onUploadSuccess={(url) => setFormData({ ...formData, photo_url: url })}
+                                currentUrl={formData.photo_preview}
+                                onUploadSuccess={(url, file) => { setFormData({ ...formData, photo_preview: url }); setPendingFile(file); }}
                                 appLang={appLang}
                             />
                         </div>
@@ -479,9 +487,9 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
-                        {selectedFarm.photo_url && (
+                        {getFileUrl(selectedFarm, selectedFarm.photo) && (
                             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                <img src={selectedFarm.photo_url} alt="Farm" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
+                                <img src={getFileUrl(selectedFarm, selectedFarm.photo)} alt="Farm" style={{ width: '100%', maxHeight: '250px', borderRadius: '15px', objectFit: 'cover' }} />
                             </div>
                         )}
 

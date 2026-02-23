@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { isGCPCompliant } from './agronomyUtils';
 import { translations } from './translations';
-import MediaUpload from './MediaUpload';
+import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
 const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
@@ -16,6 +16,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     // Detail View State
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedActivity, setSelectedActivity] = useState(null);
+    const [pendingFiles, setPendingFiles] = useState([]);
 
     const [formData, setFormData] = useState({
         model_id: '',
@@ -37,7 +38,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         // Common
         reason: '',
         notes: '',
-        media_url: ''
+        media_preview: ''
     });
 
     const [gcpWarning, setGcpWarning] = useState(false);
@@ -91,8 +92,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 activity_type: formData.activity_type,
                 description: formData.description,
                 reason: formData.reason,
-                notes: formData.notes,
-                media_url: formData.media_url
+                notes: formData.notes
             };
 
             // Add type-specific fields
@@ -115,14 +115,20 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                 payload.estimated_value = parseFloat(formData.estimated_value) || null;
             }
 
+            let recordId;
             if (isEditing) {
                 await pb.collection('annual_activities').update(editingId, payload);
-                alert(t.save_success);
+                recordId = editingId;
             } else {
-                await pb.collection('annual_activities').create(payload);
-                alert(t.save_success);
+                const record = await pb.collection('annual_activities').create(payload);
+                recordId = record.id;
             }
 
+            if (pendingFiles.length > 0 && recordId) {
+                await uploadFileToPB('annual_activities', recordId, 'media', pendingFiles);
+            }
+
+            alert(t.save_success);
             handleFormClose();
             fetchLogs();
         } catch (error) {
@@ -150,8 +156,9 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             estimated_value: log.estimated_value || '',
             reason: log.reason || '',
             notes: log.notes || '',
-            media_url: log.media_url || ''
+            media_preview: log.media && log.media.length > 0 ? log.media.map(f => getFileUrl(log, f)).join(',') : ''
         });
+        setPendingFiles([]);
         setIsEditing(true);
         setEditingId(log.id);
         setShowForm(true);
@@ -192,8 +199,9 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             estimated_value: '',
             reason: '',
             notes: '',
-            media_url: ''
+            media_preview: ''
         });
+        setPendingFiles([]);
         setGcpWarning(false);
     };
 
@@ -283,11 +291,13 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                         <td>{log.activity_date}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                {log.media_url && (
-                                                    log.media_url.endsWith('.mp4') || log.media_url.endsWith('.mov') || log.media_url.endsWith('.webm') ?
+                                                {log.media && log.media.length > 0 && (() => {
+                                                    const firstUrl = getFileUrl(log, log.media[0]);
+                                                    const fname = log.media[0].toLowerCase();
+                                                    return fname.endsWith('.mp4') || fname.endsWith('.mov') || fname.endsWith('.webm') ?
                                                         <i className="fas fa-video" style={{ color: 'var(--coffee-primary)', fontSize: '10px' }}></i> :
-                                                        <img src={log.media_url} alt="Act" style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }} />
-                                                )}
+                                                        <img src={firstUrl} alt="Act" style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }} />;
+                                                })()}
                                                 {getActivityTypeBadge(log.activity_type)}
                                             </div>
                                         </td>
@@ -488,8 +498,8 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <MediaUpload
                                 entityType="activities"
                                 entityId={isEditing ? editingId : 'new'}
-                                currentUrl={formData.media_url}
-                                onUploadSuccess={(url) => setFormData({ ...formData, media_url: url })}
+                                currentUrl={formData.media_preview}
+                                onUploadSuccess={(url, file) => { setFormData({ ...formData, media_preview: url }); if (file) setPendingFiles(prev => [...prev, file]); }}
                                 appLang={appLang}
                                 allowMultiple={true}
                             />
@@ -519,17 +529,21 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             <button onClick={() => setShowDetailModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#666' }}>&times;</button>
                         </div>
 
-                        {selectedActivity.media_url && (
+                        {selectedActivity.media && selectedActivity.media.length > 0 && (
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
-                                {selectedActivity.media_url.split(',').map((url, idx) => (
-                                    <div key={idx} style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
-                                        {url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm') ? (
-                                            <video src={url} controls style={{ width: '100%', maxHeight: '200px', borderRadius: '15px' }} />
-                                        ) : (
-                                            <img src={url} alt={`Activity ${idx}`} style={{ width: '100%', maxHeight: '200px', borderRadius: '15px', objectFit: 'cover' }} />
-                                        )}
-                                    </div>
-                                ))}
+                                {selectedActivity.media.map((filename, idx) => {
+                                    const url = getFileUrl(selectedActivity, filename);
+                                    const fname = filename.toLowerCase();
+                                    return (
+                                        <div key={idx} style={{ position: 'relative', width: '100%', maxWidth: '280px' }}>
+                                            {fname.endsWith('.mp4') || fname.endsWith('.mov') || fname.endsWith('.webm') ? (
+                                                <video src={url} controls style={{ width: '100%', maxHeight: '200px', borderRadius: '15px' }} />
+                                            ) : (
+                                                <img src={url} alt={`Activity ${idx}`} style={{ width: '100%', maxHeight: '200px', borderRadius: '15px', objectFit: 'cover' }} />
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
 

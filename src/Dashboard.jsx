@@ -260,7 +260,7 @@ const UserManagementView = ({
     );
 };
 
-const UserProfileModal = ({ user, t, onClose, onPasswordClick }) => {
+const UserProfileModal = ({ user, t, onClose, onPasswordClick, appLang = 'vi' }) => {
     if (!user) return null;
     return (
         <div className="modal-overlay" style={{ zIndex: 4000 }}>
@@ -605,7 +605,7 @@ const Dashboard = ({ devUser, onLogout }) => {
                 </div>
             </main>
 
-            {showProfileModal && <UserProfileModal user={currentUser} t={t} onClose={() => setShowProfileModal(false)} onPasswordClick={() => { setShowProfileModal(false); setShowPwModal(true); }} />}
+            {showProfileModal && <UserProfileModal user={currentUser} t={t} appLang={appLang} onClose={() => setShowProfileModal(false)} onPasswordClick={() => { setShowProfileModal(false); setShowPwModal(true); }} />}
             {showPwModal && <PasswordModal t={t} onClose={() => setShowPwModal(false)} onSave={handleChangePassword} isLoading={loading} />}
 
             <nav className="mobile-bottom-nav">
