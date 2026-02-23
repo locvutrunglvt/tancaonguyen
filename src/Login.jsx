@@ -3,7 +3,7 @@ import pb from './pbClient';
 import { translations } from './translations';
 import './Login.css';
 
-const Login = ({ onDevLogin }) => {
+const Login = () => {
     const [view, setView] = useState('login');
     const [lang, setLang] = useState(localStorage.getItem('app_lang') || 'vi');
 
@@ -99,35 +99,17 @@ const Login = ({ onDevLogin }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log("LOGIN_START: ", formData.email);
         try {
-            const selectedUser = users.find(u => u.email === formData.email);
-
-            try {
-                await pb.collection('users').authWithPassword(
-                    formData.email,
-                    formData.password
-                );
-                console.log("AUTH_LOGIN_SUCCESS");
-                return;
-            } catch (authError) {
-                if (onDevLogin) {
-                    console.warn("AUTH_FAIL: Switching to Silent Bypass Mode.");
-                    onDevLogin({
-                        email: formData.email,
-                        full_name: selectedUser?.full_name || formData.email.split('@')[0],
-                        phone: formData.phone,
-                        organization: formData.org,
-                        role: selectedUser?.role || 'Viewer',
-                        id: selectedUser?.id || '00000000-0000-0000-0000-000000000000'
-                    });
-                    return;
-                }
-                throw authError;
-            }
+            await pb.collection('users').authWithPassword(
+                formData.email,
+                formData.password
+            );
         } catch (error) {
-            console.error("LOGIN_FINAL_ERROR: ", error);
-            alert(`LOGIN_ERROR: ${error.message}`);
+            alert(lang === 'vi'
+                ? 'Sai email hoặc mật khẩu. Vui lòng thử lại.'
+                : lang === 'en'
+                ? 'Wrong email or password. Please try again.'
+                : 'Soh email mâo password. Lŏ bi lĕ.');
         } finally {
             setIsLoading(false);
         }

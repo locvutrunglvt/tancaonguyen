@@ -4,7 +4,7 @@ import { translations } from './translations';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
-const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
+const TrainingCenter = ({ onBack, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [isLoading, setIsLoading] = useState(false);
     const [trainings, setTrainings] = useState([]);
@@ -159,7 +159,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const canEdit = () => {
         if (!currentUser) return false;
-        return currentUser.role === 'Admin';
+        return currentUser.role === 'Admin' || currentUser.role === 'User';
     };
 
     const getTrainingTopicText = (topic) => {

@@ -3,7 +3,7 @@ import pb from './pbClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
-const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
+const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [isLoading, setIsLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
@@ -55,7 +55,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         e.preventDefault();
         setIsLoading(true);
 
-        const userId = pb.authStore.model?.id || devUser?.id;
+        const userId = pb.authStore.model?.id;
 
         let amountVal = parseInt(formData.amount) || 0;
         if (formData.type === 'Doanh thu') {
@@ -138,7 +138,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const canEdit = (entry) => {
         if (!currentUser) return false;
-        return currentUser.role === 'Admin' || entry.user_id === currentUser.id;
+        return currentUser.role === 'Admin' || currentUser.role === 'User' || entry.user_id === currentUser.id;
     };
 
     const getCategoryText = (cat) => {

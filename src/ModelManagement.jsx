@@ -4,7 +4,7 @@ import { translations } from './translations';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
-const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
+const ModelManagement = ({ onBack, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [models, setModels] = useState([]);
     const [farmers, setFarmers] = useState([]);
@@ -198,7 +198,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const canEdit = () => {
         if (!currentUser) return false;
-        return currentUser.role === 'Admin';
+        return currentUser.role === 'Admin' || currentUser.role === 'User';
     };
 
     const getStatusBadge = (status) => {

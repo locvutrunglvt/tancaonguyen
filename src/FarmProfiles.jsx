@@ -5,7 +5,7 @@ import { translations } from './translations';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
-const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
+const FarmProfiles = ({ onBack, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [isLoading, setIsLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
@@ -199,9 +199,8 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     };
 
     const canEdit = () => {
-        if (!currentUser && !devUser) return false;
-        const user = currentUser || devUser;
-        return user.role === 'Admin';
+        if (!currentUser) return false;
+        return currentUser.role === 'Admin' || currentUser.role === 'User';
     };
 
     return (

@@ -4,7 +4,7 @@ import './Dashboard.css';
 import { translations } from './translations';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 
-const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
+const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -188,7 +188,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const canEdit = () => {
         if (!currentUser) return false;
-        return currentUser.role === 'Admin';
+        return currentUser.role === 'Admin' || currentUser.role === 'User';
     };
 
     const getStatusBadge = (status) => {

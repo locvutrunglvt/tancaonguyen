@@ -68,18 +68,15 @@ const UserManagementView = ({
     users, t, currentUser, onBack, onAdd, onEdit, onDelete,
     showModal, onModalClose, userForm, onFormChange, onSave, isEditing, isLoading
 }) => {
-    // Permission Logic: Only Admin of the same org OR TCN Admin can Manage
+    // Permission Logic based on role
+    const userPerms = getPermissions(currentUser?.role);
     const canManageUser = (targetOrg) => {
         if (!currentUser) return false;
         const isAdmin = currentUser.role === 'Admin';
         const isTCNAdmin = currentUser.organization === 'tcn' && isAdmin;
         const isSameOrg = currentUser.organization === targetOrg;
-        // Exception: Grand admin can manage all
-        const isSuperAdmin = currentUser.email?.includes('admin@daklack.com');
-        return isAdmin && (isSameOrg || isTCNAdmin || isSuperAdmin);
+        return isAdmin && (isSameOrg || isTCNAdmin);
     };
-
-    const perms = { view: true, add: true, edit: true, delete: true }; // Form permissions helper
 
     return (
         <div className="view-container">
@@ -87,7 +84,7 @@ const UserManagementView = ({
                 <button onClick={onBack} className="btn-back">
                     <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
-                {currentUser?.role === 'Admin' && (
+                {userPerms.add && (
                     <button onClick={onAdd} className="btn-add-user">
                         <i className="fas fa-user-plus"></i> {(t.user_add_btn || 'THÊM NGƯỜI DÙNG').toUpperCase()}
                     </button>
@@ -130,23 +127,23 @@ const UserManagementView = ({
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '8px' }}>
-                                            {canManageUser(u.organization) && (
-                                                <>
-                                                    <button onClick={() => onEdit(u)} style={{
-                                                        background: '#fef3c7', border: '1px solid #d97706',
-                                                        color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                    }} title={t.edit}>
-                                                        <i className="fas fa-pen"></i>
-                                                    </button>
-                                                    <button onClick={() => onDelete(u.id)} style={{
-                                                        background: '#fef2f2', border: '1px solid #ef4444',
-                                                        color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                    }} title={t.delete}>
-                                                        <i className="fas fa-trash"></i>
-                                                    </button>
-                                                </>
+                                            {canManageUser(u.organization) && userPerms.edit && (
+                                                <button onClick={() => onEdit(u)} style={{
+                                                    background: '#fef3c7', border: '1px solid #d97706',
+                                                    color: '#92400e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }} title={t.edit}>
+                                                    <i className="fas fa-pen"></i>
+                                                </button>
+                                            )}
+                                            {canManageUser(u.organization) && userPerms.delete && (
+                                                <button onClick={() => onDelete(u.id)} style={{
+                                                    background: '#fef2f2', border: '1px solid #ef4444',
+                                                    color: '#b91c1c', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }} title={t.delete}>
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
                                             )}
                                         </div>
                                     </td>
@@ -183,7 +180,7 @@ const UserManagementView = ({
                                         className="input-pro"
                                         value={userForm.organization}
                                         onChange={e => onFormChange({ ...userForm, organization: e.target.value })}
-                                        disabled={currentUser?.organization !== 'tcn' && !currentUser?.email?.includes('admin@daklack.com')}
+                                        disabled={currentUser?.organization !== 'tcn'}
                                     >
                                         <option value="tcn">Tân Cao Nguyên (TCN)</option>
                                         <option value="tch">Tchibo (TCH)</option>
@@ -202,10 +199,9 @@ const UserManagementView = ({
                                         <>
                                             <label>{t.user_role}</label>
                                             <select className="input-pro" value={userForm.role} onChange={e => onFormChange({ ...userForm, role: e.target.value })}>
-                                                <option value="Guest">Guest</option>
-                                                <option value="Viewer">Viewer</option>
-                                                <option value="Farmer">Farmer</option>
-                                                <option value="Admin">Admin</option>
+                                                <option value="Guest">Guest ({t.user_perm_view || 'Xem'})</option>
+                                                <option value="User">User ({t.user_perm_view || 'Xem'}, {t.user_perm_add || 'Thêm'}, {t.user_perm_edit || 'Sửa'})</option>
+                                                <option value="Admin">Admin ({t.user_perm_view || 'Xem'}, {t.user_perm_add || 'Thêm'}, {t.user_perm_edit || 'Sửa'}, {t.user_perm_delete || 'Xóa'})</option>
                                             </select>
                                         </>
                                     )}
@@ -223,26 +219,31 @@ const UserManagementView = ({
                                 </div>
                             ) : null}
 
-                            <div className="permissions-section" style={{ background: '#f8fafc', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
-                                <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--coffee-dark)', marginBottom: '8px', display: 'block' }}>
-                                    <i className="fas fa-shield-alt"></i> {t.user_perm_title}
-                                </label>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.view} readOnly /> {t.user_perm_view}
-                                    </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.add} readOnly /> {t.user_perm_add}
-                                    </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.edit} readOnly /> {t.user_perm_edit}
-                                    </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={perms.delete} readOnly /> {t.user_perm_delete}
-                                    </label>
-                                </div>
-                                <p style={{ fontSize: '10px', marginTop: '10px', color: '#64748b', fontStyle: 'italic' }}>* {t.user_perm_note || 'Permissions are automatically adjusted by Role'}</p>
-                            </div>
+                            {(() => {
+                                const rolePerms = getPermissions(userForm.role);
+                                return (
+                                    <div className="permissions-section" style={{ background: '#f8fafc', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
+                                        <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--coffee-dark)', marginBottom: '8px', display: 'block' }}>
+                                            <i className="fas fa-shield-alt"></i> {t.user_perm_title}
+                                        </label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+                                                <input type="checkbox" checked={rolePerms.view} readOnly /> {t.user_perm_view}
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+                                                <input type="checkbox" checked={rolePerms.add} readOnly /> {t.user_perm_add}
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+                                                <input type="checkbox" checked={rolePerms.edit} readOnly /> {t.user_perm_edit}
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+                                                <input type="checkbox" checked={rolePerms.delete} readOnly /> {t.user_perm_delete}
+                                            </label>
+                                        </div>
+                                        <p style={{ fontSize: '10px', marginTop: '10px', color: '#64748b', fontStyle: 'italic' }}>* {t.user_perm_note || 'Quyền tự động thay đổi theo Vai trò'}</p>
+                                    </div>
+                                );
+                            })()}
 
                             <div className="modal-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'flex-end' }}>
                                 <button type="submit" className="btn-primary" disabled={isLoading}>
@@ -306,11 +307,27 @@ const UserProfileModal = ({ user, t, onClose, onPasswordClick, appLang = 'vi' })
 
 // --- Main Dashboard Component ---
 
-const Dashboard = ({ devUser, onLogout }) => {
+// Role-based permission helper
+const getPermissions = (role) => {
+    switch (role) {
+        case 'Admin':
+            return { view: true, add: true, edit: true, delete: true };
+        case 'User':
+        case 'Farmer':
+            return { view: true, add: true, edit: true, delete: false };
+        case 'Viewer':
+            return { view: true, add: false, edit: false, delete: false };
+        case 'Guest':
+        default:
+            return { view: true, add: false, edit: false, delete: false };
+    }
+};
+
+const Dashboard = ({ onLogout }) => {
     const [view, setView] = useState('home');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [currentUser, setCurrentUser] = useState(devUser || null);
+    const [currentUser, setCurrentUser] = useState(null);
     const [showUserModal, setShowUserModal] = useState(false);
     const [userForm, setUserForm] = useState({ id: '', email: '', full_name: '', organization: 'gus', role: 'Guest', employee_code: '', phone: '' });
     const [isEditing, setIsEditing] = useState(false);
@@ -320,15 +337,8 @@ const Dashboard = ({ devUser, onLogout }) => {
     const t = translations[appLang];
 
     useEffect(() => {
-        const load = async () => {
-            if (devUser) {
-                setCurrentUser(devUser);
-            } else {
-                await fetchUserProfile();
-            }
-        };
-        load();
-    }, [devUser]);
+        fetchUserProfile();
+    }, []);
 
 
     useEffect(() => {
@@ -348,12 +358,6 @@ const Dashboard = ({ devUser, onLogout }) => {
     };
 
     const handleChangePassword = async (newPassword) => {
-        if (devUser) {
-            alert("DEV_MODE: Password change simulated successfully!");
-            setShowPwModal(false);
-            return;
-        }
-
         setLoading(true);
         try {
             if (!pb.authStore.isValid) throw new Error(t.login_required || "Please login again.");
@@ -476,7 +480,7 @@ const Dashboard = ({ devUser, onLogout }) => {
     ];
 
     // Security check: Is current user an Admin?
-    const isAdmin = currentUser?.role === 'Admin' || currentUser?.email?.includes('admin@daklack.com');
+    const isAdmin = currentUser?.role === 'Admin';
 
     if (isAdmin) {
         menuItems.push({ id: 'users', title: 'Admin', desc: t.users_desc || 'Quản trị hệ thống và người dùng.', icon: 'fas fa-users-cog', action: () => setView('users') });
@@ -596,12 +600,12 @@ const Dashboard = ({ devUser, onLogout }) => {
                             isLoading={loading}
                         />
                     )}
-                    {view === 'model' && <ModelManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'activities' && <AnnualActivities onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'training' && <TrainingCenter onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'farms' && <FarmProfiles onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} devUser={devUser} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'model' && <ModelManagement onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'activities' && <AnnualActivities onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'training' && <TrainingCenter onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'farms' && <FarmProfiles onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
                 </div>
             </main>
 
