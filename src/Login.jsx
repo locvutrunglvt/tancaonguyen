@@ -122,6 +122,7 @@ const Login = () => {
         try {
             await pb.collection('users').create({
                 email: formData.email,
+                emailVisibility: true,
                 password: formData.password,
                 passwordConfirm: formData.password,
                 full_name: formData.fullName,

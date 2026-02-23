@@ -65,7 +65,7 @@ const PasswordModal = ({ t, onClose, onSave, isLoading }) => {
 };
 
 const UserManagementView = ({
-    users, t, currentUser, onBack, onAdd, onEdit, onDelete,
+    users, t, currentUser, onBack, onAdd, onEdit, onDelete, onResetPassword,
     showModal, onModalClose, userForm, onFormChange, onSave, isEditing, isLoading
 }) => {
     // Permission Logic based on role
@@ -134,6 +134,15 @@ const UserManagementView = ({
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                                                 }} title={t.edit}>
                                                     <i className="fas fa-pen"></i>
+                                                </button>
+                                            )}
+                                            {canManageUser(u.organization) && userPerms.edit && (
+                                                <button onClick={() => onResetPassword(u)} style={{
+                                                    background: '#eff6ff', border: '1px solid #3b82f6',
+                                                    color: '#1d4ed8', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }} title={t.reset_password || 'Reset password'}>
+                                                    <i className="fas fa-key"></i>
                                                 </button>
                                             )}
                                             {canManageUser(u.organization) && userPerms.delete && (
@@ -431,7 +440,8 @@ const Dashboard = ({ onLogout }) => {
                 // Create new user in PocketBase auth collection
                 await pb.collection('users').create({
                     email: userForm.email,
-                    password: userForm.password || '12345678', // Default if not provided
+                    emailVisibility: true,
+                    password: userForm.password || '12345678',
                     passwordConfirm: userForm.password || '12345678',
                     full_name: userForm.full_name,
                     organization: userForm.organization,
@@ -459,6 +469,27 @@ const Dashboard = ({ onLogout }) => {
             fetchUsersList();
         } catch (error) {
             alert(`DELETE_ERROR: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResetPassword = async (user) => {
+        const newPw = prompt(t.new_password_for?.replace('{name}', user.full_name) || `Nhập mật khẩu mới cho ${user.full_name}:`);
+        if (!newPw) return;
+        if (newPw.length < 8) {
+            alert(t.password_min_8 || 'Mật khẩu phải có ít nhất 8 ký tự.');
+            return;
+        }
+        setLoading(true);
+        try {
+            await pb.collection('users').update(user.id, {
+                password: newPw,
+                passwordConfirm: newPw
+            });
+            alert(t.password_reset_success?.replace('{name}', user.full_name) || `Đã đặt lại mật khẩu cho ${user.full_name}.`);
+        } catch (error) {
+            alert(`ERROR: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -591,6 +622,7 @@ const Dashboard = ({ onLogout }) => {
                             onAdd={() => { setUserForm({ id: '', email: '', full_name: '', organization: currentUser?.organization || 'gus', role: 'Guest', employee_code: '', phone: '' }); setIsEditing(false); setShowUserModal(true); }}
                             onEdit={(u) => { setUserForm(u); setIsEditing(true); setShowUserModal(true); }}
                             onDelete={handleDeleteUser}
+                            onResetPassword={handleResetPassword}
                             showModal={showUserModal}
                             onModalClose={() => setShowUserModal(false)}
                             userForm={userForm}
