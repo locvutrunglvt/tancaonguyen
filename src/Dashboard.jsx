@@ -1,5 +1,5 @@
 /* DASHBOARD & HOME MENU - TCN - REFACTORED FOR STABILITY */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import pb from './pbClient';
 import './Dashboard.css';
 import { translations } from './translations';
@@ -9,6 +9,8 @@ import AnnualActivities from './AnnualActivities';
 import TrainingCenter from './TrainingCenter';
 import FarmProfiles from './FarmProfiles';
 import SeasonalPlanning from './SeasonalPlanning';
+import BackupRestore from './BackupRestore';
+import useSwipeBack from './useSwipeBack';
 
 // Components Moved Outside for React Component Stability (Fixes Input Focus Bug)
 const HomeView = ({ menuItems, t }) => (
@@ -345,6 +347,12 @@ const Dashboard = ({ onLogout }) => {
     const [appLang, setAppLang] = useState(localStorage.getItem('app_lang') || 'vi');
     const t = translations[appLang];
 
+    // Swipe right from left edge → go back to home
+    const handleSwipeBack = useCallback(() => {
+        if (view !== 'home') setView('home');
+    }, [view]);
+    useSwipeBack(handleSwipeBack, view !== 'home');
+
     useEffect(() => {
         fetchUserProfile();
     }, []);
@@ -514,6 +522,7 @@ const Dashboard = ({ onLogout }) => {
     const isAdmin = currentUser?.role === 'Admin';
 
     if (isAdmin) {
+        menuItems.push({ id: 'backup', title: appLang === 'vi' ? 'Sao luu' : appLang === 'en' ? 'Backup' : 'Pioh', desc: appLang === 'vi' ? 'Sao luu & phuc hoi toan bo du lieu.' : appLang === 'en' ? 'Backup & restore all data.' : 'Pioh & lom hdra mnau.', icon: 'fas fa-database', action: () => setView('backup') });
         menuItems.push({ id: 'users', title: 'Admin', desc: t.users_desc || 'Quản trị hệ thống và người dùng.', icon: 'fas fa-users-cog', action: () => setView('users') });
     }
 
@@ -545,6 +554,11 @@ const Dashboard = ({ onLogout }) => {
                     <a className={`nav-item ${view === 'model' ? 'active' : ''}`} onClick={() => setView('model')}>
                         <i className="fas fa-seedling"></i> <span>{t.model}</span>
                     </a>
+                    {isAdmin && (
+                        <a className={`nav-item ${view === 'backup' ? 'active' : ''}`} onClick={() => setView('backup')}>
+                            <i className="fas fa-database"></i> <span>{appLang === 'vi' ? 'Sao luu' : appLang === 'en' ? 'Backup' : 'Pioh'}</span>
+                        </a>
+                    )}
                     {isAdmin && (
                         <a className={`nav-item ${view === 'users' ? 'active' : ''}`} onClick={() => setView('users')}>
                             <i className="fas fa-users-cog"></i> <span>Admin</span>
@@ -638,6 +652,7 @@ const Dashboard = ({ onLogout }) => {
                     {view === 'farms' && <FarmProfiles onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
                     {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
                     {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'backup' && <BackupRestore onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
                 </div>
             </main>
 

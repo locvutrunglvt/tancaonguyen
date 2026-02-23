@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import pb from './pbClient'
 import Login from './Login'
 import Dashboard from './Dashboard'
+import PwaInstallBanner from './PwaInstallBanner'
 import './App.css'
 
 function App() {
@@ -23,6 +24,8 @@ function App() {
     setIsLoggedIn(false)
   }
 
+  const appLang = typeof localStorage !== 'undefined' ? (localStorage.getItem('app_lang') || 'vi') : 'vi'
+
   return (
     <div className="App">
       {!isLoggedIn ? (
@@ -30,6 +33,7 @@ function App() {
       ) : (
         <Dashboard onLogout={handleLogout} />
       )}
+      <PwaInstallBanner appLang={appLang} />
     </div>
   )
 }
