@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import { isGCPCompliant } from './agronomyUtils';
 import { translations } from './translations';
 import MediaUpload from './MediaUpload';
@@ -49,17 +49,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const fetchModels = async () => {
         try {
-            const { data, error } = await supabase
-                .from('coffee_models')
-                .select(`
-                    id,
-                    model_code,
-                    name,
-                    farmer:farmers(farmer_code, full_name)
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const data = await pb.collection('coffee_models').getFullList({ expand: 'farmer_id', sort: '-created' });
             setModels(data || []);
         } catch (err) {
             console.error('Error fetching models:', err.message);
@@ -69,19 +59,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const fetchLogs = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('annual_activities')
-                .select(`
-                    *,
-                    model:coffee_models(
-                        model_code,
-                        name,
-                        farmer:farmers(farmer_code, full_name)
-                    )
-                `)
-                .order('activity_date', { ascending: false });
-
-            if (error) throw error;
+            const data = await pb.collection('annual_activities').getFullList({ expand: 'model_id,model_id.farmer_id', sort: '-activity_date' });
             setLogs(data || []);
         } catch (err) {
             console.error('Error fetching logs:', err.message);
@@ -138,19 +116,10 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             }
 
             if (isEditing) {
-                const { error } = await supabase
-                    .from('annual_activities')
-                    .update(payload)
-                    .eq('id', editingId);
-
-                if (error) throw error;
+                await pb.collection('annual_activities').update(editingId, payload);
                 alert(t.save_success);
             } else {
-                const { error } = await supabase
-                    .from('annual_activities')
-                    .insert([payload]);
-
-                if (error) throw error;
+                await pb.collection('annual_activities').create(payload);
                 alert(t.save_success);
             }
 
@@ -192,8 +161,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
-            const { error } = await supabase.from('annual_activities').delete().eq('id', id);
-            if (error) throw error;
+            await pb.collection('annual_activities').delete(id);
             alert(t.delete_success);
             fetchLogs();
         } catch (error) {
@@ -307,10 +275,10 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             ) : (
                                 logs.map(log => (
                                     <tr key={log.id} onClick={() => handleView(log)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
-                                        <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{log.model?.model_code}</span></td>
+                                        <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{log.expand?.model_id?.model_code}</span></td>
                                         <td>
-                                            <div style={{ fontSize: '11px', opacity: 0.7 }}>{log.model?.farmer?.farmer_code}</div>
-                                            <div style={{ fontWeight: 600 }}>{log.model?.farmer?.full_name}</div>
+                                            <div style={{ fontSize: '11px', opacity: 0.7 }}>{log.expand?.model_id?.expand?.farmer_id?.farmer_code}</div>
+                                            <div style={{ fontWeight: 600 }}>{log.expand?.model_id?.expand?.farmer_id?.full_name}</div>
                                         </td>
                                         <td>{log.activity_date}</td>
                                         <td>
@@ -391,7 +359,7 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                     <option value="">-- {appLang === 'vi' ? 'Chọn mô hình' : appLang === 'en' ? 'Select Model' : 'Hriêng mô hình'} --</option>
                                     {models.map(m => (
                                         <option key={m.id} value={m.id}>
-                                            {m.model_code} - {m.name} ({m.farmer?.full_name})
+                                            {m.model_code} - {m.name} ({m.expand?.farmer_id?.full_name})
                                         </option>
                                     ))}
                                 </select>
@@ -573,11 +541,11 @@ const AnnualActivities = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Mô hình' : appLang === 'en' ? 'Model' : 'Mô hình'}</label>
-                                <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedActivity.model?.name} ({selectedActivity.model?.model_code})</div>
+                                <div style={{ fontWeight: 'bold', color: 'var(--coffee-primary)' }}>{selectedActivity.expand?.model_id?.name} ({selectedActivity.expand?.model_id?.model_code})</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer}</label>
-                                <div style={{ fontWeight: 600 }}>{selectedActivity.model?.farmer?.full_name}</div>
+                                <div style={{ fontWeight: 600 }}>{selectedActivity.expand?.model_id?.expand?.farmer_id?.full_name}</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.act_type}</label>

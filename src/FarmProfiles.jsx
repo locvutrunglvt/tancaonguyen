@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import { getPHRecommendation } from './agronomyUtils';
 import { translations } from './translations';
 import MediaUpload from './MediaUpload';
@@ -49,13 +49,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const fetchFarmers = async () => {
         try {
-            const { data, error } = await supabase
-                .from('farmers')
-                .select('id, farmer_code, full_name, village')
-                .eq('status', 'active')
-                .order('full_name');
-
-            if (error) throw error;
+            const data = await pb.collection('farmers').getFullList({ filter: "status='active'", sort: 'full_name' });
             setFarmers(data || []);
         } catch (err) {
             console.error('Error fetching farmers:', err.message);
@@ -65,15 +59,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const fetchBaselines = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('farm_baselines')
-                .select(`
-                    *,
-                    farmer: farmers(farmer_code, full_name, village)
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const data = await pb.collection('farm_baselines').getFullList({ expand: 'farmer_id', sort: '-created' });
             setBaselines(data || []);
         } catch (err) {
             console.error('Error fetching baselines:', err.message);
@@ -115,19 +101,10 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
         try {
             if (isEditing) {
-                const { error } = await supabase
-                    .from('farm_baselines')
-                    .update(payload)
-                    .eq('id', editingId);
-
-                if (error) throw error;
+                await pb.collection('farm_baselines').update(editingId, payload);
                 alert(t.save_success);
             } else {
-                const { error } = await supabase
-                    .from('farm_baselines')
-                    .insert([payload]);
-
-                if (error) throw error;
+                await pb.collection('farm_baselines').create(payload);
                 alert(t.save_success);
             }
             handleFormClose();
@@ -171,8 +148,7 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
-            const { error } = await supabase.from('farm_baselines').delete().eq('id', id);
-            if (error) throw error;
+            await pb.collection('farm_baselines').delete(id);
             alert(t.delete_success);
             fetchBaselines();
         } catch (error) {
@@ -265,14 +241,14 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             ) : (
                                 baselines.map(b => (
                                     <tr key={b.id} onClick={() => handleView(b)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
-                                        <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{b.farmer?.farmer_code}</span></td>
+                                        <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{b.expand?.farmer_id?.farmer_code}</span></td>
                                         <td style={{ fontWeight: 600 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 {b.photo_url && <img src={b.photo_url} alt="Farm" style={{ width: '24px', height: '24px', borderRadius: '4px', objectFit: 'cover' }} />}
-                                                {b.farmer?.full_name}
+                                                {b.expand?.farmer_id?.full_name}
                                             </div>
                                         </td>
-                                        <td>{b.farmer?.village}</td>
+                                        <td>{b.expand?.farmer_id?.village}</td>
                                         <td>{b.total_area} ha</td>
                                         <td>{b.coffee_area} ha</td>
                                         <td>
@@ -521,11 +497,11 @@ const FarmProfiles = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.owner}</label>
-                                <div style={{ fontWeight: 600 }}>{selectedFarm.farmer?.full_name} ({selectedFarm.farmer?.farmer_code})</div>
+                                <div style={{ fontWeight: 600 }}>{selectedFarm.expand?.farmer_id?.full_name} ({selectedFarm.expand?.farmer_id?.farmer_code})</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_address}</label>
-                                <div>{selectedFarm.farmer?.village}</div>
+                                <div>{selectedFarm.expand?.farmer_id?.village}</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm_name}</label>

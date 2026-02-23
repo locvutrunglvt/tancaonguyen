@@ -1,6 +1,6 @@
 /* DASHBOARD & HOME MENU - TCN - REFACTORED FOR STABILITY */
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import './Dashboard.css';
 import { translations } from './translations';
 import ModelManagement from './ModelManagement';
@@ -336,10 +336,14 @@ const Dashboard = ({ devUser, onLogout }) => {
     }, [view]);
 
     const fetchUserProfile = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = pb.authStore.model;
         if (user) {
-            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-            setCurrentUser(profile || user);
+            try {
+                const profile = await pb.collection('users').getOne(user.id);
+                setCurrentUser(profile);
+            } catch (err) {
+                setCurrentUser(user);
+            }
         }
     };
 
@@ -352,11 +356,12 @@ const Dashboard = ({ devUser, onLogout }) => {
 
         setLoading(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) throw new Error(t.login_required || "Please login again.");
+            if (!pb.authStore.isValid) throw new Error(t.login_required || "Please login again.");
 
-            const { error } = await supabase.auth.updateUser({ password: newPassword });
-            if (error) throw error;
+            await pb.collection('users').update(pb.authStore.model.id, {
+                password: newPassword,
+                passwordConfirm: newPassword
+            });
             alert(t.password_success);
             setShowPwModal(false);
         } catch (error) {
@@ -369,11 +374,9 @@ const Dashboard = ({ devUser, onLogout }) => {
     const fetchUsersList = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('id, email, full_name, organization, role, employee_code, phone')
-                .order('created_at', { ascending: false });
-            if (error) throw error;
+            const data = await pb.collection('users').getFullList({
+                sort: '-created'
+            });
             setUsers(data || []);
         } catch (error) {
             alert(`FETCH_ERROR: ${error.message}`);
@@ -412,53 +415,26 @@ const Dashboard = ({ devUser, onLogout }) => {
             }
 
             if (isEditing) {
-                const { error } = await supabase
-                    .from('profiles')
-                    .upsert({
-                        id: userForm.id,
-                        email: userForm.email,
-                        full_name: userForm.full_name,
-                        organization: userForm.organization,
-                        role: userForm.role,
-                        employee_code: finalCode,
-                        phone: userForm.phone
-                    });
-                if (error) throw error;
+                await pb.collection('users').update(userForm.id, {
+                    email: userForm.email,
+                    full_name: userForm.full_name,
+                    organization: userForm.organization,
+                    role: userForm.role,
+                    employee_code: finalCode,
+                    phone: userForm.phone
+                });
             } else {
-                // Perform account registration in Supabase Auth
-                const { data, error: signUpError } = await supabase.auth.signUp({
+                // Create new user in PocketBase auth collection
+                await pb.collection('users').create({
                     email: userForm.email,
                     password: userForm.password || '12345678', // Default if not provided
-                    options: {
-                        data: {
-                            full_name: userForm.full_name,
-                            organization: userForm.organization,
-                            role: userForm.role,
-                            employee_code: finalCode,
-                            phone: userForm.phone
-                        }
-                    }
+                    passwordConfirm: userForm.password || '12345678',
+                    full_name: userForm.full_name,
+                    organization: userForm.organization,
+                    role: userForm.role,
+                    employee_code: finalCode,
+                    phone: userForm.phone
                 });
-
-                if (signUpError) throw signUpError;
-
-                // Manual insert into 'profiles' as fallback
-                if (data?.user) {
-                    const { error: profError } = await supabase
-                        .from('profiles')
-                        .insert([{
-                            id: data.user.id,
-                            email: userForm.email,
-                            full_name: userForm.full_name,
-                            organization: userForm.organization,
-                            role: userForm.role,
-                            employee_code: finalCode,
-                            phone: userForm.phone
-                        }]);
-                    if (profError) {
-                        console.error("METADATA_SYNC_FAIL: ", profError.message);
-                    }
-                }
             }
             alert(t.save_success);
             setShowUserModal(false);
@@ -474,8 +450,7 @@ const Dashboard = ({ devUser, onLogout }) => {
         if (!window.confirm(t.delete_confirm)) return;
         setLoading(true);
         try {
-            const { error } = await supabase.from('profiles').delete().eq('id', id);
-            if (error) throw error;
+            await pb.collection('users').delete(id);
             alert(t.delete_success);
             fetchUsersList();
         } catch (error) {
@@ -487,7 +462,7 @@ const Dashboard = ({ devUser, onLogout }) => {
 
     const handleLogout = async () => {
         if (onLogout) await onLogout();
-        else await supabase.auth.signOut();
+        else pb.authStore.clear();
     };
 
     const menuItems = [

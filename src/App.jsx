@@ -1,46 +1,40 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from './supabaseClient'
+import pb from './pbClient'
 import Login from './Login'
 import Dashboard from './Dashboard'
 import './App.css'
 
 function App() {
-  const [session, setSession] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(pb.authStore.isValid)
   const [devUser, setDevUser] = useState(() => {
-    // Restore devUser from localStorage on mount
     const stored = localStorage.getItem('devUser');
     return stored ? JSON.parse(stored) : null;
   })
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
+    const unsubscribe = pb.authStore.onChange(() => {
+      setIsLoggedIn(pb.authStore.isValid)
     })
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-
-    return () => subscription.unsubscribe()
+    return () => unsubscribe()
   }, [])
 
   const handleDevLogin = (user) => {
     console.log("APP_DEV_LOGIN_RECEIVED: ", user);
-    localStorage.setItem('devUser', JSON.stringify(user)); // Persist to localStorage
+    localStorage.setItem('devUser', JSON.stringify(user));
     setDevUser(user)
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    localStorage.removeItem('devUser'); // Clear from localStorage
+    pb.authStore.clear()
+    localStorage.removeItem('devUser');
     setDevUser(null)
+    setIsLoggedIn(false)
   }
 
   return (
     <div className="App">
-      {!session && !devUser ? (
+      {!isLoggedIn && !devUser ? (
         <Login onDevLogin={handleDevLogin} />
       ) : (
         <Dashboard devUser={devUser} onLogout={handleLogout} />

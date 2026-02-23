@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import { translations } from './translations';
 import MediaUpload from './MediaUpload';
 import './Dashboard.css';
@@ -37,13 +37,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const fetchFarmers = async () => {
         try {
-            const { data, error } = await supabase
-                .from('farmers')
-                .select('id, farmer_code, full_name, village')
-                .eq('status', 'active')
-                .order('full_name');
-
-            if (error) throw error;
+            const data = await pb.collection('farmers').getFullList({ filter: "status='active'", sort: 'full_name' });
             setFarmers(data || []);
         } catch (err) {
             console.error('Error fetching farmers:', err.message);
@@ -53,15 +47,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const fetchTrainings = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('training_records')
-                .select(`
-                    *,
-                    farmer:farmers(farmer_code, full_name, village)
-                `)
-                .order('training_date', { ascending: false });
-
-            if (error) throw error;
+            const data = await pb.collection('training_records').getFullList({ expand: 'farmer_id', sort: '-training_date' });
             setTrainings(data || []);
         } catch (err) {
             console.error('Error fetching trainings:', err.message);
@@ -90,19 +76,10 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             };
 
             if (isEditing) {
-                const { error } = await supabase
-                    .from('training_records')
-                    .update(payload)
-                    .eq('id', editingId);
-
-                if (error) throw error;
+                await pb.collection('training_records').update(editingId, payload);
                 alert(t.save_success);
             } else {
-                const { error } = await supabase
-                    .from('training_records')
-                    .insert([payload]);
-
-                if (error) throw error;
+                await pb.collection('training_records').create(payload);
                 alert(t.save_success);
             }
 
@@ -138,8 +115,7 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
-            const { error } = await supabase.from('training_records').delete().eq('id', id);
-            if (error) throw error;
+            await pb.collection('training_records').delete(id);
             alert(t.delete_success);
             fetchTrainings();
         } catch (error) {
@@ -257,8 +233,8 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             ) : (
                                 trainings.map(training => (
                                     <tr key={training.id} onClick={() => handleView(training)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
-                                        <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{training.farmer?.farmer_code}</span></td>
-                                        <td style={{ fontWeight: 600 }}>{training.farmer?.full_name}</td>
+                                        <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{training.expand?.farmer_id?.farmer_code}</span></td>
+                                        <td style={{ fontWeight: 600 }}>{training.expand?.farmer_id?.full_name}</td>
                                         <td>{training.training_date}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -470,11 +446,11 @@ const TrainingCenter = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_name}</label>
-                                <div style={{ fontWeight: 600 }}>{selectedTraining.farmer?.full_name}</div>
+                                <div style={{ fontWeight: 600 }}>{selectedTraining.expand?.farmer_id?.full_name}</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_code}</label>
-                                <div style={{ fontFamily: 'monospace' }}>{selectedTraining.farmer?.farmer_code}</div>
+                                <div style={{ fontFamily: 'monospace' }}>{selectedTraining.expand?.farmer_id?.farmer_code}</div>
                             </div>
 
                             {/* Section 3: Result */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import './Dashboard.css';
 import { translations } from './translations';
 import MediaUpload from './MediaUpload';
@@ -42,12 +42,7 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const fetchFarmers = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('farmers')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const data = await pb.collection('farmers').getFullList({ sort: '-created' });
             setFarmers(data || []);
         } catch (e) {
             console.error('Error fetching farmers:', e.message);
@@ -58,19 +53,20 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const generateFarmerCode = async () => {
         // Get the latest farmer code
-        const { data } = await supabase
-            .from('farmers')
-            .select('farmer_code')
-            .order('created_at', { ascending: false })
-            .limit(1);
+        try {
+            const result = await pb.collection('farmers').getList(1, 1, { sort: '-created' });
+            const data = result.items;
 
-        if (data && data.length > 0) {
-            const lastCode = data[0].farmer_code;
-            const match = lastCode.match(/FAR-(\d+)/);
-            if (match) {
-                const nextNum = parseInt(match[1]) + 1;
-                return `FAR-${String(nextNum).padStart(4, '0')}`;
+            if (data && data.length > 0) {
+                const lastCode = data[0].farmer_code;
+                const match = lastCode.match(/FAR-(\d+)/);
+                if (match) {
+                    const nextNum = parseInt(match[1]) + 1;
+                    return `FAR-${String(nextNum).padStart(4, '0')}`;
+                }
             }
+        } catch (e) {
+            console.error('Error generating farmer code:', e.message);
         }
         return 'FAR-0001';
     };
@@ -102,12 +98,12 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const handleDelete = async (id) => {
         if (!confirm(t.delete_confirm)) return;
         setLoading(true);
-        const { error } = await supabase.from('farmers').delete().eq('id', id);
-        if (error) {
-            alert((t.save_error || 'Lỗi: ') + error.message);
-        } else {
+        try {
+            await pb.collection('farmers').delete(id);
             alert(t.delete_success);
             fetchFarmers();
+        } catch (error) {
+            alert((t.save_error || 'Lỗi: ') + error.message);
         }
         setLoading(false);
     };
@@ -124,33 +120,29 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         try {
             if (isEditing) {
                 // Update existing farmer
-                const { error } = await supabase
-                    .from('farmers')
-                    .update({
-                        full_name: formData.full_name,
-                        gender: formData.gender,
-                        date_of_birth: formData.date_of_birth || null,
-                        id_card: formData.id_card,
-                        phone: formData.phone,
-                        email: formData.email,
-                        village: formData.village,
-                        commune: formData.commune,
-                        district: formData.district,
-                        province: formData.province,
-                        household_members: parseInt(formData.household_members) || 1,
-                        household_head: formData.household_head,
-                        status: formData.status,
-                        notes: formData.notes,
-                        photo_url: formData.photo_url
-                    })
-                    .eq('id', editingId);
+                await pb.collection('farmers').update(editingId, {
+                    full_name: formData.full_name,
+                    gender: formData.gender,
+                    date_of_birth: formData.date_of_birth || null,
+                    id_card: formData.id_card,
+                    phone: formData.phone,
+                    email: formData.email,
+                    village: formData.village,
+                    commune: formData.commune,
+                    district: formData.district,
+                    province: formData.province,
+                    household_members: parseInt(formData.household_members) || 1,
+                    household_head: formData.household_head,
+                    status: formData.status,
+                    notes: formData.notes,
+                    photo_url: formData.photo_url
+                });
 
-                if (error) throw error;
                 alert(t.save_success);
             } else {
                 // Create new farmer
                 const newCode = await generateFarmerCode();
-                const { error } = await supabase.from('farmers').insert([{
+                await pb.collection('farmers').create({
                     farmer_code: newCode,
                     full_name: formData.full_name,
                     gender: formData.gender,
@@ -167,9 +159,8 @@ const FarmerManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                     status: formData.status,
                     notes: formData.notes,
                     photo_url: formData.photo_url
-                }]);
+                });
 
-                if (error) throw error;
                 alert(t.save_success);
             }
             handleModalClose();

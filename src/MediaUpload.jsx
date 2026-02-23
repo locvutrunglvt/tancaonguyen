@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 
 const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder = 'general', appLang = 'vi', allowMultiple = false }) => {
     const [uploading, setUploading] = useState(false);
@@ -23,34 +23,29 @@ const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder
 
             const file = event.target.files[0];
             const fileExt = file.name.split('.').pop();
-            const fileName = `${entityId}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const filePath = `${entityType}/${folder}/${fileName}`;
+            const fileName = `${entityType}_${entityId}_${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-            // Upload to Supabase Storage
-            const { error: uploadError, data } = await supabase.storage
-                .from('Tancaonguyen')
-                .upload(filePath, file);
+            // Upload to PocketBase via a temporary approach:
+            // Store file as a data URL for preview, pass the File object for later record update
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
 
-            if (uploadError) {
-                throw uploadError;
-            }
+                let newUrls = [];
+                if (allowMultiple) {
+                    newUrls = [...previewUrls, dataUrl];
+                } else {
+                    newUrls = [dataUrl];
+                }
 
-            // Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('Tancaonguyen')
-                .getPublicUrl(filePath);
+                setPreviewUrls(newUrls);
 
-            let newUrls = [];
-            if (allowMultiple) {
-                newUrls = [...previewUrls, publicUrl];
-            } else {
-                newUrls = [publicUrl];
-            }
-
-            setPreviewUrls(newUrls);
-            if (onUploadSuccess) {
-                onUploadSuccess(allowMultiple ? newUrls.join(',') : publicUrl);
-            }
+                // Store the file object for the parent component to use when saving
+                if (onUploadSuccess) {
+                    onUploadSuccess(allowMultiple ? newUrls.join(',') : dataUrl, file);
+                }
+            };
+            reader.readAsDataURL(file);
         } catch (error) {
             alert(`${t.error}: ${error.message}`);
         } finally {
@@ -63,7 +58,7 @@ const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder
         const newUrls = previewUrls.filter(url => url !== urlToRemove);
         setPreviewUrls(newUrls);
         if (onUploadSuccess) {
-            onUploadSuccess(allowMultiple ? newUrls.join(',') : (newUrls[0] || ''));
+            onUploadSuccess(allowMultiple ? newUrls.join(',') : (newUrls[0] || ''), null);
         }
     };
 
@@ -71,7 +66,7 @@ const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder
         fileInputRef.current.click();
     };
 
-    const isVideo = (url) => url && (url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm'));
+    const isVideo = (url) => url && (url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm') || url.includes('video/'));
 
     return (
         <div className="media-upload-container" style={{ margin: '10px 0' }}>

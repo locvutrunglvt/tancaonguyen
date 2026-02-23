@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
@@ -29,12 +29,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const fetchEntries = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('financial_records')
-                .select('*')
-                .order('record_date', { ascending: false });
-
-            if (error) throw error;
+            const data = await pb.collection('financial_records').getFullList({ sort: '-record_date' });
             setEntries(data || []);
         } catch (err) {
             console.error('Error fetching financial records:', err.message);
@@ -60,8 +55,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         e.preventDefault();
         setIsLoading(true);
 
-        const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id || devUser?.id;
+        const userId = pb.authStore.model?.id || devUser?.id;
 
         let amountVal = parseInt(formData.amount) || 0;
         if (formData.type === 'Doanh thu') {
@@ -79,31 +73,20 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             notes: formData.notes
         };
 
-        if (isEditing) {
-            const { error } = await supabase
-                .from('financial_records')
-                .update(payload)
-                .eq('id', editingId);
-
-            if (error) {
-                alert(t.save_error + ': ' + error.message);
+        try {
+            if (isEditing) {
+                await pb.collection('financial_records').update(editingId, payload);
+                alert(t.save_success);
+                handleFormClose();
+                fetchEntries();
             } else {
+                await pb.collection('financial_records').create(payload);
                 alert(t.save_success);
                 handleFormClose();
                 fetchEntries();
             }
-        } else {
-            const { error } = await supabase
-                .from('financial_records')
-                .insert([payload]);
-
-            if (error) {
-                alert(t.save_error + ': ' + error.message);
-            } else {
-                alert(t.save_success);
-                handleFormClose();
-                fetchEntries();
-            }
+        } catch (error) {
+            alert(t.save_error + ': ' + error.message);
         }
         setIsLoading(false);
     };
@@ -130,8 +113,7 @@ const SeasonalPlanning = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         if (!window.confirm(t.delete_confirm)) return;
         setIsLoading(true);
         try {
-            const { error } = await supabase.from('financial_records').delete().eq('id', id);
-            if (error) throw error;
+            await pb.collection('financial_records').delete(id);
             alert(t.delete_success);
             fetchEntries();
         } catch (error) {

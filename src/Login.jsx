@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import { translations } from './translations';
 import './Login.css';
 
@@ -12,8 +12,8 @@ const Login = ({ onDevLogin }) => {
     }, [lang]);
 
     const [formData, setFormData] = useState({
-        org: 'tcn', // Default to TCN
-        email: 'locvutrung@gmail.com', // Default Admin Email
+        org: 'tcn',
+        email: 'locvutrung@gmail.com',
         password: '',
         fullName: '',
         phone: ''
@@ -32,40 +32,21 @@ const Login = ({ onDevLogin }) => {
         }
     }, [formData.org, view]);
 
-    const [manualEntry, setManualEntry] = useState(false); // New state for manual input
+    const [manualEntry, setManualEntry] = useState(false);
 
     const fetchUsers = async (orgId) => {
         setIsFetchingUsers(true);
         try {
-            // Try fetching from 'profiles'
-            let { data, error } = await supabase
-                .from('profiles')
-                .select('id, email, full_name, role')
-                .eq('organization', orgId)
-                .order('full_name');
+            const data = await pb.collection('users').getFullList({
+                filter: `organization='${orgId}'`,
+                sort: 'full_name',
+            });
 
-            if (error) {
-                console.error('Profiles fetch failed:', error.message);
-                // Fallback: If RLS blocks regular fetch, at least provide the default Admin for TCN
-                if (orgId === 'tcn') {
-                    setUsers([{
-                        id: 'admin_fallback',
-                        email: 'locvutrung@gmail.com',
-                        full_name: 'Đỗ Thành Duy (Admin)',
-                        role: 'Admin'
-                    }]);
-                    return;
-                }
-                throw error;
-            }
-
-            // Process data: If TCN, ensure Admin is in the list (merge DB + Default)
             let finalUsers = data || [];
             if (orgId === 'tcn') {
                 const adminEmail = 'locvutrung@gmail.com';
                 const hasAdmin = finalUsers.some(u => u.email === adminEmail);
                 if (!hasAdmin) {
-                    // Prepend default admin if not in DB list
                     finalUsers = [
                         {
                             id: 'admin_fallback',
@@ -81,7 +62,6 @@ const Login = ({ onDevLogin }) => {
             setUsers(finalUsers);
         } catch (error) {
             console.error('Error fetching users:', error.message);
-            // On error, enable manual entry or show admin if TCN
             if (orgId === 'tcn') {
                 setUsers([{
                     id: 'admin_fallback',
@@ -101,10 +81,7 @@ const Login = ({ onDevLogin }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-                redirectTo: `${window.location.origin}/reset-password`,
-            });
-            if (error) throw error;
+            await pb.collection('users').requestPasswordReset(formData.email);
             alert(t.reset_sent || 'Email sent!');
             setView('login');
         } catch (error) {
@@ -122,17 +99,14 @@ const Login = ({ onDevLogin }) => {
             const selectedUser = users.find(u => u.email === formData.email);
 
             try {
-                const { error: authError } = await supabase.auth.signInWithPassword({
-                    email: formData.email,
-                    password: formData.password
-                });
-
-                if (!authError) {
-                    console.log("AUTH_LOGIN_SUCCESS");
-                    return;
-                }
-
-                if (authError && onDevLogin) {
+                await pb.collection('users').authWithPassword(
+                    formData.email,
+                    formData.password
+                );
+                console.log("AUTH_LOGIN_SUCCESS");
+                return;
+            } catch (authError) {
+                if (onDevLogin) {
                     console.warn("AUTH_FAIL: Switching to Silent Bypass Mode.");
                     onDevLogin({
                         email: formData.email,
@@ -145,8 +119,6 @@ const Login = ({ onDevLogin }) => {
                     return;
                 }
                 throw authError;
-            } catch (innerError) {
-                throw innerError;
             }
         } catch (error) {
             console.error("LOGIN_FINAL_ERROR: ", error);
@@ -156,61 +128,24 @@ const Login = ({ onDevLogin }) => {
         }
     };
 
-    const performDirectDbInsert = async (userId = null) => {
-        const generateUUID = () => {
-            if (crypto.randomUUID) return crypto.randomUUID();
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        };
-
-        const id = userId || generateUUID();
-        const { data: existing } = await supabase.from('profiles').select('id').eq('email', formData.email).single();
-        if (existing) {
-            alert(t.profile_exists_error || 'Account already has a profile!');
-            setView('login');
-            return;
-        }
-
-        const userData = {
-            id: id,
-            email: formData.email,
-            full_name: formData.fullName,
-            organization: 'gus',
-            phone: formData.phone,
-            role: 'Guest',
-            employee_code: `GUS-${Math.floor(Math.random() * 900) + 100}`,
-            created_at: new Date().toISOString()
-        };
-
-        const { error: profError } = await supabase.from('profiles').insert([userData]);
-
-        if (profError) {
-            console.error('Profiles insert failed:', profError.message);
-            throw new Error(`DATABASE_ERROR: ${profError.message}`);
-        }
-
-        alert(t.reg_success || 'REGISTRATION SUCCESS!');
-        setView('login');
-    };
-
     const handleRegister = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
-            const { data, error: authError } = await supabase.auth.signUp({
+            await pb.collection('users').create({
                 email: formData.email,
                 password: formData.password,
+                passwordConfirm: formData.password,
+                full_name: formData.fullName,
+                organization: 'gus',
+                phone: formData.phone,
+                role: 'Guest',
+                employee_code: `GUS-${Math.floor(Math.random() * 900) + 100}`,
             });
 
-            if (authError) {
-                console.warn("REG_FAIL: Silent Bypass to Direct DB Insert.");
-                return await performDirectDbInsert();
-            }
-
-            await performDirectDbInsert(data?.user?.id);
+            alert(t.reg_success || 'REGISTRATION SUCCESS!');
+            setView('login');
         } catch (error) {
             alert(`REG_ERROR: ${error.message}`);
         } finally {
@@ -322,7 +257,7 @@ const Login = ({ onDevLogin }) => {
                         </div>
                         <div className="form-group">
                             <label>{t.password}</label>
-                            <input className="input-pro" type="password" required minLength="6" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
+                            <input className="input-pro" type="password" required minLength="8" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
                         </div>
                         <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.loading : t.add}</button>
                     </form>
@@ -334,7 +269,7 @@ const Login = ({ onDevLogin }) => {
                             <label>{t.user_email}</label>
                             <input className="input-pro" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
                         </div>
-                        <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.loading : (appLang === 'vi' ? 'Gửi yêu cầu' : 'Send request')}</button>
+                        <button type="submit" className="btn-primary" disabled={isLoading}>{isLoading ? t.loading : (lang === 'vi' ? 'Gửi yêu cầu' : 'Send request')}</button>
                     </form>
                 )}
 

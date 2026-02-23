@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import pb from './pbClient';
 import { translations } from './translations';
 import MediaUpload from './MediaUpload';
 import './Dashboard.css';
@@ -42,13 +42,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
 
     const fetchFarmers = async () => {
         try {
-            const { data, error } = await supabase
-                .from('farmers')
-                .select('id, farmer_code, full_name, village')
-                .eq('status', 'active')
-                .order('full_name');
-
-            if (error) throw error;
+            const data = await pb.collection('farmers').getFullList({ filter: "status='active'", sort: 'full_name' });
             setFarmers(data || []);
         } catch (e) {
             console.error('Error fetching farmers:', e.message);
@@ -62,12 +56,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
         }
 
         try {
-            const { data, error } = await supabase
-                .from('farm_baselines')
-                .select('id, farm_code, total_area, coffee_area')
-                .eq('farmer_id', farmerId);
-
-            if (error) throw error;
+            const data = await pb.collection('farm_baselines').getFullList({ filter: `farmer_id='${farmerId}'` });
             setFarms(data || []);
         } catch (e) {
             console.error('Error fetching farms:', e.message);
@@ -77,16 +66,7 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const fetchModels = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('coffee_models')
-                .select(`
-                    *,
-                    farmer:farmers(farmer_code, full_name, village),
-                    farm:farm_baselines(farm_code, total_area)
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const data = await pb.collection('coffee_models').getFullList({ expand: 'farmer_id,farm_id', sort: '-created' });
             setModels(data || []);
         } catch (e) {
             console.error('Error fetching models:', e.message);
@@ -136,12 +116,12 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
     const handleDelete = async (id) => {
         if (!confirm(t.delete_confirm)) return;
         setLoading(true);
-        const { error } = await supabase.from('coffee_models').delete().eq('id', id);
-        if (error) {
-            alert(t.delete_error + ': ' + error.message);
-        } else {
+        try {
+            await pb.collection('coffee_models').delete(id);
             alert(t.delete_success);
             fetchModels();
+        } catch (error) {
+            alert(t.delete_error + ': ' + error.message);
         }
         setLoading(false);
     };
@@ -169,19 +149,10 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
             };
 
             if (isEditing) {
-                const { error } = await supabase
-                    .from('coffee_models')
-                    .update(payload)
-                    .eq('id', editingId);
-
-                if (error) throw error;
+                await pb.collection('coffee_models').update(editingId, payload);
                 alert(t.save_success);
             } else {
-                const { error } = await supabase
-                    .from('coffee_models')
-                    .insert([payload]);
-
-                if (error) throw error;
+                await pb.collection('coffee_models').create(payload);
                 alert(t.save_success);
             }
 
@@ -290,9 +261,9 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                                 <tr key={m.id} onClick={() => handleView(m)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
                                     <td>
                                         <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>
-                                            {m.farmer?.farmer_code}
+                                            {m.expand?.farmer_id?.farmer_code}
                                         </span>
-                                        <div style={{ fontSize: '10px', opacity: 0.6 }}>{m.farmer?.full_name}</div>
+                                        <div style={{ fontSize: '10px', opacity: 0.6 }}>{m.expand?.farmer_id?.full_name}</div>
                                     </td>
                                     <td style={{ fontWeight: 600 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -507,11 +478,11 @@ const ModelManagement = ({ onBack, devUser, appLang = 'vi', currentUser }) => {
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer}</label>
-                                <div style={{ fontWeight: 600 }}>{selectedModel.farmer?.full_name} ({selectedModel.farmer?.farmer_code})</div>
+                                <div style={{ fontWeight: 600 }}>{selectedModel.expand?.farmer_id?.full_name} ({selectedModel.expand?.farmer_id?.farmer_code})</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farm}</label>
-                                <div>{selectedModel.farm ? `${selectedModel.farm.farm_code} (${selectedModel.farm.total_area} ha)` : t.no_selection}</div>
+                                <div>{selectedModel.expand?.farm_id ? `${selectedModel.expand.farm_id.farm_code} (${selectedModel.expand.farm_id.total_area} ha)` : t.no_selection}</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.adaptation_status}</label>
