@@ -27,22 +27,21 @@ jobs:
       - name: Package dist
         run: tar -czf tcn-dist.tar.gz -C dist .
 
-      - name: Deploy to VPS
-        env:
-          VPS_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
-          VPS_HOST: 36.50.26.99
-          VPS_USER: root
-        run: |
-          # Setup SSH key
-          mkdir -p ~/.ssh
-          echo "$VPS_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Upload to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 36.50.26.99
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          source: "tcn-dist.tar.gz"
+          target: "/tmp"
 
-          # Upload dist archive
-          scp -i ~/.ssh/deploy_key tcn-dist.tar.gz ${VPS_USER}@${VPS_HOST}:/tmp/tcn-dist.tar.gz
-
-          # Run deploy script on VPS
-          ssh -i ~/.ssh/deploy_key ${VPS_USER}@${VPS_HOST} "/opt/deploy/deploy-app.sh tcn"
-
-          echo "Deployed to tcn.lvtcenter.it.com"
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 36.50.26.99
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: /opt/deploy/deploy-app.sh tcn
