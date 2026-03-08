@@ -3,12 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import pb from './pbClient';
 import './Dashboard.css';
 import { translations } from './translations';
-import ModelManagement from './ModelManagement';
-import FarmerManagement from './FarmerManagement';
-import AnnualActivities from './AnnualActivities';
 import TrainingCenter from './TrainingCenter';
-import FarmProfiles from './FarmProfiles';
-import SeasonalPlanning from './SeasonalPlanning';
 import BackupRestore from './BackupRestore';
 import ModelHome from './ModelHome';
 import ModelDetailView from './ModelDetailView';
@@ -531,48 +526,20 @@ const Dashboard = ({ onLogout }) => {
         else pb.authStore.clear();
     };
 
-    const menuItems = [
-        { id: 'farmers', title: t.farmers, desc: t.farmers_desc, icon: 'fas fa-id-card', action: () => setView('farmers') },
-        { id: 'farms', title: t.farms, desc: t.farms_desc, icon: 'fas fa-map-marked-alt', action: () => setView('farms') },
-        { id: 'activities', title: t.activities, desc: t.activities_desc, icon: 'fas fa-calendar-check', action: () => setView('activities') },
-        { id: 'planning', title: t.planning, desc: t.planning_desc, icon: 'fas fa-clipboard-list', action: () => setView('planning') },
-        { id: 'training', title: t.training, desc: t.training_desc, icon: 'fas fa-graduation-cap', action: () => setView('training') },
-        { id: 'model', title: t.model, desc: t.model_desc, icon: 'fas fa-seedling', action: () => setView('model') },
-        { id: 'growth', title: t.growth || 'Tăng trưởng', desc: t.growth_desc || 'Theo dõi sự tăng trưởng và phát triển của mô hình.', icon: 'fas fa-chart-line', action: () => setView('growth') },
-    ];
+    const menuItems = [];
 
     // Security check: Is current user an Admin?
     const isAdmin = currentUser?.role === 'Admin';
-
-    if (isAdmin) {
-        menuItems.push({ id: 'backup', title: appLang === 'vi' ? 'Sao luu' : appLang === 'en' ? 'Backup' : 'Pioh', desc: appLang === 'vi' ? 'Sao luu & phuc hoi toan bo du lieu.' : appLang === 'en' ? 'Backup & restore all data.' : 'Pioh & lom hdra mnau.', icon: 'fas fa-database', action: () => setView('backup') });
-        menuItems.push({ id: 'users', title: 'Admin', desc: t.users_desc || 'Quản trị hệ thống và người dùng.', icon: 'fas fa-users-cog', action: () => setView('users') });
-    }
 
     return (
         <div className={`dashboard-layout lang-${appLang}`}>
             <aside className="sidebar">
                 <nav className="nav-menu">
                     <a className={`nav-item ${view === 'home' || view === 'model_detail' ? 'active' : ''}`} onClick={() => { setView('home'); setSelectedModel(null); }}>
-                        <i className="fas fa-home"></i> <span>{appLang === 'vi' ? 'Mo hinh' : appLang === 'en' ? 'Models' : 'Hdruom'}</span>
-                    </a>
-                    <a className={`nav-item ${view === 'farmers' ? 'active' : ''}`} onClick={() => setView('farmers')}>
-                        <i className="fas fa-id-card"></i> <span>{t.farmers}</span>
-                    </a>
-                    <a className={`nav-item ${view === 'farms' ? 'active' : ''}`} onClick={() => setView('farms')}>
-                        <i className="fas fa-map-marked-alt"></i> <span>{t.farms}</span>
+                        <i className="fas fa-seedling"></i> <span>{appLang === 'vi' ? 'Mo hinh' : appLang === 'en' ? 'Models' : 'Hdruom'}</span>
                     </a>
                     <a className={`nav-item ${view === 'training' ? 'active' : ''}`} onClick={() => setView('training')}>
                         <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
-                    </a>
-                    <a className={`nav-item ${view === 'activities' ? 'active' : ''}`} onClick={() => setView('activities')}>
-                        <i className="fas fa-calendar-check"></i> <span>{t.activities}</span>
-                    </a>
-                    <a className={`nav-item ${view === 'planning' ? 'active' : ''}`} onClick={() => setView('planning')}>
-                        <i className="fas fa-clipboard-list"></i> <span>{t.planning}</span>
-                    </a>
-                    <a className={`nav-item ${view === 'model' ? 'active' : ''}`} onClick={() => setView('model')}>
-                        <i className="fas fa-seedling"></i> <span>{t.model}</span>
                     </a>
                     {isAdmin && (
                         <a className={`nav-item ${view === 'backup' ? 'active' : ''}`} onClick={() => setView('backup')}>
@@ -660,14 +627,6 @@ const Dashboard = ({ onLogout }) => {
                             }
                         />
                     )}
-                    {view === 'growth' && (
-                        <div className="view-container" style={{ textAlign: 'center', padding: '100px 20px', background: 'white', borderRadius: '24px' }}>
-                            <div style={{ fontSize: '64px', color: 'var(--coffee-primary)', marginBottom: '20px' }}><i className="fas fa-chart-line"></i></div>
-                            <h2 style={{ fontSize: '24px', color: 'var(--coffee-dark)', textTransform: 'uppercase' }}>{t.growth || 'TĂNG TRƯỞNG & PHÁT TRIỂN'}</h2>
-                            <p style={{ color: '#64748b', marginTop: '10px' }}>{t.sync_data_msg || 'Chức năng đang được đồng bộ dữ liệu thực địa. Vui lòng quay lại sau.'}</p>
-                            <button onClick={() => setView('home')} className="btn-primary">{t.back}</button>
-                        </div>
-                    )}
                     {view === 'users' && (
                         <UserManagementView
                             users={users} t={t} currentUser={currentUser}
@@ -685,12 +644,7 @@ const Dashboard = ({ onLogout }) => {
                             isLoading={loading}
                         />
                     )}
-                    {view === 'model' && <ModelManagement onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'activities' && <AnnualActivities onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
                     {view === 'training' && <TrainingCenter onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'farms' && <FarmProfiles onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
                     {view === 'backup' && <BackupRestore onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
                 </div>
             </main>

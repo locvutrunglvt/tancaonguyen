@@ -96,6 +96,8 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
     const [showDiaryForm, setShowDiaryForm] = useState(false);
     const [showInspectForm, setShowInspectForm] = useState(false);
     const [showConsumForm, setShowConsumForm] = useState(false);
+    const [showFarmerForm, setShowFarmerForm] = useState(false);
+    const [showFarmForm, setShowFarmForm] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [saving, setSaving] = useState(false);
 
@@ -107,6 +109,8 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
     const [diaryForm, setDiaryForm] = useState(emptyDiary);
     const [inspectForm, setInspectForm] = useState(emptyInspect);
     const [consumForm, setConsumForm] = useState(emptyConsum);
+    const [farmerForm, setFarmerForm] = useState({});
+    const [farmForm, setFarmForm] = useState({});
 
     useEffect(() => {
         if (model) loadAllData();
@@ -266,6 +270,112 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
         } catch (err) {
             alert('Error: ' + err.message);
         }
+    };
+
+    const handleSaveFarmer = async () => {
+        setSaving(true);
+        try {
+            const data = {
+                full_name: farmerForm.full_name,
+                gender: farmerForm.gender || null,
+                phone: farmerForm.phone || null,
+                village: farmerForm.village || null,
+                commune: farmerForm.commune || null,
+                district: farmerForm.district || null,
+                province: farmerForm.province || null,
+                ethnicity: farmerForm.ethnicity || null,
+                economic_class: farmerForm.economic_class || null,
+                coffee_years: farmerForm.coffee_years ? Number(farmerForm.coffee_years) : null,
+                education: farmerForm.education || null,
+                cooperative_member: farmerForm.cooperative_member || false,
+                household_members: farmerForm.household_members ? Number(farmerForm.household_members) : null,
+                id_card: farmerForm.id_card || null,
+                notes: farmerForm.notes || null,
+            };
+            await pb.collection('farmers').update(farmer.id, data);
+            const updated = await pb.collection('farmers').getOne(farmer.id);
+            setFarmer(updated);
+            setShowFarmerForm(false);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSaveFarm = async () => {
+        setSaving(true);
+        try {
+            const data = {
+                farm_name: farmForm.farm_name || null,
+                total_area: farmForm.total_area ? Number(farmForm.total_area) : null,
+                coffee_area: farmForm.coffee_area ? Number(farmForm.coffee_area) : null,
+                intercrop_area: farmForm.intercrop_area ? Number(farmForm.intercrop_area) : null,
+                intercrop_details: farmForm.intercrop_details || null,
+                soil_type: farmForm.soil_type || null,
+                soil_ph: farmForm.soil_ph ? Number(farmForm.soil_ph) : null,
+                slope: farmForm.slope || null,
+                water_source: farmForm.water_source || null,
+                irrigation_system: farmForm.irrigation_system || null,
+                elevation: farmForm.elevation ? Number(farmForm.elevation) : null,
+                gps_lat: farmForm.gps_lat ? Number(farmForm.gps_lat) : null,
+                gps_long: farmForm.gps_long ? Number(farmForm.gps_long) : null,
+                grass_cover: farmForm.grass_cover || null,
+                shade_trees: farmForm.shade_trees ? Number(farmForm.shade_trees) : null,
+                notes: farmForm.notes || null,
+            };
+            await pb.collection('farm_baselines').update(farm.id, data);
+            const updated = await pb.collection('farm_baselines').getOne(farm.id);
+            setFarm(updated);
+            setShowFarmForm(false);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const openEditFarmer = () => {
+        setFarmerForm({
+            full_name: farmer?.full_name || '',
+            gender: farmer?.gender || '',
+            phone: farmer?.phone || '',
+            village: farmer?.village || '',
+            commune: farmer?.commune || '',
+            district: farmer?.district || '',
+            province: farmer?.province || '',
+            ethnicity: farmer?.ethnicity || '',
+            economic_class: farmer?.economic_class || '',
+            coffee_years: farmer?.coffee_years || '',
+            education: farmer?.education || '',
+            cooperative_member: farmer?.cooperative_member || false,
+            household_members: farmer?.household_members || '',
+            id_card: farmer?.id_card || '',
+            notes: farmer?.notes || '',
+        });
+        setShowFarmerForm(true);
+    };
+
+    const openEditFarm = () => {
+        setFarmForm({
+            farm_name: farm?.farm_name || '',
+            total_area: farm?.total_area || '',
+            coffee_area: farm?.coffee_area || '',
+            intercrop_area: farm?.intercrop_area || '',
+            intercrop_details: farm?.intercrop_details || '',
+            soil_type: farm?.soil_type || '',
+            soil_ph: farm?.soil_ph || '',
+            slope: farm?.slope || '',
+            water_source: farm?.water_source || '',
+            irrigation_system: farm?.irrigation_system || '',
+            elevation: farm?.elevation || '',
+            gps_lat: farm?.gps_lat || '',
+            gps_long: farm?.gps_long || '',
+            grass_cover: farm?.grass_cover || '',
+            shade_trees: farm?.shade_trees || '',
+            notes: farm?.notes || '',
+        });
+        setShowFarmForm(true);
     };
 
     const refreshDiary = async () => {
@@ -440,30 +550,35 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
         <>
             {farmer ? (
                 <>
-                    <SectionCard title={appLang === 'vi' ? 'Chu ho mo hinh' : 'Model Owner'} icon="fa-user">
-                        <InfoRow label="Ho ten" value={farmer.full_name} icon="fa-user" />
-                        <InfoRow label="Ma" value={farmer.farmer_code} icon="fa-id-badge" />
-                        <InfoRow label="Gioi tinh" value={farmer.gender} icon="fa-venus-mars" />
-                        <InfoRow label="Dan toc" value={farmer.ethnicity} icon="fa-users" />
-                        <InfoRow label="SDT" value={farmer.phone} icon="fa-phone" />
-                        <InfoRow label="Thon" value={farmer.village} icon="fa-home" />
-                        <InfoRow label="Xa" value={farmer.commune} icon="fa-map" />
-                        <InfoRow label="Kinh te ho" value={farmer.economic_class} icon="fa-chart-bar" />
-                        <InfoRow label="Nam trong ca phe" value={farmer.coffee_years ? `${farmer.coffee_years} nam` : null} icon="fa-coffee" />
-                        <InfoRow label="Hoc van" value={farmer.education} icon="fa-graduation-cap" />
-                        <InfoRow label="Thanh vien HTX" value={farmer.cooperative_member ? 'Co' : 'Khong'} icon="fa-handshake" />
+                    <SectionCard title={appLang === 'vi' ? 'Chu ho mo hinh' : 'Model Owner'} icon="fa-user"
+                        action={canEdit ? <AddButton onClick={openEditFarmer} label={appLang === 'vi' ? 'Sua' : 'Edit'} /> : null}>
+                        <InfoRow label={appLang === 'vi' ? 'Ho ten' : 'Full name'} value={farmer.full_name} icon="fa-user" />
+                        <InfoRow label={appLang === 'vi' ? 'Ma' : 'Code'} value={farmer.farmer_code} icon="fa-id-badge" />
+                        <InfoRow label={appLang === 'vi' ? 'Gioi tinh' : 'Gender'} value={farmer.gender} icon="fa-venus-mars" />
+                        <InfoRow label={appLang === 'vi' ? 'Dan toc' : 'Ethnicity'} value={farmer.ethnicity} icon="fa-users" />
+                        <InfoRow label={appLang === 'vi' ? 'SDT' : 'Phone'} value={farmer.phone} icon="fa-phone" />
+                        <InfoRow label={appLang === 'vi' ? 'CMND/CCCD' : 'ID Card'} value={farmer.id_card} icon="fa-id-card" />
+                        <InfoRow label={appLang === 'vi' ? 'Thon' : 'Village'} value={farmer.village} icon="fa-home" />
+                        <InfoRow label={appLang === 'vi' ? 'Xa' : 'Commune'} value={farmer.commune} icon="fa-map" />
+                        <InfoRow label={appLang === 'vi' ? 'Huyen' : 'District'} value={farmer.district} icon="fa-map-signs" />
+                        <InfoRow label={appLang === 'vi' ? 'Tinh' : 'Province'} value={farmer.province} icon="fa-globe" />
+                        <InfoRow label={appLang === 'vi' ? 'Kinh te ho' : 'Economic class'} value={farmer.economic_class} icon="fa-chart-bar" />
+                        <InfoRow label={appLang === 'vi' ? 'Nam trong ca phe' : 'Coffee experience'} value={farmer.coffee_years ? `${farmer.coffee_years} ${appLang === 'vi' ? 'nam' : 'years'}` : null} icon="fa-coffee" />
+                        <InfoRow label={appLang === 'vi' ? 'Hoc van' : 'Education'} value={farmer.education} icon="fa-graduation-cap" />
+                        <InfoRow label={appLang === 'vi' ? 'Thanh vien HTX' : 'Coop member'} value={farmer.cooperative_member ? (appLang === 'vi' ? 'Co' : 'Yes') : (appLang === 'vi' ? 'Khong' : 'No')} icon="fa-handshake" />
+                        <InfoRow label={appLang === 'vi' ? 'So thanh vien ho' : 'Household size'} value={farmer.household_members} icon="fa-people-arrows" />
                     </SectionCard>
 
                     {members.length > 0 && (
-                        <SectionCard title={`Thanh vien ho (${members.length})`} icon="fa-people-arrows">
+                        <SectionCard title={`${appLang === 'vi' ? 'Thanh vien ho' : 'Household'} (${members.length})`} icon="fa-people-arrows">
                             <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ background: '#f8fafc' }}>
-                                        <th style={{ padding: '8px', textAlign: 'left' }}>Ten</th>
-                                        <th style={{ padding: '8px' }}>GT</th>
-                                        <th style={{ padding: '8px' }}>Nam sinh</th>
-                                        <th style={{ padding: '8px' }}>Quan he</th>
-                                        <th style={{ padding: '8px' }}>Tham gia SX</th>
+                                        <th style={{ padding: '8px', textAlign: 'left' }}>{appLang === 'vi' ? 'Ten' : 'Name'}</th>
+                                        <th style={{ padding: '8px' }}>{appLang === 'vi' ? 'GT' : 'Gender'}</th>
+                                        <th style={{ padding: '8px' }}>{appLang === 'vi' ? 'Nam sinh' : 'Birth'}</th>
+                                        <th style={{ padding: '8px' }}>{appLang === 'vi' ? 'Quan he' : 'Relation'}</th>
+                                        <th style={{ padding: '8px' }}>{appLang === 'vi' ? 'Tham gia SX' : 'Farming'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -484,13 +599,13 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     )}
 
                     {income && (
-                        <SectionCard title={`Thu nhap nam ${income.year || 2025}`} icon="fa-coins">
-                            <InfoRow label="Tong thu nhap rong" value={income.total_income ? `${income.total_income} tr.d` : null} icon="fa-wallet" />
-                            <InfoRow label="Tu ca phe (rong)" value={income.coffee_net ? `${income.coffee_net} tr.d` : null} icon="fa-mug-hot" />
-                            <InfoRow label="Doanh thu ca phe" value={income.coffee_revenue ? `${income.coffee_revenue} tr.d` : null} icon="fa-arrow-up" />
-                            <InfoRow label="Chi phi ca phe" value={income.coffee_cost ? `${income.coffee_cost} tr.d` : null} icon="fa-arrow-down" />
-                            <InfoRow label="San luong" value={income.production_tons ? `${income.production_tons} tan` : null} icon="fa-box" />
-                            <InfoRow label="Ty trong NN" value={income.agri_income_ratio ? `${(income.agri_income_ratio * 100).toFixed(0)}%` : null} icon="fa-percent" />
+                        <SectionCard title={`${appLang === 'vi' ? 'Thu nhap nam' : 'Income'} ${income.year || 2025}`} icon="fa-coins">
+                            <InfoRow label={appLang === 'vi' ? 'Tong thu nhap rong' : 'Net income'} value={income.total_income ? `${income.total_income} tr.d` : null} icon="fa-wallet" />
+                            <InfoRow label={appLang === 'vi' ? 'Tu ca phe (rong)' : 'Coffee net'} value={income.coffee_net ? `${income.coffee_net} tr.d` : null} icon="fa-mug-hot" />
+                            <InfoRow label={appLang === 'vi' ? 'Doanh thu ca phe' : 'Coffee revenue'} value={income.coffee_revenue ? `${income.coffee_revenue} tr.d` : null} icon="fa-arrow-up" />
+                            <InfoRow label={appLang === 'vi' ? 'Chi phi ca phe' : 'Coffee cost'} value={income.coffee_cost ? `${income.coffee_cost} tr.d` : null} icon="fa-arrow-down" />
+                            <InfoRow label={appLang === 'vi' ? 'San luong' : 'Production'} value={income.production_tons ? `${income.production_tons} ${appLang === 'vi' ? 'tan' : 'tons'}` : null} icon="fa-box" />
+                            <InfoRow label={appLang === 'vi' ? 'Ty trong NN' : 'Agri ratio'} value={income.agri_income_ratio ? `${(income.agri_income_ratio * 100).toFixed(0)}%` : null} icon="fa-percent" />
                         </SectionCard>
                     )}
                 </>
@@ -500,25 +615,109 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     <p>{appLang === 'vi' ? 'Chua gan nong ho cho mo hinh nay' : 'No farmer assigned yet'}</p>
                 </div>
             )}
+
+            {/* Farmer Edit Modal */}
+            <ModalOverlay
+                show={showFarmerForm}
+                title={appLang === 'vi' ? 'Cap nhat thong tin nong ho' : 'Update Farmer Info'}
+                onClose={() => setShowFarmerForm(false)}
+                onSave={handleSaveFarmer}
+            >
+                <FormField label={appLang === 'vi' ? 'Ho ten' : 'Full Name'} required>
+                    <input value={farmerForm.full_name || ''} onChange={e => setFarmerForm({ ...farmerForm, full_name: e.target.value })} style={inputStyle} />
+                </FormField>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Gioi tinh' : 'Gender'}>
+                        <select value={farmerForm.gender || ''} onChange={e => setFarmerForm({ ...farmerForm, gender: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Nam">{appLang === 'vi' ? 'Nam' : 'Male'}</option>
+                            <option value="Nu">{appLang === 'vi' ? 'Nu' : 'Female'}</option>
+                            <option value="Khac">{appLang === 'vi' ? 'Khac' : 'Other'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Dan toc' : 'Ethnicity'}>
+                        <input value={farmerForm.ethnicity || ''} onChange={e => setFarmerForm({ ...farmerForm, ethnicity: e.target.value })} style={inputStyle} placeholder="Kinh, Ede, Jarai..." />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'SDT' : 'Phone'}>
+                        <input value={farmerForm.phone || ''} onChange={e => setFarmerForm({ ...farmerForm, phone: e.target.value })} style={inputStyle} placeholder="09xx..." />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'CMND/CCCD' : 'ID Card'}>
+                        <input value={farmerForm.id_card || ''} onChange={e => setFarmerForm({ ...farmerForm, id_card: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Thon' : 'Village'}>
+                        <input value={farmerForm.village || ''} onChange={e => setFarmerForm({ ...farmerForm, village: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Xa' : 'Commune'}>
+                        <input value={farmerForm.commune || ''} onChange={e => setFarmerForm({ ...farmerForm, commune: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Huyen' : 'District'}>
+                        <input value={farmerForm.district || ''} onChange={e => setFarmerForm({ ...farmerForm, district: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Tinh' : 'Province'}>
+                        <input value={farmerForm.province || ''} onChange={e => setFarmerForm({ ...farmerForm, province: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Kinh te ho' : 'Economic Class'}>
+                        <select value={farmerForm.economic_class || ''} onChange={e => setFarmerForm({ ...farmerForm, economic_class: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Ngheo">{appLang === 'vi' ? 'Ngheo' : 'Poor'}</option>
+                            <option value="Can ngheo">{appLang === 'vi' ? 'Can ngheo' : 'Near poor'}</option>
+                            <option value="Binh thuong">{appLang === 'vi' ? 'Binh thuong' : 'Average'}</option>
+                            <option value="Kha">{appLang === 'vi' ? 'Kha' : 'Above avg'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Hoc van' : 'Education'}>
+                        <input value={farmerForm.education || ''} onChange={e => setFarmerForm({ ...farmerForm, education: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Lop 9, THPT...' : '9th grade, high school...'} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Nam trong ca phe' : 'Coffee years'}>
+                        <input type="number" value={farmerForm.coffee_years || ''} onChange={e => setFarmerForm({ ...farmerForm, coffee_years: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'So thanh vien ho' : 'Household size'}>
+                        <input type="number" value={farmerForm.household_members || ''} onChange={e => setFarmerForm({ ...farmerForm, household_members: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Thanh vien HTX' : 'Coop member'}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', cursor: 'pointer' }}>
+                            <input type="checkbox" checked={farmerForm.cooperative_member || false} onChange={e => setFarmerForm({ ...farmerForm, cooperative_member: e.target.checked })} />
+                            <span style={{ fontSize: '13px' }}>{appLang === 'vi' ? 'Co' : 'Yes'}</span>
+                        </label>
+                    </FormField>
+                </div>
+                <FormField label={appLang === 'vi' ? 'Ghi chu' : 'Notes'}>
+                    <textarea value={farmerForm.notes || ''} onChange={e => setFarmerForm({ ...farmerForm, notes: e.target.value })}
+                        style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }} />
+                </FormField>
+            </ModalOverlay>
         </>
     );
 
     const renderFarm = () => (
         <>
             {farm ? (
-                <SectionCard title={appLang === 'vi' ? 'Trang trai tham gia mo hinh' : 'Farm in Model'} icon="fa-map-marked-alt">
-                    <InfoRow label="Ten" value={farm.farm_name} icon="fa-tag" />
-                    <InfoRow label="Tong DT" value={farm.total_area ? `${farm.total_area} ha` : null} icon="fa-ruler" />
-                    <InfoRow label="DT ca phe" value={farm.coffee_area ? `${farm.coffee_area} ha` : null} icon="fa-leaf" />
-                    <InfoRow label="DT xen canh" value={farm.intercrop_area ? `${farm.intercrop_area} ha` : null} icon="fa-tree" />
-                    <InfoRow label="Cay xen" value={farm.intercrop_details} icon="fa-seedling" />
-                    <InfoRow label="pH dat" value={farm.soil_ph} icon="fa-flask" />
-                    <InfoRow label="Loai dat" value={farm.soil_type} icon="fa-mountain" />
-                    <InfoRow label="Do doc" value={farm.slope} icon="fa-signal" />
-                    <InfoRow label="Nguon nuoc" value={farm.water_source} icon="fa-tint" />
-                    <InfoRow label="Tuoi tieu" value={farm.irrigation_system} icon="fa-shower" />
-                    <InfoRow label="Do cao" value={farm.elevation ? `${farm.elevation}m` : null} icon="fa-arrow-up" />
+                <SectionCard title={appLang === 'vi' ? 'Trang trai tham gia mo hinh' : 'Farm in Model'} icon="fa-map-marked-alt"
+                    action={canEdit ? <AddButton onClick={openEditFarm} label={appLang === 'vi' ? 'Sua' : 'Edit'} /> : null}>
+                    <InfoRow label={appLang === 'vi' ? 'Ten' : 'Name'} value={farm.farm_name} icon="fa-tag" />
+                    <InfoRow label={appLang === 'vi' ? 'Tong DT' : 'Total area'} value={farm.total_area ? `${farm.total_area} ha` : null} icon="fa-ruler" />
+                    <InfoRow label={appLang === 'vi' ? 'DT ca phe' : 'Coffee area'} value={farm.coffee_area ? `${farm.coffee_area} ha` : null} icon="fa-leaf" />
+                    <InfoRow label={appLang === 'vi' ? 'DT xen canh' : 'Intercrop area'} value={farm.intercrop_area ? `${farm.intercrop_area} ha` : null} icon="fa-tree" />
+                    <InfoRow label={appLang === 'vi' ? 'Cay xen' : 'Intercrop'} value={farm.intercrop_details} icon="fa-seedling" />
+                    <InfoRow label="pH" value={farm.soil_ph} icon="fa-flask" />
+                    <InfoRow label={appLang === 'vi' ? 'Loai dat' : 'Soil type'} value={farm.soil_type} icon="fa-mountain" />
+                    <InfoRow label={appLang === 'vi' ? 'Do doc' : 'Slope'} value={farm.slope} icon="fa-signal" />
+                    <InfoRow label={appLang === 'vi' ? 'Nguon nuoc' : 'Water source'} value={farm.water_source} icon="fa-tint" />
+                    <InfoRow label={appLang === 'vi' ? 'Tuoi tieu' : 'Irrigation'} value={farm.irrigation_system} icon="fa-shower" />
+                    <InfoRow label={appLang === 'vi' ? 'Do cao' : 'Elevation'} value={farm.elevation ? `${farm.elevation}m` : null} icon="fa-arrow-up" />
                     <InfoRow label="GPS" value={farm.gps_lat && farm.gps_long ? `${farm.gps_lat}, ${farm.gps_long}` : null} icon="fa-map-pin" />
+                    <InfoRow label={appLang === 'vi' ? 'Co phu' : 'Grass cover'} value={farm.grass_cover} icon="fa-leaf" />
+                    <InfoRow label={appLang === 'vi' ? 'Cay bong mat' : 'Shade trees'} value={farm.shade_trees} icon="fa-tree" />
                 </SectionCard>
             ) : (
                 <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
@@ -528,20 +727,99 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
             )}
 
             {plots.length > 0 && (
-                <SectionCard title={`Cac manh dat cua ho (${plots.length})`} icon="fa-th-large">
+                <SectionCard title={`${appLang === 'vi' ? 'Cac manh dat cua ho' : 'Land Plots'} (${plots.length})`} icon="fa-th-large">
                     {plots.map(p => (
                         <div key={p.id} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--coffee-dark)' }}>{p.plot_name || 'Manh dat'}</div>
+                            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--coffee-dark)' }}>{p.plot_name || (appLang === 'vi' ? 'Manh dat' : 'Plot')}</div>
                             <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
                                 <span>{p.area_ha} ha</span>
-                                {p.tree_count && <span>{p.tree_count} goc</span>}
-                                {p.yield_current && <span>SL: {p.yield_current}</span>}
-                                {p.intercrop && <span>Xen: {p.intercrop_species}</span>}
+                                {p.tree_count && <span>{p.tree_count} {appLang === 'vi' ? 'goc' : 'trees'}</span>}
+                                {p.yield_current && <span>{appLang === 'vi' ? 'SL' : 'Yield'}: {p.yield_current}</span>}
+                                {p.intercrop && <span>{appLang === 'vi' ? 'Xen' : 'Intercrop'}: {p.intercrop_species}</span>}
                             </div>
                         </div>
                     ))}
                 </SectionCard>
             )}
+
+            {/* Farm Edit Modal */}
+            <ModalOverlay
+                show={showFarmForm}
+                title={appLang === 'vi' ? 'Cap nhat thong tin trang trai' : 'Update Farm Info'}
+                onClose={() => setShowFarmForm(false)}
+                onSave={handleSaveFarm}
+            >
+                <FormField label={appLang === 'vi' ? 'Ten trang trai' : 'Farm Name'}>
+                    <input value={farmForm.farm_name || ''} onChange={e => setFarmForm({ ...farmForm, farm_name: e.target.value })} style={inputStyle} />
+                </FormField>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Tong DT (ha)' : 'Total Area (ha)'}>
+                        <input type="number" step="0.01" value={farmForm.total_area || ''} onChange={e => setFarmForm({ ...farmForm, total_area: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'DT ca phe (ha)' : 'Coffee Area (ha)'}>
+                        <input type="number" step="0.01" value={farmForm.coffee_area || ''} onChange={e => setFarmForm({ ...farmForm, coffee_area: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'DT xen canh (ha)' : 'Intercrop Area (ha)'}>
+                        <input type="number" step="0.01" value={farmForm.intercrop_area || ''} onChange={e => setFarmForm({ ...farmForm, intercrop_area: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <FormField label={appLang === 'vi' ? 'Chi tiet xen canh' : 'Intercrop Details'}>
+                    <input value={farmForm.intercrop_details || ''} onChange={e => setFarmForm({ ...farmForm, intercrop_details: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Bo, sau rieng, tieu...' : 'Avocado, durian, pepper...'} />
+                </FormField>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Loai dat' : 'Soil Type'}>
+                        <input value={farmForm.soil_type || ''} onChange={e => setFarmForm({ ...farmForm, soil_type: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Bazan, phu sa...' : 'Basalt, alluvial...'} />
+                    </FormField>
+                    <FormField label="pH">
+                        <input type="number" step="0.1" value={farmForm.soil_ph || ''} onChange={e => setFarmForm({ ...farmForm, soil_ph: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Do doc' : 'Slope'}>
+                        <select value={farmForm.slope || ''} onChange={e => setFarmForm({ ...farmForm, slope: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="flat">{appLang === 'vi' ? 'Bang phang' : 'Flat'}</option>
+                            <option value="gentle">{appLang === 'vi' ? 'Thoai' : 'Gentle'}</option>
+                            <option value="moderate">{appLang === 'vi' ? 'Vua' : 'Moderate'}</option>
+                            <option value="steep">{appLang === 'vi' ? 'Doc' : 'Steep'}</option>
+                        </select>
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Nguon nuoc' : 'Water Source'}>
+                        <input value={farmForm.water_source || ''} onChange={e => setFarmForm({ ...farmForm, water_source: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Gieng, suoi, ho...' : 'Well, stream, pond...'} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'He thong tuoi' : 'Irrigation'}>
+                        <input value={farmForm.irrigation_system || ''} onChange={e => setFarmForm({ ...farmForm, irrigation_system: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Nho giot, phun mua...' : 'Drip, sprinkler...'} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Do cao (m)' : 'Elevation (m)'}>
+                        <input type="number" value={farmForm.elevation || ''} onChange={e => setFarmForm({ ...farmForm, elevation: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label="GPS Lat">
+                        <input type="number" step="0.0001" value={farmForm.gps_lat || ''} onChange={e => setFarmForm({ ...farmForm, gps_lat: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label="GPS Long">
+                        <input type="number" step="0.0001" value={farmForm.gps_long || ''} onChange={e => setFarmForm({ ...farmForm, gps_long: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Co phu' : 'Grass Cover'}>
+                        <select value={farmForm.grass_cover || ''} onChange={e => setFarmForm({ ...farmForm, grass_cover: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Low">{appLang === 'vi' ? 'Thap' : 'Low'}</option>
+                            <option value="Medium">{appLang === 'vi' ? 'Trung binh' : 'Medium'}</option>
+                            <option value="High">{appLang === 'vi' ? 'Cao' : 'High'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'So cay bong mat' : 'Shade Trees'}>
+                        <input type="number" value={farmForm.shade_trees || ''} onChange={e => setFarmForm({ ...farmForm, shade_trees: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <FormField label={appLang === 'vi' ? 'Ghi chu' : 'Notes'}>
+                    <textarea value={farmForm.notes || ''} onChange={e => setFarmForm({ ...farmForm, notes: e.target.value })}
+                        style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }} />
+                </FormField>
+            </ModalOverlay>
         </>
     );
 
