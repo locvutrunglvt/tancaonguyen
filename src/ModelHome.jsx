@@ -3,22 +3,16 @@ import pb from './pbClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
-const CARD_GRADIENTS = [
-    { from: '#166534', to: '#22c55e', glow: 'rgba(22,101,52,0.3)' },
-    { from: '#1e40af', to: '#3b82f6', glow: 'rgba(30,64,175,0.3)' },
-    { from: '#92400e', to: '#d97706', glow: 'rgba(146,64,14,0.3)' },
-    { from: '#7c3aed', to: '#a78bfa', glow: 'rgba(124,58,237,0.3)' },
-    { from: '#0f766e', to: '#14b8a6', glow: 'rgba(15,118,110,0.3)' },
-    { from: '#be185d', to: '#ec4899', glow: 'rgba(190,24,93,0.3)' },
-    { from: '#c2410c', to: '#f97316', glow: 'rgba(194,65,12,0.3)' },
-    { from: '#4338ca', to: '#6366f1', glow: 'rgba(67,56,202,0.3)' },
+const PAD_COLORS = [
+    { bg: '#166534', light: '#22c55e', glow: 'rgba(22,101,52,0.35)' },
+    { bg: '#1e40af', light: '#3b82f6', glow: 'rgba(30,64,175,0.35)' },
+    { bg: '#92400e', light: '#d97706', glow: 'rgba(146,64,14,0.35)' },
+    { bg: '#7c3aed', light: '#a78bfa', glow: 'rgba(124,58,237,0.35)' },
+    { bg: '#0f766e', light: '#14b8a6', glow: 'rgba(15,118,110,0.35)' },
+    { bg: '#be185d', light: '#ec4899', glow: 'rgba(190,24,93,0.35)' },
+    { bg: '#c2410c', light: '#f97316', glow: 'rgba(194,65,12,0.35)' },
+    { bg: '#4338ca', light: '#6366f1', glow: 'rgba(67,56,202,0.35)' },
 ];
-
-const STATUS_COLORS = {
-    active: { icon: 'fa-check-circle' },
-    planning: { icon: 'fa-clock' },
-    completed: { icon: 'fa-flag-checkered' }
-};
 
 const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
@@ -90,13 +84,13 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
 
     const displayModels = models.length > 0 ? models : Array.from({ length: 8 }, (_, i) => ({
         id: `placeholder-${i}`, model_code: `GL${String(i + 1).padStart(2, '0')}-XP`,
-        model_name: `Mo hinh GL${String(i + 1).padStart(2, '0')}`, status: 'planning', data_status: 'pending', _placeholder: true
+        model_name: `Mo hinh GL${String(i + 1).padStart(2, '0')}`, status: 'planning', _placeholder: true
     }));
 
     return (
         <div className="home-container">
             {/* Title */}
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <h2 style={{
                     fontSize: '17px', fontWeight: 900, color: 'var(--coffee-dark)',
                     letterSpacing: '2px', margin: 0, textTransform: 'uppercase'
@@ -104,21 +98,25 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                 <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{L.subtitle}</p>
             </div>
 
-            {/* 3D Card Grid */}
+            {/* Horizontal scroll pad grid */}
             <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '20px',
-                marginBottom: '30px',
-                perspective: '1200px',
+                display: 'flex',
+                flexWrap: 'nowrap',
+                overflowX: 'auto',
+                gap: '14px',
+                padding: '10px 4px 20px',
+                scrollSnapType: 'x mandatory',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
             }}>
                 {displayModels.map((model, idx) => {
-                    const grad = CARD_GRADIENTS[idx % CARD_GRADIENTS.length];
-                    const sc = STATUS_COLORS[model.status] || STATUS_COLORS.planning;
+                    const c = PAD_COLORS[idx % PAD_COLORS.length];
                     const st = stats[model.id] || { diary: 0, inspections: 0, consumables: 0 };
                     const farmerName = model.expand?.farmer_id?.full_name;
                     const isPressed = pressedId === model.id;
                     const area = model.area || model.target_area;
+                    const totalRecs = st.diary + st.inspections + st.consumables;
 
                     return (
                         <div
@@ -127,117 +125,162 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                             onMouseEnter={() => setPressedId(model.id)}
                             onMouseLeave={() => setPressedId(null)}
                             onTouchStart={() => setPressedId(model.id)}
-                            onTouchEnd={() => setTimeout(() => setPressedId(null), 600)}
+                            onTouchEnd={() => setTimeout(() => setPressedId(null), 500)}
                             style={{
-                                borderRadius: '20px',
-                                overflow: 'hidden',
+                                flex: '0 0 auto',
+                                width: '155px',
+                                scrollSnapAlign: 'start',
                                 cursor: model._placeholder ? 'default' : 'pointer',
-                                opacity: model._placeholder ? 0.45 : 1,
-                                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                                transform: isPressed
-                                    ? 'translateY(-6px) rotateX(2deg) scale(1.03)'
-                                    : 'translateY(0) rotateX(0deg) scale(1)',
-                                transformStyle: 'preserve-3d',
-                                boxShadow: isPressed
-                                    ? `0 20px 40px ${grad.glow}, 0 8px 16px rgba(0,0,0,0.1), 0 0 0 1px ${grad.to}30`
-                                    : `0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)`,
-                                background: 'white',
+                                opacity: model._placeholder ? 0.4 : 1,
+                                perspective: '600px',
                             }}
                         >
-                            {/* Header bar with gradient + 3D shine */}
+                            {/* 3D Pad */}
                             <div style={{
-                                background: `linear-gradient(135deg, ${grad.from}, ${grad.to})`,
-                                padding: '16px 20px',
-                                color: 'white',
+                                width: '155px',
+                                minHeight: '180px',
+                                borderRadius: '18px',
+                                background: `linear-gradient(145deg, ${c.bg}, ${c.light})`,
                                 position: 'relative',
                                 overflow: 'hidden',
+                                transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                transform: isPressed
+                                    ? 'translateY(-8px) rotateX(5deg) scale(1.05)'
+                                    : 'translateY(0) rotateX(0) scale(1)',
+                                transformStyle: 'preserve-3d',
+                                boxShadow: isPressed
+                                    ? `0 18px 35px ${c.glow}, 0 6px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)`
+                                    : `0 6px 18px ${c.glow}, 0 2px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.15)`,
                             }}>
-                                {/* 3D shine overlay */}
+                                {/* 3D top shine */}
                                 <div style={{
-                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)',
+                                    position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+                                    background: 'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)',
+                                    borderRadius: '18px 18px 0 0',
                                     pointerEvents: 'none',
                                 }}></div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-                                    <div>
-                                        <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '1px', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-                                            {model.model_code}
-                                        </div>
-                                        <div style={{ fontSize: '12px', opacity: 0.9, marginTop: '2px' }}>
-                                            {model.name || model.model_name || '---'}
-                                        </div>
-                                    </div>
+                                {/* Bottom edge shadow (3D depth) */}
+                                <div style={{
+                                    position: 'absolute', bottom: 0, left: 0, right: 0, height: '6px',
+                                    background: 'rgba(0,0,0,0.15)',
+                                    borderRadius: '0 0 18px 18px',
+                                    pointerEvents: 'none',
+                                }}></div>
+
+                                {/* Content */}
+                                <div style={{
+                                    position: 'relative', zIndex: 1,
+                                    padding: '14px 12px 12px',
+                                    display: 'flex', flexDirection: 'column',
+                                    minHeight: '180px',
+                                    color: 'white',
+                                }}>
+                                    {/* Model code - big & bold */}
                                     <div style={{
-                                        padding: '4px 10px', borderRadius: '20px',
-                                        background: 'rgba(255,255,255,0.2)',
-                                        backdropFilter: 'blur(4px)',
-                                        fontSize: '10px', fontWeight: 700
+                                        fontSize: '22px', fontWeight: 900,
+                                        letterSpacing: '1px',
+                                        textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                                        marginBottom: '2px',
                                     }}>
-                                        <i className={`fas ${sc.icon}`} style={{ marginRight: '4px' }}></i>
-                                        {model.status?.toUpperCase()}
+                                        {model.model_code?.replace('-XP', '') || '---'}
                                     </div>
+
+                                    {/* Model name */}
+                                    <div style={{
+                                        fontSize: '10px', opacity: 0.85,
+                                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                        marginBottom: '10px',
+                                    }}>
+                                        {model.name || model.model_name || '---'}
+                                    </div>
+
+                                    {/* Farmer */}
+                                    <div style={{
+                                        fontSize: '11px', fontWeight: 600,
+                                        display: 'flex', alignItems: 'center', gap: '5px',
+                                        marginBottom: '4px',
+                                        opacity: farmerName ? 1 : 0.6,
+                                    }}>
+                                        <i className="fas fa-user" style={{ fontSize: '9px' }}></i>
+                                        <span style={{
+                                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                            maxWidth: '120px',
+                                        }}>
+                                            {farmerName || L.no_farmer}
+                                        </span>
+                                    </div>
+
+                                    {/* Area */}
+                                    {area && (
+                                        <div style={{ fontSize: '10px', opacity: 0.8, marginBottom: '4px' }}>
+                                            <i className="fas fa-ruler-combined" style={{ fontSize: '8px', marginRight: '4px' }}></i>
+                                            {area} {L.ha}
+                                        </div>
+                                    )}
+
+                                    {/* Location */}
+                                    {(model.location || model.commune) && (
+                                        <div style={{
+                                            fontSize: '9px', opacity: 0.7,
+                                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                        }}>
+                                            <i className="fas fa-map-marker-alt" style={{ fontSize: '8px', marginRight: '3px' }}></i>
+                                            {model.location || model.commune}
+                                        </div>
+                                    )}
+
+                                    {/* Spacer */}
+                                    <div style={{ flex: 1 }}></div>
+
+                                    {/* Stats row at bottom */}
+                                    {!model._placeholder && (
+                                        <div style={{
+                                            display: 'flex', gap: '4px', marginTop: '8px',
+                                        }}>
+                                            <div style={{
+                                                flex: 1, textAlign: 'center',
+                                                background: 'rgba(255,255,255,0.18)',
+                                                borderRadius: '8px',
+                                                padding: '5px 2px',
+                                                backdropFilter: 'blur(4px)',
+                                            }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 800 }}>{st.diary}</div>
+                                                <div style={{ fontSize: '7px', fontWeight: 600, opacity: 0.8 }}>{L.diary}</div>
+                                            </div>
+                                            <div style={{
+                                                flex: 1, textAlign: 'center',
+                                                background: 'rgba(255,255,255,0.18)',
+                                                borderRadius: '8px',
+                                                padding: '5px 2px',
+                                                backdropFilter: 'blur(4px)',
+                                            }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 800 }}>{st.inspections}</div>
+                                                <div style={{ fontSize: '7px', fontWeight: 600, opacity: 0.8 }}>{L.inspections}</div>
+                                            </div>
+                                            <div style={{
+                                                flex: 1, textAlign: 'center',
+                                                background: 'rgba(255,255,255,0.18)',
+                                                borderRadius: '8px',
+                                                padding: '5px 2px',
+                                                backdropFilter: 'blur(4px)',
+                                            }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 800 }}>{st.consumables}</div>
+                                                <div style={{ fontSize: '7px', fontWeight: 600, opacity: 0.8 }}>{L.costs}</div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Body */}
-                            <div style={{ padding: '16px 20px' }}>
-                                {/* Farmer info */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                                    <i className="fas fa-user" style={{ color: grad.from, width: '16px' }}></i>
-                                    <span style={{ fontSize: '13px', fontWeight: 600, color: farmerName ? 'var(--coffee-dark)' : '#94a3b8' }}>
-                                        {farmerName || L.no_farmer}
-                                    </span>
-                                </div>
-
-                                {/* Area + Location */}
-                                {(area || model.location || model.commune) && (
-                                    <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
-                                        {area && (
-                                            <span><i className="fas fa-ruler-combined" style={{ marginRight: '4px', color: grad.from }}></i>{area} {L.ha}</span>
-                                        )}
-                                        {(model.location || model.commune) && (
-                                            <span><i className="fas fa-map-marker-alt" style={{ marginRight: '4px', color: grad.from }}></i>{model.location || model.commune}</span>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Quick stats - 3D raised bars */}
-                                {!model._placeholder && (
-                                    <div style={{
-                                        display: 'flex', gap: '8px', marginTop: '12px',
-                                        paddingTop: '12px', borderTop: '1px solid #f1f5f9'
-                                    }}>
-                                        <div style={{
-                                            flex: 1, textAlign: 'center', padding: '8px 6px',
-                                            background: 'linear-gradient(to bottom, #f0fdf4, #dcfce7)',
-                                            borderRadius: '10px',
-                                            boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
-                                        }}>
-                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#166534' }}>{st.diary}</div>
-                                            <div style={{ fontSize: '9px', color: '#15803d', fontWeight: 600 }}>{L.diary}</div>
-                                        </div>
-                                        <div style={{
-                                            flex: 1, textAlign: 'center', padding: '8px 6px',
-                                            background: 'linear-gradient(to bottom, #eff6ff, #dbeafe)',
-                                            borderRadius: '10px',
-                                            boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
-                                        }}>
-                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#1e40af' }}>{st.inspections}</div>
-                                            <div style={{ fontSize: '9px', color: '#1d4ed8', fontWeight: 600 }}>{L.inspections}</div>
-                                        </div>
-                                        <div style={{
-                                            flex: 1, textAlign: 'center', padding: '8px 6px',
-                                            background: 'linear-gradient(to bottom, #fefce8, #fef9c3)',
-                                            borderRadius: '10px',
-                                            boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
-                                        }}>
-                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#854d0e' }}>{st.consumables}</div>
-                                            <div style={{ fontSize: '9px', color: '#a16207', fontWeight: 600 }}>{L.costs}</div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Ground shadow */}
+                            <div style={{
+                                width: '80%', height: '8px', margin: '4px auto 0',
+                                background: `radial-gradient(ellipse, ${c.glow} 0%, transparent 70%)`,
+                                borderRadius: '50%',
+                                opacity: isPressed ? 0.3 : 0.6,
+                                transition: 'opacity 0.3s',
+                            }}></div>
                         </div>
                     );
                 })}
@@ -246,7 +289,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
             {/* Quick access buttons */}
             <div style={{
                 background: 'white', borderRadius: '20px', padding: '20px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.04)', marginBottom: '20px'
+                boxShadow: '0 4px 15px rgba(0,0,0,0.04)', marginBottom: '20px', marginTop: '10px',
             }}>
                 <h4 style={{ fontSize: '12px', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase' }}>
                     {L.manage_all}
