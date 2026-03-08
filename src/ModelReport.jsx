@@ -75,12 +75,11 @@ const MONTH_NAMES = {
     ede: ['Bl01', 'Bl02', 'Bl03', 'Bl04', 'Bl05', 'Bl06', 'Bl07', 'Bl08', 'Bl09', 'Bl10', 'Bl11', 'Bl12'],
 };
 
-const fmtDate = (d, lang = 'vi') => {
+const fmtDate = (d) => {
     if (!d) return '';
     const s = d.split('T')[0] || d.split(' ')[0];
     const [y, m, dd] = s.split('-');
-    const months = MONTH_NAMES[lang] || MONTH_NAMES.vi;
-    return `${dd}-${months[parseInt(m, 10) - 1]}-${y}`;
+    return `${dd}/${m}/${y}`;
 };
 
 const fmtNum = (n) => n != null ? Number(n).toLocaleString('vi-VN') : '';
@@ -232,7 +231,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                 const logoH = logoW * aspectRatio;
                 const logoX = (pageW - logoW) / 2;
                 doc.addImage(logoResult.data, 'PNG', logoX, y, logoW, logoH);
-                y += logoH + 4;
+                y += logoH + 8;
             }
 
             // Title
@@ -262,7 +261,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                 || [farmer?.village, farmer?.commune, farmer?.province].filter(Boolean).join(', ');
             if (location) infoPairs.push([P.location, location]);
             if (model.target_area) infoPairs.push([P.area, `${model.target_area} ${P.ha}`]);
-            infoPairs.push([P.period, `${fmtDate(dateFrom, lang)} - ${fmtDate(dateTo, lang)}`]);
+            infoPairs.push([P.period, `${fmtDate(dateFrom)} - ${fmtDate(dateTo)}`]);
 
             infoPairs.forEach(([label, val]) => {
                 doc.setFont(fontName, 'bold');
@@ -316,7 +315,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                         headStyles: { fillColor: [93, 64, 55], textColor: 255, fontStyle: 'bold' },
                         head: [[P.date, P.activity, P.description, P.material, P.qty, P.laborCost, P.matCost, P.gcp]],
                         body: diaryData.map(d => [
-                            fmtDate(d.diary_date, lang),
+                            fmtDate(d.diary_date),
                             labelFor(ACTIVITY_LABELS, d.activity_type, lang),
                             (d.description || '').substring(0, 50),
                             d.material_name || '',
@@ -365,7 +364,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                         headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
                         head: [[P.date, P.type, P.growth, P.pests, P.soil, P.water, P.healthPct, P.recomm]],
                         body: inspectData.map(i => [
-                            fmtDate(i.inspection_date, lang),
+                            fmtDate(i.inspection_date),
                             labelFor(INSPECT_TYPE_LABELS, i.inspection_type, lang),
                             labelFor(QUALITY_LABELS, i.growth_quality, lang),
                             labelFor(PEST_LABELS, i.pest_status, lang),
@@ -404,7 +403,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                         headStyles: { fillColor: [133, 77, 14], textColor: 255, fontStyle: 'bold' },
                         head: [[P.date, P.category, P.item, P.qty, P.unit, P.price, P.total, P.notes]],
                         body: consumData.map(c => [
-                            fmtDate(c.record_date, lang),
+                            fmtDate(c.record_date),
                             labelFor(CATEGORY_LABELS, c.category, lang),
                             c.item_name || '',
                             fmtNum(c.quantity),
