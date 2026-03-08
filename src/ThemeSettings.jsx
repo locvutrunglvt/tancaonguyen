@@ -5,7 +5,7 @@ const ThemeSettings = ({ appLang = 'vi', onBack }) => {
     const [activeTheme, setActiveTheme] = useState(getStoredTheme());
 
     const labels = {
-        vi: { title: 'Giao dien', subtitle: 'Chon giao dien phu hop voi ban', current: 'Dang su dung', apply: 'Ap dung' },
+        vi: { title: 'Giao diện', subtitle: 'Chọn giao diện phù hợp với bạn', current: 'Đang sử dụng', apply: 'Áp dụng' },
         en: { title: 'Appearance', subtitle: 'Choose your preferred theme', current: 'Active', apply: 'Apply' },
         ede: { title: 'Asei Đrưh', subtitle: 'Hriêng asei đrưh kơ jia', current: 'Hruê anei', apply: 'Yua' }
     };
@@ -20,7 +20,7 @@ const ThemeSettings = ({ appLang = 'vi', onBack }) => {
         <div className="view-container" style={{ animation: 'fadeInUp 0.5s ease' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                 <button onClick={onBack} className="btn-back">
-                    <i className="fas fa-arrow-left"></i> {appLang === 'vi' ? 'Quay lai' : appLang === 'en' ? 'Back' : 'Lêt'}
+                    <i className="fas fa-arrow-left"></i> {appLang === 'vi' ? 'Quay lại' : appLang === 'en' ? 'Back' : 'Lêt'}
                 </button>
             </div>
 

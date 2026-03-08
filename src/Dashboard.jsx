@@ -539,14 +539,14 @@ const Dashboard = ({ onLogout }) => {
             <aside className="sidebar">
                 <nav className="nav-menu">
                     <a className={`nav-item ${view === 'home' || view === 'model_detail' ? 'active' : ''}`} onClick={() => { setView('home'); setSelectedModel(null); }}>
-                        <i className="fas fa-seedling"></i> <span>{appLang === 'vi' ? 'Mo hinh' : appLang === 'en' ? 'Models' : 'Hdruom'}</span>
+                        <i className="fas fa-seedling"></i> <span>{appLang === 'vi' ? 'Mô hình' : appLang === 'en' ? 'Models' : 'Hdruôm'}</span>
                     </a>
                     <a className={`nav-item ${view === 'training' ? 'active' : ''}`} onClick={() => setView('training')}>
                         <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
                     </a>
                     {isAdmin && (
                         <a className={`nav-item ${view === 'backup' ? 'active' : ''}`} onClick={() => setView('backup')}>
-                            <i className="fas fa-database"></i> <span>{appLang === 'vi' ? 'Sao luu' : appLang === 'en' ? 'Backup' : 'Pioh'}</span>
+                            <i className="fas fa-database"></i> <span>{appLang === 'vi' ? 'Sao lưu' : appLang === 'en' ? 'Backup' : 'Pioh'}</span>
                         </a>
                     )}
                     {isAdmin && (
@@ -555,7 +555,7 @@ const Dashboard = ({ onLogout }) => {
                         </a>
                     )}
                     <a className={`nav-item ${view === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}>
-                        <i className="fas fa-palette"></i> <span>{appLang === 'vi' ? 'Giao dien' : appLang === 'en' ? 'Themes' : 'Asei'}</span>
+                        <i className="fas fa-palette"></i> <span>{appLang === 'vi' ? 'Giao diện' : appLang === 'en' ? 'Themes' : 'Asei'}</span>
                     </a>
                 </nav>
                 <div className="sidebar-footer">
@@ -667,7 +667,7 @@ const Dashboard = ({ onLogout }) => {
                     <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
                 </button>
                 <button className={`nav-item-mobile ${view === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}>
-                    <i className="fas fa-palette"></i> <span>{appLang === 'vi' ? 'Giao dien' : appLang === 'en' ? 'Themes' : 'Asei'}</span>
+                    <i className="fas fa-palette"></i> <span>{appLang === 'vi' ? 'Giao diện' : appLang === 'en' ? 'Themes' : 'Asei'}</span>
                 </button>
             </nav>
         </div>

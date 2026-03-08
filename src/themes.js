@@ -4,7 +4,7 @@
 export const themes = {
     coffee_classic: {
         id: 'coffee_classic',
-        name: { vi: 'Ca phe Co dien', en: 'Classic Coffee', ede: 'Kaphe Khăn' },
+        name: { vi: 'Cà Phê Cổ Điển', en: 'Classic Coffee', ede: 'Kăphê Khăn' },
         icon: 'fas fa-mug-hot',
         preview: ['#5D4037', '#8D6E63', '#D7CCC8', '#EFEBE9'],
         vars: {
@@ -27,7 +27,7 @@ export const themes = {
     },
     forest_green: {
         id: 'forest_green',
-        name: { vi: 'Rung Xanh', en: 'Forest Green', ede: 'Kmui Mtiêt' },
+        name: { vi: 'Rừng Xanh', en: 'Forest Green', ede: 'Kmui Mtiêt' },
         icon: 'fas fa-tree',
         preview: ['#2E7D32', '#4CAF50', '#C8E6C9', '#E8F5E9'],
         vars: {
@@ -50,7 +50,7 @@ export const themes = {
     },
     earth_tone: {
         id: 'earth_tone',
-        name: { vi: 'Dat Bazan', en: 'Earth Tone', ede: 'Lăn Bazan' },
+        name: { vi: 'Đất Bazan', en: 'Earth Tone', ede: 'Lăn Bazan' },
         icon: 'fas fa-mountain',
         preview: ['#6D4C41', '#A1887F', '#D7CCC8', '#F5F0EB'],
         vars: {
@@ -73,7 +73,7 @@ export const themes = {
     },
     ocean_mist: {
         id: 'ocean_mist',
-        name: { vi: 'Suong Bien', en: 'Ocean Mist', ede: 'Êa Ksĭt' },
+        name: { vi: 'Sương Biển', en: 'Ocean Mist', ede: 'Êa Ksĭt' },
         icon: 'fas fa-water',
         preview: ['#37474F', '#607D8B', '#CFD8DC', '#ECEFF1'],
         vars: {
@@ -96,7 +96,7 @@ export const themes = {
     },
     sunset_harvest: {
         id: 'sunset_harvest',
-        name: { vi: 'Hoang Hon', en: 'Sunset Harvest', ede: 'Yang Hruê Lĕ' },
+        name: { vi: 'Hoàng Hôn', en: 'Sunset Harvest', ede: 'Yang Hruê Lĕ' },
         icon: 'fas fa-sun',
         preview: ['#BF360C', '#E64A19', '#FFCCBC', '#FBE9E7'],
         vars: {
@@ -119,7 +119,7 @@ export const themes = {
     },
     highland_lavender: {
         id: 'highland_lavender',
-        name: { vi: 'Oai Huong', en: 'Highland Lavender', ede: 'Boh Mngăt' },
+        name: { vi: 'Oải Hương', en: 'Highland Lavender', ede: 'Boh Mngăt' },
         icon: 'fas fa-spa',
         preview: ['#4A148C', '#7B1FA2', '#E1BEE7', '#F3E5F5'],
         vars: {
@@ -142,7 +142,7 @@ export const themes = {
     },
     bamboo_zen: {
         id: 'bamboo_zen',
-        name: { vi: 'Tre Xanh', en: 'Bamboo Zen', ede: 'Kmuh Ai' },
+        name: { vi: 'Tre Xanh', en: 'Bamboo Zen', ede: 'Kmŭh Ai' },
         icon: 'fas fa-leaf',
         preview: ['#33691E', '#689F38', '#DCEDC8', '#F1F8E9'],
         vars: {
@@ -165,7 +165,7 @@ export const themes = {
     },
     dark_roast: {
         id: 'dark_roast',
-        name: { vi: 'Rang Dam', en: 'Dark Roast', ede: 'Jŭ Jing' },
+        name: { vi: 'Rang Đậm', en: 'Dark Roast', ede: 'Jŭ Jing' },
         icon: 'fas fa-moon',
         preview: ['#1A1A2E', '#2D2D44', '#4A4A6A', '#E8E8F0'],
         vars: {
@@ -187,6 +187,94 @@ export const themes = {
         }
     }
 };
+
+// Card gradients per theme - 8 variants harmonized with each theme
+export const themeCardGradients = {
+    coffee_classic: [
+        { from: '#5D4037', to: '#8D6E63' },
+        { from: '#6D4C41', to: '#A1887F' },
+        { from: '#795548', to: '#BCAAA4' },
+        { from: '#4E342E', to: '#795548' },
+        { from: '#8D6E63', to: '#D7CCC8' },
+        { from: '#3E2723', to: '#6D4C41' },
+        { from: '#A1887F', to: '#C49A6C' },
+        { from: '#5D4037', to: '#A1887F' },
+    ],
+    forest_green: [
+        { from: '#1B5E20', to: '#4CAF50' },
+        { from: '#2E7D32', to: '#66BB6A' },
+        { from: '#388E3C', to: '#81C784' },
+        { from: '#1B5E20', to: '#388E3C' },
+        { from: '#4CAF50', to: '#A5D6A7' },
+        { from: '#2E7D32', to: '#4CAF50' },
+        { from: '#33691E', to: '#689F38' },
+        { from: '#1B5E20', to: '#66BB6A' },
+    ],
+    earth_tone: [
+        { from: '#4E342E', to: '#8D6E63' },
+        { from: '#5D4037', to: '#A1887F' },
+        { from: '#6D4C41', to: '#BCAAA4' },
+        { from: '#3E2723', to: '#6D4C41' },
+        { from: '#795548', to: '#A1887F' },
+        { from: '#4E342E', to: '#795548' },
+        { from: '#6D4C41', to: '#8D6E63' },
+        { from: '#5D4037', to: '#8D6E63' },
+    ],
+    ocean_mist: [
+        { from: '#263238', to: '#546E7A' },
+        { from: '#37474F', to: '#607D8B' },
+        { from: '#455A64', to: '#78909C' },
+        { from: '#263238', to: '#455A64' },
+        { from: '#546E7A', to: '#90A4AE' },
+        { from: '#37474F', to: '#546E7A' },
+        { from: '#455A64', to: '#607D8B' },
+        { from: '#263238', to: '#607D8B' },
+    ],
+    sunset_harvest: [
+        { from: '#BF360C', to: '#E64A19' },
+        { from: '#D84315', to: '#FF5722' },
+        { from: '#E64A19', to: '#FF7043' },
+        { from: '#BF360C', to: '#D84315' },
+        { from: '#FF5722', to: '#FF8A65' },
+        { from: '#D84315', to: '#E64A19' },
+        { from: '#BF360C', to: '#FF5722' },
+        { from: '#E64A19', to: '#FF8A65' },
+    ],
+    highland_lavender: [
+        { from: '#4A148C', to: '#7B1FA2' },
+        { from: '#6A1B9A', to: '#9C27B0' },
+        { from: '#7B1FA2', to: '#AB47BC' },
+        { from: '#4A148C', to: '#6A1B9A' },
+        { from: '#8E24AA', to: '#CE93D8' },
+        { from: '#6A1B9A', to: '#8E24AA' },
+        { from: '#4A148C', to: '#9C27B0' },
+        { from: '#7B1FA2', to: '#CE93D8' },
+    ],
+    bamboo_zen: [
+        { from: '#33691E', to: '#558B2F' },
+        { from: '#33691E', to: '#689F38' },
+        { from: '#558B2F', to: '#7CB342' },
+        { from: '#33691E', to: '#558B2F' },
+        { from: '#689F38', to: '#9CCC65' },
+        { from: '#558B2F', to: '#689F38' },
+        { from: '#33691E', to: '#7CB342' },
+        { from: '#689F38', to: '#8BC34A' },
+    ],
+    dark_roast: [
+        { from: '#2D2D44', to: '#4A4A6A' },
+        { from: '#3D3D5C', to: '#5A5A7A' },
+        { from: '#4A4A6A', to: '#7C7C9A' },
+        { from: '#2D2D44', to: '#3D3D5C' },
+        { from: '#5A5A7A', to: '#9A9AB8' },
+        { from: '#3D3D5C', to: '#5A5A7A' },
+        { from: '#2D2D44', to: '#5A5A7A' },
+        { from: '#4A4A6A', to: '#9A9AB8' },
+    ],
+};
+
+export function getCardGradients(themeId) {
+    return themeCardGradients[themeId] || themeCardGradients.coffee_classic;
+}
 
 export const defaultTheme = 'coffee_classic';
 

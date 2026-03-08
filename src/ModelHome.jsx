@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
+import { getCardGradients, getStoredTheme } from './themes';
 import './Dashboard.css';
-
-const CARD_GRADIENTS = [
-    { from: '#166534', to: '#22c55e', glow: 'rgba(22,101,52,0.3)' },
-    { from: '#1e40af', to: '#3b82f6', glow: 'rgba(30,64,175,0.3)' },
-    { from: '#92400e', to: '#d97706', glow: 'rgba(146,64,14,0.3)' },
-    { from: '#7c3aed', to: '#a78bfa', glow: 'rgba(124,58,237,0.3)' },
-    { from: '#0f766e', to: '#14b8a6', glow: 'rgba(15,118,110,0.3)' },
-    { from: '#be185d', to: '#ec4899', glow: 'rgba(190,24,93,0.3)' },
-    { from: '#c2410c', to: '#f97316', glow: 'rgba(194,65,12,0.3)' },
-    { from: '#4338ca', to: '#6366f1', glow: 'rgba(67,56,202,0.3)' },
-];
 
 const STATUS_COLORS = {
     active: { icon: 'fa-check-circle' },
@@ -26,6 +16,9 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({});
     const [pressedId, setPressedId] = useState(null);
+
+    // Get theme-aware card gradients
+    const cardGradients = getCardGradients(getStoredTheme());
 
     useEffect(() => { fetchModels(); }, []);
 
@@ -56,11 +49,11 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
 
     const labels = {
         vi: {
-            title: '08 MO HINH TRINH DIEN', subtitle: 'Bam vao mo hinh de xem chi tiet',
-            farmer: 'Nong ho', area: 'Dien tich', inspections: 'Kiem tra', diary: 'Nhat ky',
-            no_farmer: 'Chua gan nong ho', manage_all: 'Quan ly chung',
-            all_farmers: 'Tat ca nong ho', all_training: 'Dao tao', finance: 'Tai chinh', ha: 'ha',
-            costs: 'Tieu hao',
+            title: '08 MÔ HÌNH TRÌNH DIỄN', subtitle: 'Bấm vào mô hình để xem chi tiết',
+            farmer: 'Nông hộ', area: 'Diện tích', inspections: 'Kiểm tra', diary: 'Nhật ký',
+            no_farmer: 'Chưa gán nông hộ', manage_all: 'Quản lý chung',
+            all_farmers: 'Tất cả nông hộ', all_training: 'Đào tạo', finance: 'Tài chính', ha: 'ha',
+            costs: 'Tiêu hao',
         },
         en: {
             title: '08 DEMONSTRATION MODELS', subtitle: 'Tap a model to explore',
@@ -83,7 +76,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
         return (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <i className="fas fa-spinner fa-spin" style={{ fontSize: '32px', color: 'var(--coffee-primary)' }}></i>
-                <p style={{ marginTop: '15px', color: '#64748b' }}>{t.loading}</p>
+                <p style={{ marginTop: '15px', color: 'var(--gray-700)' }}>{t.loading}</p>
             </div>
         );
     }
@@ -104,7 +97,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                     fontSize: '17px', fontWeight: 900, color: 'var(--coffee-dark)',
                     letterSpacing: '2px', margin: 0, textTransform: 'uppercase'
                 }}>{L.title}</h2>
-                <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{L.subtitle}</p>
+                <p style={{ fontSize: '12px', color: 'var(--gray-700)', opacity: 0.6, marginTop: '4px' }}>{L.subtitle}</p>
             </div>
 
             {/* 3D Card Grid - 5 per row */}
@@ -116,7 +109,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                 perspective: '1200px',
             }}>
                 {displayModels.map((model, idx) => {
-                    const grad = CARD_GRADIENTS[idx % CARD_GRADIENTS.length];
+                    const grad = cardGradients[idx % cardGradients.length];
                     const sc = STATUS_COLORS[model.status] || STATUS_COLORS.planning;
                     const st = stats[model.id] || { diary: 0, inspections: 0, consumables: 0 };
                     const farmer = model.expand?.farmer_id;
@@ -141,16 +134,16 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                 overflow: 'hidden',
                                 cursor: model._placeholder ? 'default' : 'pointer',
                                 opacity: model._placeholder ? 0.45 : isOtherFarmerModel ? 0.6 : 1,
-                                border: isMyModel ? '3px solid #f59e0b' : 'none',
+                                border: isMyModel ? '3px solid var(--gold-accent)' : 'none',
                                 transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
                                 transform: isPressed
                                     ? 'translateY(-6px) rotateX(2deg) scale(1.03)'
                                     : 'translateY(0) rotateX(0deg) scale(1)',
                                 transformStyle: 'preserve-3d',
                                 boxShadow: isPressed
-                                    ? `0 20px 40px ${grad.glow}, 0 8px 16px rgba(0,0,0,0.1), 0 0 0 1px ${grad.to}30`
+                                    ? `0 20px 40px ${grad.from}30, 0 8px 16px rgba(0,0,0,0.1), 0 0 0 1px ${grad.to}30`
                                     : `0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)`,
-                                background: 'white',
+                                background: 'var(--white, #fff)',
                             }}
                         >
                             {/* Header bar with gradient + 3D shine */}
@@ -181,7 +174,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                         {isMyModel && (
                                             <div style={{
                                                 padding: '4px 8px', borderRadius: '20px',
-                                                background: '#f59e0b', color: '#fff',
+                                                background: 'var(--gold-accent)', color: '#fff',
                                                 fontSize: '9px', fontWeight: 800
                                             }}>
                                                 <i className="fas fa-star" style={{ marginRight: '3px' }}></i>
@@ -216,14 +209,14 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                 {/* Farmer info */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                                     <i className="fas fa-user" style={{ color: grad.from, width: '16px' }}></i>
-                                    <span style={{ fontSize: '13px', fontWeight: 600, color: farmerName ? 'var(--coffee-dark)' : '#94a3b8' }}>
+                                    <span style={{ fontSize: '13px', fontWeight: 600, color: farmerName ? 'var(--coffee-dark)' : 'var(--gray-300)' }}>
                                         {farmerName || L.no_farmer}
                                     </span>
                                 </div>
 
                                 {/* Area + Location */}
                                 {(area || village || commune) && (
-                                    <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#64748b', marginBottom: '10px', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: 'var(--gray-700)', marginBottom: '10px', flexWrap: 'wrap' }}>
                                         {area && (
                                             <span><i className="fas fa-ruler-combined" style={{ marginRight: '4px', color: grad.from }}></i>{area} {L.ha}</span>
                                         )}
@@ -235,38 +228,38 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                     </div>
                                 )}
 
-                                {/* Quick stats - 3D raised bars */}
+                                {/* Quick stats - theme-aware */}
                                 {!model._placeholder && (
                                     <div style={{
                                         display: 'flex', gap: '8px', marginTop: '12px',
-                                        paddingTop: '12px', borderTop: '1px solid #f1f5f9'
+                                        paddingTop: '12px', borderTop: '1px solid var(--gray-200)'
                                     }}>
                                         <div style={{
                                             flex: 1, textAlign: 'center', padding: '6px 4px',
-                                            background: 'linear-gradient(to bottom, #f0fdf4, #dcfce7)',
+                                            background: `linear-gradient(to bottom, var(--cream-light), var(--cream))`,
                                             borderRadius: '8px',
                                             boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
                                         }}>
-                                            <div style={{ fontSize: '15px', fontWeight: 800, color: '#166534' }}>{st.diary}</div>
-                                            <div style={{ fontSize: '8px', color: '#15803d', fontWeight: 600 }}>{L.diary}</div>
+                                            <div style={{ fontSize: '15px', fontWeight: 800, color: grad.from }}>{st.diary}</div>
+                                            <div style={{ fontSize: '8px', color: 'var(--coffee-medium)', fontWeight: 600 }}>{L.diary}</div>
                                         </div>
                                         <div style={{
                                             flex: 1, textAlign: 'center', padding: '6px 4px',
-                                            background: 'linear-gradient(to bottom, #eff6ff, #dbeafe)',
+                                            background: `linear-gradient(to bottom, var(--cream-light), var(--cream))`,
                                             borderRadius: '8px',
                                             boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
                                         }}>
-                                            <div style={{ fontSize: '15px', fontWeight: 800, color: '#1e40af' }}>{st.inspections}</div>
-                                            <div style={{ fontSize: '8px', color: '#1d4ed8', fontWeight: 600 }}>{L.inspections}</div>
+                                            <div style={{ fontSize: '15px', fontWeight: 800, color: grad.from }}>{st.inspections}</div>
+                                            <div style={{ fontSize: '8px', color: 'var(--coffee-medium)', fontWeight: 600 }}>{L.inspections}</div>
                                         </div>
                                         <div style={{
                                             flex: 1, textAlign: 'center', padding: '6px 4px',
-                                            background: 'linear-gradient(to bottom, #fefce8, #fef9c3)',
+                                            background: `linear-gradient(to bottom, var(--cream-light), var(--cream))`,
                                             borderRadius: '8px',
                                             boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
                                         }}>
-                                            <div style={{ fontSize: '15px', fontWeight: 800, color: '#854d0e' }}>{st.consumables}</div>
-                                            <div style={{ fontSize: '8px', color: '#a16207', fontWeight: 600 }}>{L.costs}</div>
+                                            <div style={{ fontSize: '15px', fontWeight: 800, color: grad.from }}>{st.consumables}</div>
+                                            <div style={{ fontSize: '8px', color: 'var(--coffee-medium)', fontWeight: 600 }}>{L.costs}</div>
                                         </div>
                                     </div>
                                 )}
@@ -278,10 +271,10 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
 
             {/* Quick access buttons */}
             <div style={{
-                background: 'white', borderRadius: '20px', padding: '20px',
+                background: 'var(--white, #fff)', borderRadius: '20px', padding: '20px',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.04)', marginBottom: '20px'
             }}>
-                <h4 style={{ fontSize: '12px', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase' }}>
+                <h4 style={{ fontSize: '12px', color: 'var(--gray-700)', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase' }}>
                     {L.manage_all}
                 </h4>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -291,7 +284,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                     <button onClick={() => onNavigate('training')} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', background: 'var(--green-accent)' }}>
                         <i className="fas fa-graduation-cap" style={{ marginRight: '6px' }}></i>{L.all_training}
                     </button>
-                    <button onClick={() => onNavigate('planning')} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', background: 'var(--gold-accent)', color: '#3E2723' }}>
+                    <button onClick={() => onNavigate('planning')} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', background: 'var(--gold-accent)', color: 'var(--coffee-dark)' }}>
                         <i className="fas fa-clipboard-list" style={{ marginRight: '6px' }}></i>{L.finance}
                     </button>
                 </div>

@@ -13,7 +13,7 @@ const Login = () => {
 
     const [formData, setFormData] = useState({
         org: 'tcn',
-        email: 'locvutrung@gmail.com',
+        email: 'demo@tcn.app',
         password: '',
         fullName: '',
         phone: ''
@@ -44,14 +44,14 @@ const Login = () => {
 
             let finalUsers = data || [];
             if (orgId === 'tcn') {
-                const adminEmail = 'locvutrung@gmail.com';
+                const adminEmail = 'demo@tcn.app';
                 const hasAdmin = finalUsers.some(u => u.email === adminEmail);
                 if (!hasAdmin) {
                     finalUsers = [
                         {
                             id: 'admin_fallback',
                             email: adminEmail,
-                            full_name: 'Đỗ Thành Duy',
+                            full_name: 'Demo Admin',
                             role: 'Admin'
                         },
                         ...finalUsers
@@ -65,8 +65,8 @@ const Login = () => {
             if (orgId === 'tcn') {
                 setUsers([{
                     id: 'admin_fallback',
-                    email: 'locvutrung@gmail.com',
-                    full_name: 'Đỗ Thành Duy (Fallback)',
+                    email: 'demo@tcn.app',
+                    full_name: 'Demo Admin (Fallback)',
                     role: 'Admin'
                 }]);
             } else {
