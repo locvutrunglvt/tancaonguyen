@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
 import ModelReport from './ModelReport';
+import { getDisplayCurrency, getCachedRates, formatCompact } from './currencyUtils';
 import './Dashboard.css';
 
 const TABS = [
@@ -937,7 +938,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                             )}
                             {(d.labor_cost || d.material_cost) && (
                                 <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
-                                    {appLang === 'vi' ? 'Chi phí' : 'Cost'}: {((d.labor_cost || 0) + (d.material_cost || 0)).toLocaleString()} đ
+                                    {appLang === 'vi' ? 'Chi phí' : 'Cost'}: {formatCompact((d.labor_cost || 0) + (d.material_cost || 0), getDisplayCurrency(), getCachedRates())}
                                 </div>
                             )}
                         </div>
@@ -1145,8 +1146,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     padding: '20px', color: 'white', textAlign: 'center', marginBottom: '16px'
                 }}>
                     <div style={{ fontSize: '12px', opacity: 0.9 }}>{appLang === 'vi' ? 'Tổng tiêu hao' : 'Total Costs'}</div>
-                    <div style={{ fontSize: '32px', fontWeight: 800 }}>{totalCost.toLocaleString()}</div>
-                    <div style={{ fontSize: '12px', opacity: 0.8 }}>VND</div>
+                    <div style={{ fontSize: '32px', fontWeight: 800 }}>{formatCompact(totalCost, getDisplayCurrency(), getCachedRates())}</div>
                 </div>
 
                 {Object.keys(byCat).length > 0 && (
@@ -1156,7 +1156,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                                 <span style={{ fontSize: '13px', textTransform: 'capitalize' }}>
                                     {CONSUMABLE_CATEGORIES.find(c => c.value === cat)?.[appLang] || cat}
                                 </span>
-                                <span style={{ fontWeight: 700, color: 'var(--coffee-dark)' }}>{total.toLocaleString()}</span>
+                                <span style={{ fontWeight: 700, color: 'var(--coffee-dark)' }}>{formatCompact(total, getDisplayCurrency(), getCachedRates())}</span>
                             </div>
                         ))}
                     </SectionCard>
@@ -1177,7 +1177,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span style={{ fontWeight: 600 }}>{c.item_name}</span>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ color: '#dc2626', fontWeight: 700 }}>{(c.total_cost || 0).toLocaleString()}</span>
+                                        <span style={{ color: '#dc2626', fontWeight: 700 }}>{formatCompact(c.total_cost || 0, getDisplayCurrency(), getCachedRates())}</span>
                                         {canEdit && <button onClick={() => openEditConsum(c)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}>
                                             <i className="fas fa-edit" style={{ fontSize: '11px' }}></i>
                                         </button>}
@@ -1249,18 +1249,17 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     padding: '20px', color: 'white', textAlign: 'center', marginBottom: '16px'
                 }}>
                     <div style={{ fontSize: '12px', opacity: 0.9 }}>{appLang === 'vi' ? 'Tổng đầu tư mô hình' : 'Total Model Investment'}</div>
-                    <div style={{ fontSize: '32px', fontWeight: 800 }}>{totalInvest.toLocaleString()}</div>
-                    <div style={{ fontSize: '12px', opacity: 0.8 }}>VND</div>
+                    <div style={{ fontSize: '32px', fontWeight: 800 }}>{formatCompact(totalInvest, getDisplayCurrency(), getCachedRates())}</div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
                     <div style={{ background: '#f0fdf4', borderRadius: '16px', padding: '16px', textAlign: 'center' }}>
                         <div style={{ fontSize: '11px', color: '#166534' }}>{appLang === 'vi' ? 'Từ nhật ký' : 'From Diary'}</div>
-                        <div style={{ fontSize: '22px', fontWeight: 800, color: '#166534' }}>{diaryCost.toLocaleString()}</div>
+                        <div style={{ fontSize: '22px', fontWeight: 800, color: '#166534' }}>{formatCompact(diaryCost, getDisplayCurrency(), getCachedRates())}</div>
                     </div>
                     <div style={{ background: '#fef9c3', borderRadius: '16px', padding: '16px', textAlign: 'center' }}>
                         <div style={{ fontSize: '11px', color: '#854d0e' }}>{appLang === 'vi' ? 'Từ tiêu hao' : 'From Consumables'}</div>
-                        <div style={{ fontSize: '22px', fontWeight: 800, color: '#854d0e' }}>{consumCost.toLocaleString()}</div>
+                        <div style={{ fontSize: '22px', fontWeight: 800, color: '#854d0e' }}>{formatCompact(consumCost, getDisplayCurrency(), getCachedRates())}</div>
                     </div>
                 </div>
 

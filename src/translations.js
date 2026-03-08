@@ -33,6 +33,22 @@ export const translations = {
         feature_coming_soon: "Tính năng đang được phát triển...",
         close: "Đóng",
 
+        // Settings
+        settings: 'Cài đặt',
+        settings_themes: 'Giao diện',
+        settings_currency: 'Tiền tệ',
+        settings_admin: 'Quản trị',
+        currency_input: 'Tiền tệ nhập',
+        currency_display: 'Tiền tệ hiển thị',
+        currency_input_fixed: 'Cố định',
+        currency_rate: 'Tỷ giá',
+        currency_updated: 'Cập nhật lúc',
+        currency_refresh: 'Làm mới tỷ giá',
+        currency_loading: 'Đang lấy tỷ giá...',
+        currency_error: 'Không thể lấy tỷ giá. Vui lòng thử lại sau.',
+        settings_users: 'Người dùng',
+        settings_backup: 'Sao lưu',
+
         // Forgot Password
         forgot_title: "Quên mật khẩu?",
         forgot_desc: "Nhập email của bạn để nhận liên kết đặt lại mật khẩu.",
@@ -291,6 +307,22 @@ export const translations = {
         feature_coming_soon: "Feature under development...",
         close: "Close",
 
+        // Settings
+        settings: 'Settings',
+        settings_themes: 'Themes',
+        settings_currency: 'Currency',
+        settings_admin: 'Admin',
+        currency_input: 'Input Currency',
+        currency_display: 'Display Currency',
+        currency_input_fixed: 'Fixed',
+        currency_rate: 'Exchange Rate',
+        currency_updated: 'Last updated',
+        currency_refresh: 'Refresh rates',
+        currency_loading: 'Fetching rates...',
+        currency_error: 'Could not fetch rates. Please try again later.',
+        settings_users: 'Users',
+        settings_backup: 'Backup',
+
         // Forgot Password
         forgot_title: "Forgot Password?",
         forgot_desc: "Enter your email to receive a password reset link.",
@@ -548,6 +580,22 @@ export const translations = {
         user_info: "Klei kơ mnuih bruă",
         feature_coming_soon: "Bruă hriăm...",
         close: "Dư",
+
+        // Settings
+        settings: 'Klei hơ mơ',
+        settings_themes: 'Asei',
+        settings_currency: 'Prăk',
+        settings_admin: 'Khua',
+        currency_input: 'Prăk mŭt',
+        currency_display: 'Prăk bi êdah',
+        currency_input_fixed: 'Khŏ bi mlih',
+        currency_rate: 'Kna prăk',
+        currency_updated: 'Mrâo leh',
+        currency_refresh: 'Lŏm hdra kna prăk',
+        currency_loading: 'Dŭm kna prăk...',
+        currency_error: 'Khŏ dưi mă kna prăk.',
+        settings_users: 'Mnuih',
+        settings_backup: 'Pioh',
 
         // Forgot Password
         forgot_title: "Khŏ kơ mật khẩu?",

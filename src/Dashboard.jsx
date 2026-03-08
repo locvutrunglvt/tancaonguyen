@@ -4,11 +4,12 @@ import pb from './pbClient';
 import './Dashboard.css';
 import { translations } from './translations';
 import TrainingCenter from './TrainingCenter';
-import BackupRestore from './BackupRestore';
 import ModelHome from './ModelHome';
 import ModelDetailView from './ModelDetailView';
 import useSwipeBack from './useSwipeBack';
-import ThemeSettings from './ThemeSettings';
+import Settings from './Settings';
+import FarmerManagement from './FarmerManagement';
+import SeasonalPlanning from './SeasonalPlanning';
 import { applyTheme, getStoredTheme } from './themes';
 
 // Components Moved Outside for React Component Stability (Fixes Input Focus Bug)
@@ -364,9 +365,7 @@ const Dashboard = ({ onLogout }) => {
     }, []);
 
 
-    useEffect(() => {
-        if (view === 'users') fetchUsersList();
-    }, [view]);
+    // User list fetching is now handled by Settings component's Admin tab
 
     const fetchUserProfile = async () => {
         const user = pb.authStore.model;
@@ -544,18 +543,8 @@ const Dashboard = ({ onLogout }) => {
                     <a className={`nav-item ${view === 'training' ? 'active' : ''}`} onClick={() => setView('training')}>
                         <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
                     </a>
-                    {isAdmin && (
-                        <a className={`nav-item ${view === 'backup' ? 'active' : ''}`} onClick={() => setView('backup')}>
-                            <i className="fas fa-database"></i> <span>{appLang === 'vi' ? 'Sao lưu' : appLang === 'en' ? 'Backup' : 'Pioh'}</span>
-                        </a>
-                    )}
-                    {isAdmin && (
-                        <a className={`nav-item ${view === 'users' ? 'active' : ''}`} onClick={() => setView('users')}>
-                            <i className="fas fa-users-cog"></i> <span>Admin</span>
-                        </a>
-                    )}
                     <a className={`nav-item ${view === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}>
-                        <i className="fas fa-palette"></i> <span>{appLang === 'vi' ? 'Giao diện' : appLang === 'en' ? 'Themes' : 'Asei'}</span>
+                        <i className="fas fa-cog"></i> <span>{t.settings || 'Cài đặt'}</span>
                     </a>
                 </nav>
                 <div className="sidebar-footer">
@@ -633,26 +622,34 @@ const Dashboard = ({ onLogout }) => {
                             }
                         />
                     )}
-                    {view === 'users' && (
-                        <UserManagementView
-                            users={users} t={t} currentUser={currentUser}
+                    {view === 'training' && <TrainingCenter onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'farmers' && <FarmerManagement onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'planning' && <SeasonalPlanning onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
+                    {view === 'settings' && (
+                        <Settings
                             onBack={() => setView('home')}
-                            onAdd={() => { setUserForm({ id: '', email: '', full_name: '', organization: currentUser?.organization || 'gus', role: 'Guest', employee_code: '', phone: '' }); setIsEditing(false); setShowUserModal(true); }}
-                            onEdit={(u) => { setUserForm(u); setIsEditing(true); setShowUserModal(true); }}
-                            onDelete={handleDeleteUser}
-                            onResetPassword={handleResetPassword}
-                            showModal={showUserModal}
-                            onModalClose={() => setShowUserModal(false)}
-                            userForm={userForm}
-                            onFormChange={setUserForm}
-                            onSave={handleSaveUser}
-                            isEditing={isEditing}
-                            isLoading={loading}
+                            appLang={appLang}
+                            currentUser={currentUser}
+                            fetchUsersList={fetchUsersList}
+                            renderUserManagement={() => (
+                                <UserManagementView
+                                    users={users} t={t} currentUser={currentUser}
+                                    onBack={() => {}}
+                                    onAdd={() => { setUserForm({ id: '', email: '', full_name: '', organization: currentUser?.organization || 'gus', role: 'Guest', employee_code: '', phone: '' }); setIsEditing(false); setShowUserModal(true); }}
+                                    onEdit={(u) => { setUserForm(u); setIsEditing(true); setShowUserModal(true); }}
+                                    onDelete={handleDeleteUser}
+                                    onResetPassword={handleResetPassword}
+                                    showModal={showUserModal}
+                                    onModalClose={() => setShowUserModal(false)}
+                                    userForm={userForm}
+                                    onFormChange={setUserForm}
+                                    onSave={handleSaveUser}
+                                    isEditing={isEditing}
+                                    isLoading={loading}
+                                />
+                            )}
                         />
                     )}
-                    {view === 'training' && <TrainingCenter onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'backup' && <BackupRestore onBack={() => setView('home')} appLang={appLang} currentUser={currentUser} />}
-                    {view === 'settings' && <ThemeSettings onBack={() => setView('home')} appLang={appLang} />}
                 </div>
             </main>
 
@@ -667,7 +664,7 @@ const Dashboard = ({ onLogout }) => {
                     <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
                 </button>
                 <button className={`nav-item-mobile ${view === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}>
-                    <i className="fas fa-palette"></i> <span>{appLang === 'vi' ? 'Giao diện' : appLang === 'en' ? 'Themes' : 'Asei'}</span>
+                    <i className="fas fa-cog"></i> <span>{t.settings || 'Cài đặt'}</span>
                 </button>
             </nav>
         </div>

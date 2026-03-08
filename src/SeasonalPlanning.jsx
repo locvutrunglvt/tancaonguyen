@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
+import { getDisplayCurrency, getCachedRates, formatCurrencyDisplay } from './currencyUtils';
 import './Dashboard.css';
 
 const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
@@ -43,12 +44,7 @@ const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
     const profit = totalRevenue - totalCost;
 
     const formatCurrency = (val) => {
-        if (isNaN(val) || val === undefined) return '0 ₫';
-        return new Intl.NumberFormat(appLang === 'en' ? 'en-US' : 'vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-            maximumFractionDigits: 0
-        }).format(val);
+        return formatCurrencyDisplay(val, getDisplayCurrency(), getCachedRates(), appLang);
     };
 
     const handleSave = async (e) => {
