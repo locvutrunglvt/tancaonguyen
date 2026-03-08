@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { isGCPCompliant } from './agronomyUtils';
 import { translations } from './translations';
+import { formatDate } from './dateUtils';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
@@ -288,7 +289,7 @@ const AnnualActivities = ({ onBack, appLang = 'vi', currentUser }) => {
                                             <div style={{ fontSize: '11px', opacity: 0.7 }}>{log.expand?.model_id?.expand?.farmer_id?.farmer_code}</div>
                                             <div style={{ fontWeight: 600 }}>{log.expand?.model_id?.expand?.farmer_id?.full_name}</div>
                                         </td>
-                                        <td>{log.activity_date}</td>
+                                        <td>{formatDate(log.activity_date)}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 {log.media && log.media.length > 0 && (() => {
@@ -567,7 +568,7 @@ const AnnualActivities = ({ onBack, appLang = 'vi', currentUser }) => {
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.date}</label>
-                                <div>{new Date(selectedActivity.activity_date).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN')}</div>
+                                <div>{formatDate(selectedActivity.activity_date)}</div>
                             </div>
 
                             {/* Section 2: Specific Details */}

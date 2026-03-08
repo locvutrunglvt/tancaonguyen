@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
+import { formatDate } from './dateUtils';
 import { getDisplayCurrency, getCachedRates, formatCurrencyDisplay } from './currencyUtils';
+import MediaUpload from './MediaUpload';
 import './Dashboard.css';
 
 const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
@@ -20,7 +22,8 @@ const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
         date: new Date().toISOString().split('T')[0],
         item: '',
         amount: '',
-        notes: ''
+        notes: '',
+        media_preview: ''
     });
 
     useEffect(() => {
@@ -195,7 +198,7 @@ const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
                                 ) : (
                                     entries.map(entry => (
                                         <tr key={entry.id} onClick={() => handleView(entry)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
-                                            <td>{entry.record_date}</td>
+                                            <td>{formatDate(entry.record_date)}</td>
                                             <td>
                                                 <span className="badge-org" style={{ background: entry.amount < 0 ? '#d1fae5' : '#fee2e2' }}>
                                                     {getCategoryText(entry.category)}
@@ -268,6 +271,15 @@ const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
                             <textarea className="input-pro" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} rows="3" placeholder={t.notes + '...'}></textarea>
                         </div>
 
+                        <div className="form-group">
+                            <label><i className="fas fa-paperclip" style={{ marginRight: '6px' }}></i>{appLang === 'vi' ? 'Ảnh / Tài liệu đính kèm' : appLang === 'en' ? 'Attachments' : 'Tài liệu'}</label>
+                            <MediaUpload
+                                appLang={appLang}
+                                currentUrl={formData.media_preview}
+                                onUploadSuccess={(url) => setFormData({ ...formData, media_preview: url })}
+                            />
+                        </div>
+
                         <div style={{ marginTop: '30px', display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
                             <button type="submit" className="btn-primary" disabled={isLoading}>
                                 <i className="fas fa-save"></i> {isLoading ? t.loading : (isEditing ? t.update.toUpperCase() : t.save.toUpperCase())}
@@ -295,7 +307,7 @@ const SeasonalPlanning = ({ onBack, appLang = 'vi', currentUser }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.date}</label>
-                                <div style={{ fontWeight: 600 }}>{new Date(selectedEntry.record_date).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN')}</div>
+                                <div style={{ fontWeight: 600 }}>{formatDate(selectedEntry.record_date)}</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.fin_category}</label>

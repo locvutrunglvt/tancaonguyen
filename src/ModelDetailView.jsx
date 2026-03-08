@@ -3,6 +3,8 @@ import pb from './pbClient';
 import { translations } from './translations';
 import ModelReport from './ModelReport';
 import { getDisplayCurrency, getCachedRates, formatCompact } from './currencyUtils';
+import { formatDate } from './dateUtils';
+import MediaUpload from './MediaUpload';
 import './Dashboard.css';
 
 const TABS = [
@@ -1001,6 +1003,13 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 <FormField label={appLang === 'vi' ? 'Ghi chú' : 'Notes'}>
                     <input value={diaryForm.notes} onChange={e => setDiaryForm({ ...diaryForm, notes: e.target.value })} style={inputStyle} />
                 </FormField>
+                <FormField label={appLang === 'vi' ? 'Ảnh / Tài liệu' : 'Attachments'}>
+                    <MediaUpload
+                        appLang={appLang}
+                        currentUrl={diaryForm.media_preview || ''}
+                        onUploadSuccess={(url) => setDiaryForm({ ...diaryForm, media_preview: url })}
+                    />
+                </FormField>
             </ModalOverlay>
         </>
     );
@@ -1127,6 +1136,13 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 <FormField label={appLang === 'vi' ? 'Ghi chú' : 'Notes'}>
                     <input value={inspectForm.notes} onChange={e => setInspectForm({ ...inspectForm, notes: e.target.value })} style={inputStyle} />
                 </FormField>
+                <FormField label={appLang === 'vi' ? 'Ảnh / Tài liệu' : 'Attachments'}>
+                    <MediaUpload
+                        appLang={appLang}
+                        currentUrl={inspectForm.media_preview || ''}
+                        onUploadSuccess={(url) => setInspectForm({ ...inspectForm, media_preview: url })}
+                    />
+                </FormField>
             </ModalOverlay>
         </>
     );
@@ -1231,6 +1247,13 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     </FormField>
                     <FormField label={appLang === 'vi' ? 'Ghi chú' : 'Notes'}>
                         <input value={consumForm.notes} onChange={e => setConsumForm({ ...consumForm, notes: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Ảnh / Tài liệu' : 'Attachments'}>
+                        <MediaUpload
+                            appLang={appLang}
+                            currentUrl={consumForm.media_preview || ''}
+                            onUploadSuccess={(url) => setConsumForm({ ...consumForm, media_preview: url })}
+                        />
                     </FormField>
                 </ModalOverlay>
             </>

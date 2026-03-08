@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import './Dashboard.css';
 import { translations } from './translations';
+import { formatDate } from './dateUtils';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 
 const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
@@ -465,7 +466,7 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
 
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_dob}</label>
-                                <div>{selectedFarmer.date_of_birth ? new Date(selectedFarmer.date_of_birth).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN') : '---'}</div>
+                                <div>{selectedFarmer.date_of_birth ? formatDate(selectedFarmer.date_of_birth) : '---'}</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.farmer_id_card}</label>

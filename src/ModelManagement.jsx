@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
+import { formatDate } from './dateUtils';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
@@ -533,7 +534,7 @@ const ModelManagement = ({ onBack, appLang = 'vi', currentUser }) => {
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{appLang === 'vi' ? 'Kiểm tra lần cuối' : 'Last Inspection'}</label>
-                                <div>{selectedModel.last_inspection ? new Date(selectedModel.last_inspection).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN') : '---'}</div>
+                                <div>{selectedModel.last_inspection ? formatDate(selectedModel.last_inspection) : '---'}</div>
                             </div>
 
                             {selectedModel.notes && (

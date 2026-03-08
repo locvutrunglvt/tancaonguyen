@@ -23,156 +23,181 @@ export const uploadFileToPB = async (collectionName, recordId, fieldName, files)
     await pb.collection(collectionName).update(recordId, fd);
 };
 
-const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder = 'general', appLang = 'vi', allowMultiple = false }) => {
+const ACCEPT_ALL = 'image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv';
+
+const MediaUpload = ({ entityType, entityId, currentUrl, onUploadSuccess, folder = 'general', appLang = 'vi', allowMultiple = true }) => {
     const [uploading, setUploading] = useState(false);
-    const [previewUrls, setPreviewUrls] = useState(allowMultiple ? (currentUrl ? currentUrl.split(',').filter(u => u) : []) : (currentUrl ? [currentUrl] : []));
+    const [previewUrls, setPreviewUrls] = useState(
+        currentUrl ? currentUrl.split(',').filter(u => u) : []
+    );
+    const [fileNames, setFileNames] = useState([]);
     const fileInputRef = useRef(null);
+    const cameraInputRef = useRef(null);
 
     const labels = {
-        vi: { upload: 'Tải ảnh/video', change: 'Thay đổi', uploading: 'Đang tải...', error: 'Lỗi tải lên', success: 'Thành công', remove: 'Xóa' },
-        en: { upload: 'Upload Media', change: 'Change', uploading: 'Uploading...', error: 'Upload error', success: 'Success', remove: 'Remove' },
-        ede: { upload: 'Čih ảnh/video', change: 'Mlih', uploading: 'Dữ...', error: 'Lỗi', success: 'KLă', remove: 'Xóa' }
+        vi: { upload: 'Tải ảnh/video/tài liệu', camera: 'Chụp ảnh', file: 'Chọn tệp', uploading: 'Đang tải...', error: 'Lỗi tải lên', success: 'Thành công', remove: 'Xóa' },
+        en: { upload: 'Upload media/docs', camera: 'Take photo', file: 'Choose files', uploading: 'Uploading...', error: 'Upload error', success: 'Success', remove: 'Remove' },
+        ede: { upload: 'Čih ảnh/video/tài liệu', camera: 'Mă rup', file: 'Hriêng tệp', uploading: 'Dữ...', error: 'Lỗi', success: 'Klă', remove: 'Xóa' }
     };
-
     const t = labels[appLang] || labels.vi;
 
-    const handleFileChange = async (event) => {
+    const isVideo = (url, name) => {
+        const s = (url || name || '').toLowerCase();
+        return s.endsWith('.mp4') || s.endsWith('.mov') || s.endsWith('.webm') || s.endsWith('.avi') || s.includes('video/');
+    };
+
+    const isDoc = (url, name) => {
+        const s = (url || name || '').toLowerCase();
+        return s.endsWith('.pdf') || s.endsWith('.doc') || s.endsWith('.docx')
+            || s.endsWith('.xls') || s.endsWith('.xlsx') || s.endsWith('.ppt') || s.endsWith('.pptx')
+            || s.endsWith('.txt') || s.endsWith('.csv');
+    };
+
+    const getDocIcon = (name) => {
+        const s = (name || '').toLowerCase();
+        if (s.endsWith('.pdf')) return 'fas fa-file-pdf';
+        if (s.endsWith('.doc') || s.endsWith('.docx')) return 'fas fa-file-word';
+        if (s.endsWith('.xls') || s.endsWith('.xlsx')) return 'fas fa-file-excel';
+        if (s.endsWith('.ppt') || s.endsWith('.pptx')) return 'fas fa-file-powerpoint';
+        if (s.endsWith('.csv')) return 'fas fa-file-csv';
+        return 'fas fa-file-alt';
+    };
+
+    const processFiles = (files) => {
+        if (!files || files.length === 0) return;
+        setUploading(true);
         try {
-            setUploading(true);
-            if (!event.target.files || event.target.files.length === 0) {
-                return;
-            }
+            const fileList = Array.from(files);
+            let processed = 0;
+            const newUrls = [...previewUrls];
+            const newNames = [...fileNames];
 
-            const file = event.target.files[0];
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataUrl = e.target.result;
-
-                let newUrls = [];
-                if (allowMultiple) {
-                    newUrls = [...previewUrls, dataUrl];
-                } else {
-                    newUrls = [dataUrl];
-                }
-
-                setPreviewUrls(newUrls);
-
-                // Store the file object for the parent component to use when saving
-                if (onUploadSuccess) {
-                    onUploadSuccess(allowMultiple ? newUrls.join(',') : dataUrl, file);
-                }
-            };
-            reader.readAsDataURL(file);
+            fileList.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    newUrls.push(e.target.result);
+                    newNames.push(file.name);
+                    processed++;
+                    if (processed === fileList.length) {
+                        setPreviewUrls([...newUrls]);
+                        setFileNames([...newNames]);
+                        if (onUploadSuccess) {
+                            onUploadSuccess(newUrls.join(','), fileList.length === 1 ? fileList[0] : fileList);
+                        }
+                        setUploading(false);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
         } catch (error) {
             alert(`${t.error}: ${error.message}`);
-        } finally {
             setUploading(false);
         }
     };
 
-    const handleRemove = (e, urlToRemove) => {
+    const handleFileChange = (event) => {
+        processFiles(event.target.files);
+        event.target.value = '';
+    };
+
+    const handleRemove = (e, index) => {
         e.stopPropagation();
-        const newUrls = previewUrls.filter(url => url !== urlToRemove);
+        const newUrls = previewUrls.filter((_, i) => i !== index);
+        const newNames = fileNames.filter((_, i) => i !== index);
         setPreviewUrls(newUrls);
+        setFileNames(newNames);
         if (onUploadSuccess) {
-            onUploadSuccess(allowMultiple ? newUrls.join(',') : (newUrls[0] || ''), null);
+            onUploadSuccess(newUrls.join(','), null);
         }
     };
 
-    const triggerFileInput = () => {
-        fileInputRef.current.click();
-    };
-
-    const isVideo = (url) => url && (url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm') || url.includes('video/'));
+    const boxSize = 90;
 
     return (
-        <div className="media-upload-container" style={{ margin: '10px 0' }}>
-            <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={handleFileChange}
-                disabled={uploading}
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-            />
+        <div className="media-upload-container" style={{ margin: '8px 0' }}>
+            <input type="file" accept={ACCEPT_ALL} onChange={handleFileChange} disabled={uploading}
+                ref={fileInputRef} style={{ display: 'none' }} multiple={allowMultiple} />
+            <input type="file" accept="image/*" capture="environment" onChange={handleFileChange}
+                disabled={uploading} ref={cameraInputRef} style={{ display: 'none' }} />
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {previewUrls.map((url, index) => (
-                    <div key={index} className="media-preview-box" style={{
-                        width: allowMultiple ? '100px' : '100%',
-                        height: allowMultiple ? '100px' : '200px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden',
-                        background: '#f8fafc',
-                        position: 'relative'
-                    }}>
-                        {isVideo(url) ? (
-                            <video src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
-                        ) : (
-                            <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        )}
-                        {!uploading && (
-                            <div onClick={(e) => handleRemove(e, url)} style={{
-                                position: 'absolute',
-                                top: '5px',
-                                right: '5px',
-                                background: 'rgba(255,255,255,0.8)',
-                                width: '24px',
-                                height: '24px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                color: '#ef4444'
-                            }}>
-                                <i className="fas fa-times"></i>
-                            </div>
-                        )}
-                    </div>
-                ))}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'flex-start' }}>
+                {previewUrls.map((url, index) => {
+                    const name = fileNames[index] || '';
+                    const docFile = isDoc(url, name);
+                    const videoFile = isVideo(url, name);
+                    return (
+                        <div key={index} style={{
+                            width: `${boxSize}px`, height: `${boxSize}px`,
+                            border: '1px solid #e2e8f0', borderRadius: '10px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            overflow: 'hidden', background: '#f8fafc', position: 'relative', flexShrink: 0,
+                        }}>
+                            {docFile ? (
+                                <div style={{ textAlign: 'center', padding: '6px' }}>
+                                    <i className={getDocIcon(name)} style={{ fontSize: '24px', color: '#6366f1' }}></i>
+                                    <div style={{ fontSize: '9px', color: '#64748b', marginTop: '4px', wordBreak: 'break-all', lineHeight: 1.2 }}>
+                                        {name.length > 16 ? name.slice(0, 14) + '...' : name}
+                                    </div>
+                                </div>
+                            ) : videoFile ? (
+                                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                    <video src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+                                    <i className="fas fa-play-circle" style={{
+                                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                                        fontSize: '22px', color: 'rgba(255,255,255,0.9)', textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                    }}></i>
+                                </div>
+                            ) : (
+                                <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            )}
+                            {!uploading && (
+                                <div onClick={(e) => handleRemove(e, index)} style={{
+                                    position: 'absolute', top: '3px', right: '3px',
+                                    background: 'rgba(255,255,255,0.85)', width: '20px', height: '20px',
+                                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    cursor: 'pointer', color: '#ef4444', fontSize: '11px',
+                                }}>
+                                    <i className="fas fa-times"></i>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
 
-                {(allowMultiple || previewUrls.length === 0) && (
-                    <div className="media-add-box" style={{
-                        width: allowMultiple ? '100px' : '100%',
-                        height: allowMultiple ? '100px' : '200px',
-                        border: '2px dashed #cbd5e1',
-                        borderRadius: '12px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: '#f1f5f9',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }} onClick={triggerFileInput}>
+                {/* Add buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div onClick={() => fileInputRef.current.click()} style={{
+                        width: `${boxSize}px`, height: `${Math.floor(boxSize / 2) - 2}px`,
+                        border: '2px dashed #cbd5e1', borderRadius: '10px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        background: '#f1f5f9', cursor: 'pointer', transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = '#eff6ff'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; }}
+                    >
                         {uploading ? (
-                            <div className="spinner" style={{ border: '3px solid #f3f3f3', borderTop: '3px solid #3498db', borderRadius: '50%', width: '20px', height: '20px', animation: 'spin 1s linear infinite' }}></div>
+                            <i className="fas fa-spinner fa-spin" style={{ fontSize: '14px', color: '#3b82f6' }}></i>
                         ) : (
                             <>
-                                <i className="fas fa-plus" style={{ fontSize: '20px', color: '#64748b' }}></i>
-                                {!allowMultiple && <div style={{ fontSize: '12px', color: '#64748b', marginTop: '5px' }}>{t.upload}</div>}
+                                <i className="fas fa-paperclip" style={{ fontSize: '13px', color: '#64748b' }}></i>
+                                <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>{t.file}</span>
                             </>
                         )}
                     </div>
-                )}
+                    <div onClick={() => cameraInputRef.current.click()} style={{
+                        width: `${boxSize}px`, height: `${Math.floor(boxSize / 2) - 2}px`,
+                        border: '2px dashed #cbd5e1', borderRadius: '10px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        background: '#f1f5f9', cursor: 'pointer', transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.background = '#ecfdf5'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; }}
+                    >
+                        <i className="fas fa-camera" style={{ fontSize: '13px', color: '#64748b' }}></i>
+                        <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>{t.camera}</span>
+                    </div>
+                </div>
             </div>
-
-            <style>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                .media-add-box:hover {
-                    border-color: #3b82f6;
-                    background: #eff6ff;
-                }
-            `}</style>
         </div>
     );
 };

@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import pb from './pbClient';
 import { getDisplayCurrency, getCachedRates, convertFromVND } from './currencyUtils';
+import { formatDate } from './dateUtils';
 
 // Available fonts for PDF (loaded at runtime from public/fonts/)
 const FONT_OPTIONS = [
@@ -76,13 +77,7 @@ const MONTH_NAMES = {
     ede: ['Bl01', 'Bl02', 'Bl03', 'Bl04', 'Bl05', 'Bl06', 'Bl07', 'Bl08', 'Bl09', 'Bl10', 'Bl11', 'Bl12'],
 };
 
-const fmtDate = (d) => {
-    if (!d) return '';
-    const s = String(d).replace(/[T ].*/g, '');
-    const [y, m, dd] = s.split('-');
-    if (!y || !m || !dd) return d;
-    return `${dd}/${m}/${y}`;
-};
+const fmtDate = (d) => formatDate(d);
 
 const fmtNum = (n) => {
     if (n == null) return '';

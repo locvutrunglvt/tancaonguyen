@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
+import { formatDate } from './dateUtils';
 import MediaUpload, { getFileUrl, uploadFileToPB } from './MediaUpload';
 import './Dashboard.css';
 
@@ -243,7 +244,7 @@ const TrainingCenter = ({ onBack, appLang = 'vi', currentUser }) => {
                                     <tr key={training.id} onClick={() => handleView(training)} style={{ cursor: 'pointer', transition: 'background 0.2s' }} className="hover-row">
                                         <td><span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--coffee-primary)' }}>{training.expand?.farmer_id?.farmer_code}</span></td>
                                         <td style={{ fontWeight: 600 }}>{training.expand?.farmer_id?.full_name}</td>
-                                        <td>{training.training_date}</td>
+                                        <td>{formatDate(training.training_date)}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 {training.photo && training.photo.length > 0 && <img src={getFileUrl(training, training.photo[0])} alt="Training" style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }} />}
@@ -432,7 +433,7 @@ const TrainingCenter = ({ onBack, appLang = 'vi', currentUser }) => {
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.date}</label>
-                                <div>{new Date(selectedTraining.training_date).toLocaleDateString(appLang === 'en' ? 'en-US' : 'vi-VN')}</div>
+                                <div>{formatDate(selectedTraining.training_date)}</div>
                             </div>
                             <div className="detail-item">
                                 <label style={{ fontSize: '12px', color: '#666', marginBottom: '4px', display: 'block' }}>{t.location}</label>

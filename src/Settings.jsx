@@ -8,6 +8,8 @@ import {
     getCachedRates, isCacheStale, fetchExchangeRates,
     getRatesTimestamp,
 } from './currencyUtils';
+import { DATE_FORMATS, getDateFormat, setDateFormat, formatDate } from './dateUtils';
+import { WEIGHT_UNITS, AREA_UNITS, getWeightUnit, setWeightUnit, getAreaUnit, setAreaUnit } from './unitUtils';
 
 const Settings = ({
     onBack, appLang = 'vi', currentUser,
@@ -32,6 +34,11 @@ const Settings = ({
     const [rates, setRates] = useState(getCachedRates());
     const [ratesFetching, setRatesFetching] = useState(false);
     const [ratesError, setRatesError] = useState('');
+
+    // Date & Units state
+    const [dateFmt, setDateFmt] = useState(getDateFormat());
+    const [weightUnit, setWeightUnitState] = useState(getWeightUnit());
+    const [areaUnit, setAreaUnitState] = useState(getAreaUnit());
 
     // Admin sub-tab
     const [adminTab, setAdminTab] = useState('users');
@@ -71,14 +78,29 @@ const Settings = ({
         }
     };
 
+    const handleDateFmtChange = (fmt) => {
+        setDateFormat(fmt);
+        setDateFmt(fmt);
+    };
+    const handleWeightChange = (u) => {
+        setWeightUnit(u);
+        setWeightUnitState(u);
+    };
+    const handleAreaChange = (u) => {
+        setAreaUnit(u);
+        setAreaUnitState(u);
+    };
+
     const tabs = [
         { id: 'themes', label: t.settings_themes || 'Giao diện', icon: 'fas fa-palette' },
         { id: 'currency', label: t.settings_currency || 'Tiền tệ', icon: 'fas fa-coins' },
+        { id: 'datetime', label: t.settings_datetime || 'Ngày giờ', icon: 'fas fa-calendar-alt' },
+        { id: 'units', label: t.settings_units || 'Đo lường', icon: 'fas fa-ruler-combined' },
         ...(isAdmin ? [{ id: 'admin', label: t.settings_admin || 'Quản trị', icon: 'fas fa-users-cog' }] : []),
     ];
 
     const ratesTs = getRatesTimestamp();
-    const ratesTime = ratesTs ? new Date(ratesTs).toLocaleString(appLang === 'en' ? 'en-US' : 'vi-VN') : null;
+    const ratesTime = ratesTs ? formatDate(new Date(ratesTs)) + ' ' + new Date(ratesTs).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : null;
 
     return (
         <div className="view-container" style={{ animation: 'fadeInUp 0.5s ease' }}>
@@ -97,6 +119,7 @@ const Settings = ({
             <div style={{
                 display: 'flex', gap: '4px', marginBottom: '20px',
                 background: 'var(--cream, #f5f5f5)', borderRadius: '12px', padding: '4px',
+                overflowX: 'auto', WebkitOverflowScrolling: 'touch',
             }}>
                 {tabs.map(tab => (
                     <button
@@ -311,6 +334,128 @@ const Settings = ({
                                 <i className={`fas ${ratesFetching ? 'fa-spinner fa-spin' : 'fa-sync-alt'}`} style={{ marginRight: '4px' }}></i>
                                 {t.currency_refresh || 'Làm mới'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* === DATE & TIME TAB === */}
+            {activeTab === 'datetime' && (
+                <div style={{ maxWidth: '600px' }}>
+                    <div style={{
+                        background: 'var(--white, #fff)', borderRadius: '14px', padding: '20px',
+                        boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-200)',
+                    }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '4px' }}>
+                            {t.date_format || 'Định dạng ngày'}
+                        </div>
+                        <p style={{ fontSize: '11px', color: 'var(--gray-700)', opacity: 0.6, marginTop: 0, marginBottom: '14px' }}>
+                            {t.date_format_desc || 'Chọn cách hiển thị ngày tháng trong ứng dụng'}
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {DATE_FORMATS.map(fmt => (
+                                <div
+                                    key={fmt.id}
+                                    onClick={() => handleDateFmtChange(fmt.id)}
+                                    style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        padding: '12px 16px', borderRadius: '10px', cursor: 'pointer',
+                                        border: dateFmt === fmt.id ? '2px solid var(--coffee-primary)' : '1.5px solid var(--gray-200)',
+                                        background: dateFmt === fmt.id ? 'var(--cream)' : 'var(--white, #fff)',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{
+                                            width: '18px', height: '18px', borderRadius: '50%',
+                                            border: dateFmt === fmt.id ? '5px solid var(--coffee-primary)' : '2px solid var(--gray-300)',
+                                            background: 'var(--white, #fff)',
+                                        }} />
+                                        <div>
+                                            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--coffee-dark)' }}>{fmt.label}</div>
+                                            <div style={{ fontSize: '11px', color: 'var(--gray-700)', opacity: 0.5 }}>{fmt.example}</div>
+                                        </div>
+                                    </div>
+                                    {dateFmt === fmt.id && (
+                                        <i className="fas fa-check-circle" style={{ color: 'var(--coffee-primary)', fontSize: '16px' }}></i>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* === UNITS TAB === */}
+            {activeTab === 'units' && (
+                <div style={{ maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* Weight Unit */}
+                    <div style={{
+                        background: 'var(--white, #fff)', borderRadius: '14px', padding: '20px',
+                        boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-200)',
+                    }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '4px' }}>
+                            <i className="fas fa-weight-hanging" style={{ marginRight: '6px', color: 'var(--coffee-primary)' }}></i>
+                            {t.weight_unit || 'Đơn vị cân nặng'}
+                        </div>
+                        <p style={{ fontSize: '11px', color: 'var(--gray-700)', opacity: 0.6, marginTop: 0, marginBottom: '12px' }}>
+                            {t.weight_unit_desc || 'Dữ liệu lưu trữ bằng kg, hiển thị theo đơn vị bạn chọn'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {WEIGHT_UNITS.map(u => {
+                                const label = typeof u.label === 'object' ? (u.label[appLang] || u.label.vi) : u.label;
+                                return (
+                                    <button
+                                        key={u.id}
+                                        onClick={() => handleWeightChange(u.id)}
+                                        style={{
+                                            padding: '10px 20px', borderRadius: '10px',
+                                            border: weightUnit === u.id ? '2px solid var(--coffee-primary)' : '1.5px solid var(--gray-200)',
+                                            background: weightUnit === u.id ? 'var(--cream)' : 'var(--white, #fff)',
+                                            cursor: 'pointer', transition: 'all 0.2s ease',
+                                            fontSize: '13px', fontWeight: weightUnit === u.id ? 700 : 500,
+                                            color: weightUnit === u.id ? 'var(--coffee-dark)' : 'var(--gray-700)',
+                                        }}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Area Unit */}
+                    <div style={{
+                        background: 'var(--white, #fff)', borderRadius: '14px', padding: '20px',
+                        boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-200)',
+                    }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '4px' }}>
+                            <i className="fas fa-vector-square" style={{ marginRight: '6px', color: 'var(--coffee-primary)' }}></i>
+                            {t.area_unit || 'Đơn vị diện tích'}
+                        </div>
+                        <p style={{ fontSize: '11px', color: 'var(--gray-700)', opacity: 0.6, marginTop: 0, marginBottom: '12px' }}>
+                            {t.area_unit_desc || 'Dữ liệu lưu trữ bằng ha, hiển thị theo đơn vị bạn chọn'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {AREA_UNITS.map(u => {
+                                const label = typeof u.label === 'object' ? (u.label[appLang] || u.label.vi) : u.label;
+                                return (
+                                    <button
+                                        key={u.id}
+                                        onClick={() => handleAreaChange(u.id)}
+                                        style={{
+                                            padding: '10px 20px', borderRadius: '10px',
+                                            border: areaUnit === u.id ? '2px solid var(--coffee-primary)' : '1.5px solid var(--gray-200)',
+                                            background: areaUnit === u.id ? 'var(--cream)' : 'var(--white, #fff)',
+                                            cursor: 'pointer', transition: 'all 0.2s ease',
+                                            fontSize: '13px', fontWeight: areaUnit === u.id ? 700 : 500,
+                                            color: areaUnit === u.id ? 'var(--coffee-dark)' : 'var(--gray-700)',
+                                        }}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
