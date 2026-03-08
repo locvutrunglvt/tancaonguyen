@@ -3,16 +3,22 @@ import pb from './pbClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
-const PAD_COLORS = [
-    { bg: '#166534', light: '#22c55e', glow: 'rgba(22,101,52,0.35)' },
-    { bg: '#1e40af', light: '#3b82f6', glow: 'rgba(30,64,175,0.35)' },
-    { bg: '#92400e', light: '#d97706', glow: 'rgba(146,64,14,0.35)' },
-    { bg: '#7c3aed', light: '#a78bfa', glow: 'rgba(124,58,237,0.35)' },
-    { bg: '#0f766e', light: '#14b8a6', glow: 'rgba(15,118,110,0.35)' },
-    { bg: '#be185d', light: '#ec4899', glow: 'rgba(190,24,93,0.35)' },
-    { bg: '#c2410c', light: '#f97316', glow: 'rgba(194,65,12,0.35)' },
-    { bg: '#4338ca', light: '#6366f1', glow: 'rgba(67,56,202,0.35)' },
+const CARD_GRADIENTS = [
+    { from: '#166534', to: '#22c55e', glow: 'rgba(22,101,52,0.3)' },
+    { from: '#1e40af', to: '#3b82f6', glow: 'rgba(30,64,175,0.3)' },
+    { from: '#92400e', to: '#d97706', glow: 'rgba(146,64,14,0.3)' },
+    { from: '#7c3aed', to: '#a78bfa', glow: 'rgba(124,58,237,0.3)' },
+    { from: '#0f766e', to: '#14b8a6', glow: 'rgba(15,118,110,0.3)' },
+    { from: '#be185d', to: '#ec4899', glow: 'rgba(190,24,93,0.3)' },
+    { from: '#c2410c', to: '#f97316', glow: 'rgba(194,65,12,0.3)' },
+    { from: '#4338ca', to: '#6366f1', glow: 'rgba(67,56,202,0.3)' },
 ];
+
+const STATUS_COLORS = {
+    active: { icon: 'fa-check-circle' },
+    planning: { icon: 'fa-clock' },
+    completed: { icon: 'fa-flag-checkered' }
+};
 
 const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
@@ -98,19 +104,20 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                 <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{L.subtitle}</p>
             </div>
 
-            {/* Row 1: 5 models, Row 2: 3 models centered */}
+            {/* Row 1: 5 cards, Row 2: 3 cards centered */}
             {[displayModels.slice(0, 5), displayModels.slice(5)].map((row, rowIdx) => (
                 <div key={rowIdx} style={{
                     display: 'flex',
                     justifyContent: 'center',
-                    gap: '10px',
-                    marginBottom: rowIdx === 0 ? '14px' : '20px',
+                    gap: '12px',
+                    marginBottom: rowIdx === 0 ? '16px' : '24px',
                     flexWrap: 'nowrap',
-                    padding: '4px 0',
+                    perspective: '1200px',
                 }}>
                     {row.map((model, idx) => {
                         const realIdx = rowIdx * 5 + idx;
-                        const c = PAD_COLORS[realIdx % PAD_COLORS.length];
+                        const grad = CARD_GRADIENTS[realIdx % CARD_GRADIENTS.length];
+                        const sc = STATUS_COLORS[model.status] || STATUS_COLORS.planning;
                         const st = stats[model.id] || { diary: 0, inspections: 0, consumables: 0 };
                         const farmerName = model.expand?.farmer_id?.full_name;
                         const isPressed = pressedId === model.id;
@@ -123,123 +130,119 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                 onMouseEnter={() => setPressedId(model.id)}
                                 onMouseLeave={() => setPressedId(null)}
                                 onTouchStart={() => setPressedId(model.id)}
-                                onTouchEnd={() => setTimeout(() => setPressedId(null), 500)}
+                                onTouchEnd={() => setTimeout(() => setPressedId(null), 600)}
                                 style={{
-                                    flex: '0 0 auto',
-                                    width: 'calc((100% - 40px) / 5)',
-                                    minWidth: '62px',
-                                    maxWidth: '130px',
-                                    cursor: model._placeholder ? 'default' : 'pointer',
-                                    opacity: model._placeholder ? 0.4 : 1,
-                                    perspective: '500px',
-                                }}
-                            >
-                                {/* 3D Pad */}
-                                <div style={{
-                                    width: '100%',
-                                    aspectRatio: '1',
+                                    flex: '1 1 0',
+                                    minWidth: 0,
+                                    maxWidth: '220px',
                                     borderRadius: '16px',
-                                    background: `linear-gradient(145deg, ${c.bg}, ${c.light})`,
-                                    position: 'relative',
                                     overflow: 'hidden',
-                                    transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                    cursor: model._placeholder ? 'default' : 'pointer',
+                                    opacity: model._placeholder ? 0.45 : 1,
+                                    transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
                                     transform: isPressed
-                                        ? 'translateY(-6px) rotateX(4deg) scale(1.06)'
-                                        : 'translateY(0) rotateX(0) scale(1)',
+                                        ? 'translateY(-6px) rotateX(2deg) scale(1.03)'
+                                        : 'translateY(0) rotateX(0deg) scale(1)',
                                     transformStyle: 'preserve-3d',
                                     boxShadow: isPressed
-                                        ? `0 14px 28px ${c.glow}, 0 4px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)`
-                                        : `0 4px 14px ${c.glow}, 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.15)`,
+                                        ? `0 16px 32px ${grad.glow}, 0 6px 12px rgba(0,0,0,0.1), 0 0 0 1px ${grad.to}30`
+                                        : `0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)`,
+                                    background: 'white',
+                                }}
+                            >
+                                {/* Header bar with gradient */}
+                                <div style={{
+                                    background: `linear-gradient(135deg, ${grad.from}, ${grad.to})`,
+                                    padding: '10px 12px',
+                                    color: 'white',
+                                    position: 'relative',
+                                    overflow: 'hidden',
                                 }}>
-                                    {/* 3D top shine */}
+                                    {/* 3D shine overlay */}
                                     <div style={{
-                                        position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
-                                        background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)',
-                                        borderRadius: '16px 16px 0 0',
+                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                        background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)',
                                         pointerEvents: 'none',
                                     }}></div>
 
-                                    {/* Bottom edge */}
-                                    <div style={{
-                                        position: 'absolute', bottom: 0, left: 0, right: 0, height: '5px',
-                                        background: 'rgba(0,0,0,0.12)',
-                                        borderRadius: '0 0 16px 16px',
-                                        pointerEvents: 'none',
-                                    }}></div>
-
-                                    {/* Content */}
-                                    <div style={{
-                                        position: 'relative', zIndex: 1,
-                                        padding: '8px 6px 6px',
-                                        display: 'flex', flexDirection: 'column',
-                                        height: '100%',
-                                        color: 'white',
-                                        boxSizing: 'border-box',
-                                    }}>
-                                        {/* Model code */}
-                                        <div style={{
-                                            fontSize: '15px', fontWeight: 900,
-                                            letterSpacing: '0.5px',
-                                            textShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                                            lineHeight: 1.1,
-                                        }}>
-                                            {model.model_code?.replace('-XP', '') || '---'}
-                                        </div>
-
-                                        {/* Farmer name */}
-                                        <div style={{
-                                            fontSize: '8px', fontWeight: 600,
-                                            marginTop: '3px',
-                                            opacity: farmerName ? 0.95 : 0.5,
-                                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                        }}>
-                                            <i className="fas fa-user" style={{ fontSize: '7px', marginRight: '2px' }}></i>
-                                            {farmerName ? farmerName.split(' ').slice(-2).join(' ') : '---'}
-                                        </div>
-
-                                        {/* Area */}
-                                        {area && (
-                                            <div style={{ fontSize: '8px', opacity: 0.75, marginTop: '1px' }}>
-                                                {area} {L.ha}
+                                    <div style={{ position: 'relative', zIndex: 1 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ fontSize: '16px', fontWeight: 900, letterSpacing: '0.5px', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                                                {model.model_code}
                                             </div>
-                                        )}
-
-                                        <div style={{ flex: 1 }}></div>
-
-                                        {/* Stats mini */}
-                                        {!model._placeholder && (
-                                            <div style={{
-                                                display: 'flex', gap: '2px',
-                                                marginTop: '4px',
-                                            }}>
-                                                {[
-                                                    { val: st.diary, label: L.diary },
-                                                    { val: st.inspections, label: L.inspections },
-                                                    { val: st.consumables, label: L.costs },
-                                                ].map((s, i) => (
-                                                    <div key={i} style={{
-                                                        flex: 1, textAlign: 'center',
-                                                        background: 'rgba(255,255,255,0.18)',
-                                                        borderRadius: '6px',
-                                                        padding: '3px 1px',
-                                                    }}>
-                                                        <div style={{ fontSize: '11px', fontWeight: 800, lineHeight: 1 }}>{s.val}</div>
-                                                        <div style={{ fontSize: '5px', fontWeight: 600, opacity: 0.7, marginTop: '1px' }}>{s.label}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                            <i className={`fas ${sc.icon}`} style={{ fontSize: '10px', opacity: 0.8 }}></i>
+                                        </div>
+                                        <div style={{ fontSize: '10px', opacity: 0.85, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {model.name || model.model_name || '---'}
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Ground shadow */}
-                                <div style={{
-                                    width: '75%', height: '6px', margin: '3px auto 0',
-                                    background: `radial-gradient(ellipse, ${c.glow} 0%, transparent 70%)`,
-                                    borderRadius: '50%',
-                                    opacity: isPressed ? 0.3 : 0.5,
-                                    transition: 'opacity 0.3s',
-                                }}></div>
+                                {/* Body */}
+                                <div style={{ padding: '10px 12px' }}>
+                                    {/* Farmer info */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                                        <i className="fas fa-user" style={{ color: grad.from, fontSize: '10px', width: '14px' }}></i>
+                                        <span style={{
+                                            fontSize: '11px', fontWeight: 600,
+                                            color: farmerName ? 'var(--coffee-dark)' : '#94a3b8',
+                                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                        }}>
+                                            {farmerName || L.no_farmer}
+                                        </span>
+                                    </div>
+
+                                    {/* Area + Location */}
+                                    {(area || model.location || model.commune) && (
+                                        <div style={{ display: 'flex', gap: '8px', fontSize: '10px', color: '#64748b', marginBottom: '6px', flexWrap: 'wrap' }}>
+                                            {area && (
+                                                <span><i className="fas fa-ruler-combined" style={{ marginRight: '3px', color: grad.from, fontSize: '9px' }}></i>{area} {L.ha}</span>
+                                            )}
+                                            {(model.location || model.commune) && (
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80px' }}>
+                                                    <i className="fas fa-map-marker-alt" style={{ marginRight: '3px', color: grad.from, fontSize: '9px' }}></i>
+                                                    {model.location || model.commune}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Quick stats */}
+                                    {!model._placeholder && (
+                                        <div style={{
+                                            display: 'flex', gap: '4px', marginTop: '8px',
+                                            paddingTop: '8px', borderTop: '1px solid #f1f5f9'
+                                        }}>
+                                            <div style={{
+                                                flex: 1, textAlign: 'center', padding: '5px 3px',
+                                                background: 'linear-gradient(to bottom, #f0fdf4, #dcfce7)',
+                                                borderRadius: '8px',
+                                                boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
+                                            }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 800, color: '#166534' }}>{st.diary}</div>
+                                                <div style={{ fontSize: '8px', color: '#15803d', fontWeight: 600 }}>{L.diary}</div>
+                                            </div>
+                                            <div style={{
+                                                flex: 1, textAlign: 'center', padding: '5px 3px',
+                                                background: 'linear-gradient(to bottom, #eff6ff, #dbeafe)',
+                                                borderRadius: '8px',
+                                                boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
+                                            }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 800, color: '#1e40af' }}>{st.inspections}</div>
+                                                <div style={{ fontSize: '8px', color: '#1d4ed8', fontWeight: 600 }}>{L.inspections}</div>
+                                            </div>
+                                            <div style={{
+                                                flex: 1, textAlign: 'center', padding: '5px 3px',
+                                                background: 'linear-gradient(to bottom, #fefce8, #fef9c3)',
+                                                borderRadius: '8px',
+                                                boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
+                                            }}>
+                                                <div style={{ fontSize: '14px', fontWeight: 800, color: '#854d0e' }}>{st.consumables}</div>
+                                                <div style={{ fontSize: '8px', color: '#a16207', fontWeight: 600 }}>{L.costs}</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         );
                     })}
@@ -249,7 +252,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
             {/* Quick access buttons */}
             <div style={{
                 background: 'white', borderRadius: '20px', padding: '20px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.04)', marginBottom: '20px', marginTop: '10px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.04)', marginBottom: '20px'
             }}>
                 <h4 style={{ fontSize: '12px', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase' }}>
                     {L.manage_all}
