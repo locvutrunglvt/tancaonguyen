@@ -112,6 +112,8 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
     const [editingItem, setEditingItem] = useState(null);
     const [saving, setSaving] = useState(false);
     const [showReport, setShowReport] = useState(false);
+    const [orgUsers, setOrgUsers] = useState([]);
+    const [inspectorManual, setInspectorManual] = useState(false);
 
     // Form data
     const emptyDiary = { diary_date: today(), activity_type: 'fertilize', description: '', material_name: '', material_amount: '', material_unit: 'kg', labor_hours: '', labor_cost: '', material_cost: '', gcp_compliant: false, weather: '', notes: '' };
@@ -127,6 +129,15 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
     useEffect(() => {
         if (model) loadAllData();
     }, [model]);
+
+    useEffect(() => {
+        const org = currentUser?.organization || pb.authStore.model?.organization;
+        if (org) {
+            pb.collection('users').getFullList({ filter: `organization='${org}'`, sort: 'full_name' })
+                .then(u => setOrgUsers(u))
+                .catch(() => setOrgUsers([]));
+        }
+    }, [currentUser]);
 
     const loadAllData = async () => {
         setLoading(true);
@@ -544,17 +555,46 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     <i className="fas fa-user-tie" style={{ width: '20px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}></i>
                     <span style={{ fontSize: '12px', color: '#64748b', minWidth: '100px' }}>{appLang === 'vi' ? 'Cán bộ kiểm tra' : appLang === 'en' ? 'Inspector' : 'Pô dlăng'}</span>
                     {canEdit ? (
-                        <input
-                            type="text"
-                            value={model.inspector_name || ''}
-                            onChange={async (e) => {
-                                const val = e.target.value;
-                                model.inspector_name = val;
-                                try { await pb.collection('demo_models').update(model.id, { inspector_name: val }); } catch {}
-                            }}
-                            placeholder={pb.authStore.model?.full_name || (appLang === 'vi' ? 'Nhập tên cán bộ...' : 'Enter inspector name...')}
-                            style={{ flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#1e293b', background: '#f8fafc' }}
-                        />
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {inspectorManual ? (
+                                    <input
+                                        type="text"
+                                        value={model.inspector_name || ''}
+                                        onChange={async (e) => {
+                                            const val = e.target.value;
+                                            model.inspector_name = val;
+                                            try { await pb.collection('demo_models').update(model.id, { inspector_name: val }); } catch {}
+                                        }}
+                                        placeholder={appLang === 'vi' ? 'Nhập tên...' : 'Type name...'}
+                                        style={{ flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#1e293b', background: '#f8fafc' }}
+                                    />
+                                ) : (
+                                    <select
+                                        value={model.inspector_name || ''}
+                                        onChange={async (e) => {
+                                            const val = e.target.value;
+                                            model.inspector_name = val;
+                                            try { await pb.collection('demo_models').update(model.id, { inspector_name: val }); } catch {}
+                                        }}
+                                        style={{ flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#1e293b', background: '#f8fafc' }}
+                                    >
+                                        <option value="">{appLang === 'vi' ? '-- Chọn cán bộ --' : '-- Select --'}</option>
+                                        {orgUsers.map(u => (
+                                            <option key={u.id} value={u.full_name}>{u.full_name}{u.role ? ` (${u.role})` : ''}</option>
+                                        ))}
+                                    </select>
+                                )}
+                                <span
+                                    onClick={() => setInspectorManual(!inspectorManual)}
+                                    style={{ fontSize: '10px', color: '#3b82f6', cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'underline' }}
+                                >
+                                    {inspectorManual
+                                        ? (appLang === 'vi' ? 'Chọn DS' : 'List')
+                                        : (appLang === 'vi' ? 'Tự nhập' : 'Manual')}
+                                </span>
+                            </div>
+                        </div>
                     ) : (
                         <span style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: model.inspector_name ? '#1e293b' : '#cbd5e1' }}>
                             {model.inspector_name || '---'}
