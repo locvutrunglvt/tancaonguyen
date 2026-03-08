@@ -104,11 +104,11 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                 <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{L.subtitle}</p>
             </div>
 
-            {/* 3D Card Grid */}
+            {/* 3D Card Grid - 5 per row */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '20px',
+                gridTemplateColumns: 'repeat(5, 1fr)',
+                gap: '16px',
                 marginBottom: '30px',
                 perspective: '1200px',
             }}>
@@ -116,9 +116,12 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                     const grad = CARD_GRADIENTS[idx % CARD_GRADIENTS.length];
                     const sc = STATUS_COLORS[model.status] || STATUS_COLORS.planning;
                     const st = stats[model.id] || { diary: 0, inspections: 0, consumables: 0 };
-                    const farmerName = model.expand?.farmer_id?.full_name;
+                    const farmer = model.expand?.farmer_id;
+                    const farmerName = farmer?.full_name;
                     const isPressed = pressedId === model.id;
                     const area = model.area || model.target_area;
+                    const village = model.village || farmer?.village;
+                    const commune = model.commune || farmer?.commune;
 
                     return (
                         <div
@@ -147,7 +150,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                             {/* Header bar with gradient + 3D shine */}
                             <div style={{
                                 background: `linear-gradient(135deg, ${grad.from}, ${grad.to})`,
-                                padding: '16px 20px',
+                                padding: '14px 16px',
                                 color: 'white',
                                 position: 'relative',
                                 overflow: 'hidden',
@@ -161,10 +164,10 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
 
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
                                     <div>
-                                        <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '1px', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                                        <div style={{ fontSize: '16px', fontWeight: 900, letterSpacing: '1px', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
                                             {model.model_code}
                                         </div>
-                                        <div style={{ fontSize: '12px', opacity: 0.9, marginTop: '2px' }}>
+                                        <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             {model.name || model.model_name || '---'}
                                         </div>
                                     </div>
@@ -181,7 +184,7 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                             </div>
 
                             {/* Body */}
-                            <div style={{ padding: '16px 20px' }}>
+                            <div style={{ padding: '12px 16px' }}>
                                 {/* Farmer info */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                                     <i className="fas fa-user" style={{ color: grad.from, width: '16px' }}></i>
@@ -191,13 +194,15 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                 </div>
 
                                 {/* Area + Location */}
-                                {(area || model.location || model.commune) && (
-                                    <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
+                                {(area || village || commune) && (
+                                    <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#64748b', marginBottom: '10px', flexWrap: 'wrap' }}>
                                         {area && (
                                             <span><i className="fas fa-ruler-combined" style={{ marginRight: '4px', color: grad.from }}></i>{area} {L.ha}</span>
                                         )}
-                                        {(model.location || model.commune) && (
-                                            <span><i className="fas fa-map-marker-alt" style={{ marginRight: '4px', color: grad.from }}></i>{model.location || model.commune}</span>
+                                        {(village || commune) && (
+                                            <span><i className="fas fa-map-marker-alt" style={{ marginRight: '4px', color: grad.from }}></i>
+                                                {village && commune ? `${village}, ${commune}` : village || commune}
+                                            </span>
                                         )}
                                     </div>
                                 )}
@@ -209,31 +214,31 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                         paddingTop: '12px', borderTop: '1px solid #f1f5f9'
                                     }}>
                                         <div style={{
-                                            flex: 1, textAlign: 'center', padding: '8px 6px',
+                                            flex: 1, textAlign: 'center', padding: '6px 4px',
                                             background: 'linear-gradient(to bottom, #f0fdf4, #dcfce7)',
-                                            borderRadius: '10px',
+                                            borderRadius: '8px',
                                             boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
                                         }}>
-                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#166534' }}>{st.diary}</div>
-                                            <div style={{ fontSize: '9px', color: '#15803d', fontWeight: 600 }}>{L.diary}</div>
+                                            <div style={{ fontSize: '15px', fontWeight: 800, color: '#166534' }}>{st.diary}</div>
+                                            <div style={{ fontSize: '8px', color: '#15803d', fontWeight: 600 }}>{L.diary}</div>
                                         </div>
                                         <div style={{
-                                            flex: 1, textAlign: 'center', padding: '8px 6px',
+                                            flex: 1, textAlign: 'center', padding: '6px 4px',
                                             background: 'linear-gradient(to bottom, #eff6ff, #dbeafe)',
-                                            borderRadius: '10px',
+                                            borderRadius: '8px',
                                             boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
                                         }}>
-                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#1e40af' }}>{st.inspections}</div>
-                                            <div style={{ fontSize: '9px', color: '#1d4ed8', fontWeight: 600 }}>{L.inspections}</div>
+                                            <div style={{ fontSize: '15px', fontWeight: 800, color: '#1e40af' }}>{st.inspections}</div>
+                                            <div style={{ fontSize: '8px', color: '#1d4ed8', fontWeight: 600 }}>{L.inspections}</div>
                                         </div>
                                         <div style={{
-                                            flex: 1, textAlign: 'center', padding: '8px 6px',
+                                            flex: 1, textAlign: 'center', padding: '6px 4px',
                                             background: 'linear-gradient(to bottom, #fefce8, #fef9c3)',
-                                            borderRadius: '10px',
+                                            borderRadius: '8px',
                                             boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
                                         }}>
-                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#854d0e' }}>{st.consumables}</div>
-                                            <div style={{ fontSize: '9px', color: '#a16207', fontWeight: 600 }}>{L.costs}</div>
+                                            <div style={{ fontSize: '15px', fontWeight: 800, color: '#854d0e' }}>{st.consumables}</div>
+                                            <div style={{ fontSize: '8px', color: '#a16207', fontWeight: 600 }}>{L.costs}</div>
                                         </div>
                                     </div>
                                 )}
