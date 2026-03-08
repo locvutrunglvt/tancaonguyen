@@ -3,24 +3,29 @@ import pb from './pbClient';
 import { translations } from './translations';
 import './Dashboard.css';
 
-// Sphere gradient colors per model index
-const SPHERE_GRADIENTS = [
-    { from: '#166534', to: '#4ade80', glow: 'rgba(22,101,52,0.35)' },
-    { from: '#1e40af', to: '#60a5fa', glow: 'rgba(30,64,175,0.35)' },
-    { from: '#92400e', to: '#fbbf24', glow: 'rgba(146,64,14,0.35)' },
-    { from: '#7c3aed', to: '#c084fc', glow: 'rgba(124,58,237,0.35)' },
-    { from: '#0f766e', to: '#2dd4bf', glow: 'rgba(15,118,110,0.35)' },
-    { from: '#be185d', to: '#f472b6', glow: 'rgba(190,24,93,0.35)' },
-    { from: '#c2410c', to: '#fb923c', glow: 'rgba(194,65,12,0.35)' },
-    { from: '#4338ca', to: '#818cf8', glow: 'rgba(67,56,202,0.35)' },
+const CARD_GRADIENTS = [
+    { from: '#166534', to: '#22c55e', glow: 'rgba(22,101,52,0.3)' },
+    { from: '#1e40af', to: '#3b82f6', glow: 'rgba(30,64,175,0.3)' },
+    { from: '#92400e', to: '#d97706', glow: 'rgba(146,64,14,0.3)' },
+    { from: '#7c3aed', to: '#a78bfa', glow: 'rgba(124,58,237,0.3)' },
+    { from: '#0f766e', to: '#14b8a6', glow: 'rgba(15,118,110,0.3)' },
+    { from: '#be185d', to: '#ec4899', glow: 'rgba(190,24,93,0.3)' },
+    { from: '#c2410c', to: '#f97316', glow: 'rgba(194,65,12,0.3)' },
+    { from: '#4338ca', to: '#6366f1', glow: 'rgba(67,56,202,0.3)' },
 ];
+
+const STATUS_COLORS = {
+    active: { icon: 'fa-check-circle' },
+    planning: { icon: 'fa-clock' },
+    completed: { icon: 'fa-flag-checkered' }
+};
 
 const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) => {
     const t = translations[appLang] || translations.vi;
     const [models, setModels] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({});
-    const [hoveredId, setHoveredId] = useState(null);
+    const [pressedId, setPressedId] = useState(null);
 
     useEffect(() => { fetchModels(); }, []);
 
@@ -50,9 +55,27 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
     };
 
     const labels = {
-        vi: { title: '08 MO HINH TRINH DIEN', subtitle: 'Bam vao mo hinh de xem chi tiet', manage_all: 'Quan ly chung', all_farmers: 'Tat ca nong ho', all_training: 'Dao tao', finance: 'Tai chinh', ha: 'ha' },
-        en: { title: '08 DEMONSTRATION MODELS', subtitle: 'Tap a model sphere to explore', manage_all: 'General Management', all_farmers: 'All Farmers', all_training: 'Training', finance: 'Finance', ha: 'ha' },
-        ede: { title: '08 HDRUOM KLEI HRA', subtitle: 'Mnek hdruom ko dlang ting', manage_all: 'Brua mdrong', all_farmers: 'Aboh mnuih', all_training: 'Hriam', finance: 'Prak', ha: 'ha' },
+        vi: {
+            title: '08 MO HINH TRINH DIEN', subtitle: 'Bam vao mo hinh de xem chi tiet',
+            farmer: 'Nong ho', area: 'Dien tich', inspections: 'Kiem tra', diary: 'Nhat ky',
+            no_farmer: 'Chua gan nong ho', manage_all: 'Quan ly chung',
+            all_farmers: 'Tat ca nong ho', all_training: 'Dao tao', finance: 'Tai chinh', ha: 'ha',
+            costs: 'Tieu hao',
+        },
+        en: {
+            title: '08 DEMONSTRATION MODELS', subtitle: 'Tap a model to explore',
+            farmer: 'Farmer', area: 'Area', inspections: 'Inspections', diary: 'Diary',
+            no_farmer: 'No farmer assigned', manage_all: 'General Management',
+            all_farmers: 'All Farmers', all_training: 'Training', finance: 'Finance', ha: 'ha',
+            costs: 'Costs',
+        },
+        ede: {
+            title: '08 HDRUOM KLEI HRA', subtitle: 'Mnek hdruom ko dlang ting',
+            farmer: 'Mnuih hma', area: 'Prong', inspections: 'Dlang', diary: 'Hdro',
+            no_farmer: 'Ka mao mnuih', manage_all: 'Brua mdrong',
+            all_farmers: 'Aboh mnuih', all_training: 'Hriam', finance: 'Prak', ha: 'ha',
+            costs: 'Prak',
+        },
     };
     const L = labels[appLang] || labels.vi;
 
@@ -73,151 +96,148 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
     return (
         <div className="home-container">
             {/* Title */}
-            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                 <h2 style={{
-                    fontSize: '18px', fontWeight: 900, color: 'var(--coffee-dark)',
+                    fontSize: '17px', fontWeight: 900, color: 'var(--coffee-dark)',
                     letterSpacing: '2px', margin: 0, textTransform: 'uppercase'
                 }}>{L.title}</h2>
-                <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px' }}>{L.subtitle}</p>
+                <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{L.subtitle}</p>
             </div>
 
-            {/* 3D Sphere Grid */}
+            {/* 3D Card Grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                gap: '24px',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '20px',
                 marginBottom: '30px',
-                perspective: '800px',
-                padding: '10px',
+                perspective: '1200px',
             }}>
                 {displayModels.map((model, idx) => {
-                    const grad = SPHERE_GRADIENTS[idx % SPHERE_GRADIENTS.length];
+                    const grad = CARD_GRADIENTS[idx % CARD_GRADIENTS.length];
+                    const sc = STATUS_COLORS[model.status] || STATUS_COLORS.planning;
                     const st = stats[model.id] || { diary: 0, inspections: 0, consumables: 0 };
                     const farmerName = model.expand?.farmer_id?.full_name;
-                    const isHovered = hoveredId === model.id;
-                    const totalRecords = st.diary + st.inspections + st.consumables;
+                    const isPressed = pressedId === model.id;
                     const area = model.area || model.target_area;
 
                     return (
                         <div
                             key={model.id}
                             onClick={() => !model._placeholder && onSelectModel(model)}
-                            onMouseEnter={() => setHoveredId(model.id)}
-                            onMouseLeave={() => setHoveredId(null)}
-                            onTouchStart={() => setHoveredId(model.id)}
-                            onTouchEnd={() => setTimeout(() => setHoveredId(null), 1500)}
+                            onMouseEnter={() => setPressedId(model.id)}
+                            onMouseLeave={() => setPressedId(null)}
+                            onTouchStart={() => setPressedId(model.id)}
+                            onTouchEnd={() => setTimeout(() => setPressedId(null), 600)}
                             style={{
-                                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                borderRadius: '20px',
+                                overflow: 'hidden',
                                 cursor: model._placeholder ? 'default' : 'pointer',
-                                opacity: model._placeholder ? 0.4 : 1,
+                                opacity: model._placeholder ? 0.45 : 1,
                                 transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                                transform: isHovered ? 'translateY(-8px) scale(1.08)' : 'translateY(0) scale(1)',
+                                transform: isPressed
+                                    ? 'translateY(-6px) rotateX(2deg) scale(1.03)'
+                                    : 'translateY(0) rotateX(0deg) scale(1)',
                                 transformStyle: 'preserve-3d',
+                                boxShadow: isPressed
+                                    ? `0 20px 40px ${grad.glow}, 0 8px 16px rgba(0,0,0,0.1), 0 0 0 1px ${grad.to}30`
+                                    : `0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)`,
+                                background: 'white',
                             }}
                         >
-                            {/* Sphere */}
+                            {/* Header bar with gradient + 3D shine */}
                             <div style={{
-                                width: '110px', height: '110px', borderRadius: '50%',
-                                background: `radial-gradient(circle at 35% 30%, ${grad.to}, ${grad.from} 70%)`,
-                                boxShadow: isHovered
-                                    ? `0 16px 40px ${grad.glow}, 0 0 20px ${grad.glow}, inset 0 -8px 20px rgba(0,0,0,0.25)`
-                                    : `0 8px 24px ${grad.glow}, inset 0 -6px 16px rgba(0,0,0,0.2)`,
-                                display: 'flex', flexDirection: 'column',
-                                alignItems: 'center', justifyContent: 'center',
+                                background: `linear-gradient(135deg, ${grad.from}, ${grad.to})`,
+                                padding: '16px 20px',
+                                color: 'white',
                                 position: 'relative',
-                                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                overflow: 'hidden',
                             }}>
-                                {/* Shine highlight */}
+                                {/* 3D shine overlay */}
                                 <div style={{
-                                    position: 'absolute', top: '12px', left: '22px',
-                                    width: '30px', height: '18px', borderRadius: '50%',
-                                    background: 'radial-gradient(ellipse, rgba(255,255,255,0.55), transparent)',
-                                    transform: 'rotate(-25deg)',
+                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)',
+                                    pointerEvents: 'none',
                                 }}></div>
 
-                                {/* Model code */}
-                                <div style={{
-                                    fontSize: '18px', fontWeight: 900, color: 'white',
-                                    textShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                                    letterSpacing: '1px', zIndex: 1,
-                                }}>
-                                    {model.model_code.split('-')[0]}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                                    <div>
+                                        <div style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '1px', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                                            {model.model_code}
+                                        </div>
+                                        <div style={{ fontSize: '12px', opacity: 0.9, marginTop: '2px' }}>
+                                            {model.name || model.model_name || '---'}
+                                        </div>
+                                    </div>
+                                    <div style={{
+                                        padding: '4px 10px', borderRadius: '20px',
+                                        background: 'rgba(255,255,255,0.2)',
+                                        backdropFilter: 'blur(4px)',
+                                        fontSize: '10px', fontWeight: 700
+                                    }}>
+                                        <i className={`fas ${sc.icon}`} style={{ marginRight: '4px' }}></i>
+                                        {model.status?.toUpperCase()}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Body */}
+                            <div style={{ padding: '16px 20px' }}>
+                                {/* Farmer info */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                                    <i className="fas fa-user" style={{ color: grad.from, width: '16px' }}></i>
+                                    <span style={{ fontSize: '13px', fontWeight: 600, color: farmerName ? 'var(--coffee-dark)' : '#94a3b8' }}>
+                                        {farmerName || L.no_farmer}
+                                    </span>
                                 </div>
 
-                                {/* Area badge */}
-                                {area && (
-                                    <div style={{
-                                        fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-                                        marginTop: '2px', zIndex: 1,
-                                    }}>
-                                        {area} {L.ha}
+                                {/* Area + Location */}
+                                {(area || model.location || model.commune) && (
+                                    <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
+                                        {area && (
+                                            <span><i className="fas fa-ruler-combined" style={{ marginRight: '4px', color: grad.from }}></i>{area} {L.ha}</span>
+                                        )}
+                                        {(model.location || model.commune) && (
+                                            <span><i className="fas fa-map-marker-alt" style={{ marginRight: '4px', color: grad.from }}></i>{model.location || model.commune}</span>
+                                        )}
                                     </div>
                                 )}
 
-                                {/* Record count ring */}
-                                {totalRecords > 0 && (
+                                {/* Quick stats - 3D raised bars */}
+                                {!model._placeholder && (
                                     <div style={{
-                                        position: 'absolute', top: '-4px', right: '-4px',
-                                        width: '26px', height: '26px', borderRadius: '50%',
-                                        background: '#ef4444', color: 'white',
-                                        fontSize: '11px', fontWeight: 800,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        boxShadow: '0 2px 8px rgba(239,68,68,0.5)',
-                                        border: '2px solid white',
+                                        display: 'flex', gap: '8px', marginTop: '12px',
+                                        paddingTop: '12px', borderTop: '1px solid #f1f5f9'
                                     }}>
-                                        {totalRecords}
+                                        <div style={{
+                                            flex: 1, textAlign: 'center', padding: '8px 6px',
+                                            background: 'linear-gradient(to bottom, #f0fdf4, #dcfce7)',
+                                            borderRadius: '10px',
+                                            boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
+                                        }}>
+                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#166534' }}>{st.diary}</div>
+                                            <div style={{ fontSize: '9px', color: '#15803d', fontWeight: 600 }}>{L.diary}</div>
+                                        </div>
+                                        <div style={{
+                                            flex: 1, textAlign: 'center', padding: '8px 6px',
+                                            background: 'linear-gradient(to bottom, #eff6ff, #dbeafe)',
+                                            borderRadius: '10px',
+                                            boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
+                                        }}>
+                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#1e40af' }}>{st.inspections}</div>
+                                            <div style={{ fontSize: '9px', color: '#1d4ed8', fontWeight: 600 }}>{L.inspections}</div>
+                                        </div>
+                                        <div style={{
+                                            flex: 1, textAlign: 'center', padding: '8px 6px',
+                                            background: 'linear-gradient(to bottom, #fefce8, #fef9c3)',
+                                            borderRadius: '10px',
+                                            boxShadow: 'inset 0 -2px 4px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)',
+                                        }}>
+                                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#854d0e' }}>{st.consumables}</div>
+                                            <div style={{ fontSize: '9px', color: '#a16207', fontWeight: 600 }}>{L.costs}</div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
-
-                            {/* Shadow on ground */}
-                            <div style={{
-                                width: isHovered ? '80px' : '70px',
-                                height: '10px', borderRadius: '50%',
-                                background: 'radial-gradient(ellipse, rgba(0,0,0,0.15), transparent)',
-                                marginTop: isHovered ? '12px' : '8px',
-                                transition: 'all 0.4s ease',
-                            }}></div>
-
-                            {/* Farmer name */}
-                            <div style={{
-                                marginTop: '8px', textAlign: 'center', maxWidth: '130px',
-                            }}>
-                                <div style={{
-                                    fontSize: '12px', fontWeight: 700, color: 'var(--coffee-dark)',
-                                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                }}>
-                                    {farmerName || (model.name || model.model_name || '---')}
-                                </div>
-                                {farmerName && (
-                                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '2px' }}>
-                                        {model.location || model.commune || ''}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Hover detail card */}
-                            {isHovered && !model._placeholder && (
-                                <div style={{
-                                    marginTop: '8px', background: 'white', borderRadius: '12px',
-                                    padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-                                    minWidth: '140px', fontSize: '11px',
-                                    animation: 'fadeIn 0.2s ease',
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                        <span style={{ color: '#166534' }}><i className="fas fa-book" style={{ marginRight: '4px' }}></i>{appLang === 'vi' ? 'Nhat ky' : 'Diary'}</span>
-                                        <b style={{ color: '#166534' }}>{st.diary}</b>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                        <span style={{ color: '#1e40af' }}><i className="fas fa-clipboard-check" style={{ marginRight: '4px' }}></i>{appLang === 'vi' ? 'Kiem tra' : 'Inspect'}</span>
-                                        <b style={{ color: '#1e40af' }}>{st.inspections}</b>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: '#854d0e' }}><i className="fas fa-receipt" style={{ marginRight: '4px' }}></i>{appLang === 'vi' ? 'Tieu hao' : 'Costs'}</span>
-                                        <b style={{ color: '#854d0e' }}>{st.consumables}</b>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     );
                 })}
@@ -247,11 +267,6 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
             <footer className="dashboard-footer-branding">
                 {t.footer_copyright || 'Ban quyen va phat trien boi Tan Cao Nguyen, 2026'}
             </footer>
-
-            {/* Inline CSS animations */}
-            <style>{`
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-            `}</style>
         </div>
     );
 };
