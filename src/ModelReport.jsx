@@ -1,57 +1,66 @@
 import React, { useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { FontRegular, FontBold } from './fonts/roboto-base64';
 
 // Label maps with 3 languages: vi, en, ede
 const ACTIVITY_LABELS = {
-    fertilize: { vi: 'Bon phan', en: 'Fertilize', ede: 'Mdung' },
-    pesticide: { vi: 'Phun thuoc', en: 'Pesticide', ede: 'Pur aseh' },
-    irrigate: { vi: 'Tuoi nuoc', en: 'Irrigate', ede: 'Ea hnhao' },
-    prune: { vi: 'Tia canh', en: 'Prune', ede: 'Kueh' },
-    weed: { vi: 'Lam co', en: 'Weed', ede: 'Mkra' },
-    harvest: { vi: 'Thu hoach', en: 'Harvest', ede: 'Pioh' },
-    transport: { vi: 'Van chuyen', en: 'Transport', ede: 'Djam' },
-    drying: { vi: 'Phoi ca phe', en: 'Drying', ede: 'Phui' },
-    milling: { vi: 'Xay ca phe', en: 'Milling', ede: 'Poh' },
-    tree_care: { vi: 'Cham cay', en: 'Tree Care', ede: 'Kiih ana' },
-    other: { vi: 'Khac', en: 'Other', ede: 'Mkra' },
+    fertilize: { vi: 'Bón phân', en: 'Fertilize', ede: 'Mdung' },
+    pesticide: { vi: 'Phun thuốc', en: 'Pesticide', ede: 'Pur aseh' },
+    irrigate: { vi: 'Tưới nước', en: 'Irrigate', ede: 'Ea hnhao' },
+    prune: { vi: 'Tỉa cành', en: 'Prune', ede: 'Kueh' },
+    weed: { vi: 'Làm cỏ', en: 'Weed', ede: 'Mkra' },
+    harvest: { vi: 'Thu hoạch', en: 'Harvest', ede: 'Pioh' },
+    transport: { vi: 'Vận chuyển', en: 'Transport', ede: 'Djam' },
+    drying: { vi: 'Phơi cà phê', en: 'Drying', ede: 'Phui' },
+    milling: { vi: 'Xay cà phê', en: 'Milling', ede: 'Poh' },
+    tree_care: { vi: 'Chăm cây', en: 'Tree Care', ede: 'Kiih ana' },
+    other: { vi: 'Khác', en: 'Other', ede: 'Mkra' },
 };
 
 const INSPECT_TYPE_LABELS = {
-    quarterly: { vi: 'Hang quy', en: 'Quarterly', ede: 'Tlam' },
-    monthly: { vi: 'Hang thang', en: 'Monthly', ede: 'Mlan' },
-    adhoc: { vi: 'Dot xuat', en: 'Ad-hoc', ede: 'Bhian' },
+    quarterly: { vi: 'Hàng quý', en: 'Quarterly', ede: 'Tlam' },
+    monthly: { vi: 'Hàng tháng', en: 'Monthly', ede: 'Mlan' },
+    adhoc: { vi: 'Đột xuất', en: 'Ad-hoc', ede: 'Bhian' },
 };
 
-const QUALITY_LABELS = { poor: { vi: 'Kem', en: 'Poor', ede: 'Jhat' }, fair: { vi: 'TB', en: 'Fair', ede: 'Hdai' }, good: { vi: 'Tot', en: 'Good', ede: 'Jia' }, excellent: { vi: 'Rat tot', en: 'Excellent', ede: 'Siam' } };
-const WATER_LABELS = { drought: { vi: 'Han', en: 'Drought', ede: 'Khuah' }, adequate: { vi: 'Du', en: 'Adequate', ede: 'Djap' }, excess: { vi: 'Thua', en: 'Excess', ede: 'Lu' } };
-const PEST_LABELS = { none: { vi: 'Khong', en: 'None', ede: 'Ka' }, minor: { vi: 'Nhe', en: 'Minor', ede: 'Djet' }, moderate: { vi: 'TB', en: 'Moderate', ede: 'Hdai' }, severe: { vi: 'Nang', en: 'Severe', ede: 'Dluh' } };
+const QUALITY_LABELS = { poor: { vi: 'Kém', en: 'Poor', ede: 'Jhat' }, fair: { vi: 'TB', en: 'Fair', ede: 'Hdai' }, good: { vi: 'Tốt', en: 'Good', ede: 'Jia' }, excellent: { vi: 'Rất tốt', en: 'Excellent', ede: 'Siam' } };
+const WATER_LABELS = { drought: { vi: 'Hạn', en: 'Drought', ede: 'Khuah' }, adequate: { vi: 'Đủ', en: 'Adequate', ede: 'Djap' }, excess: { vi: 'Thừa', en: 'Excess', ede: 'Lu' } };
+const PEST_LABELS = { none: { vi: 'Không', en: 'None', ede: 'Ka' }, minor: { vi: 'Nhẹ', en: 'Minor', ede: 'Djet' }, moderate: { vi: 'TB', en: 'Moderate', ede: 'Hdai' }, severe: { vi: 'Nặng', en: 'Severe', ede: 'Dluh' } };
 
 const CATEGORY_LABELS = {
-    fertilizer: { vi: 'Phan bon', en: 'Fertilizer', ede: 'Mdung' },
-    pesticide: { vi: 'Thuoc BVTV', en: 'Pesticide', ede: 'Aseh' },
-    labor: { vi: 'Nhan cong', en: 'Labor', ede: 'Mnuih' },
-    fuel: { vi: 'Nhien lieu', en: 'Fuel', ede: 'Pui' },
-    electricity: { vi: 'Dien', en: 'Electricity', ede: 'Klet' },
-    water_irrigation: { vi: 'Tuoi nuoc', en: 'Irrigation', ede: 'Ea' },
-    harvest_equip: { vi: 'Dung cu thu hoach', en: 'Harvest Equip.', ede: 'Mna' },
-    transport: { vi: 'Van chuyen', en: 'Transport', ede: 'Djam' },
-    drying: { vi: 'Phoi ca phe', en: 'Drying', ede: 'Phui' },
-    milling: { vi: 'Xay ca phe', en: 'Milling', ede: 'Poh' },
-    ppe: { vi: 'Bao ho LD', en: 'PPE', ede: 'Ao brei' },
-    depreciation: { vi: 'Khau hao', en: 'Depreciation', ede: 'Roh' },
-    loan_interest: { vi: 'Lai vay', en: 'Loan Interest', ede: 'Kmlan' },
-    other: { vi: 'Khac', en: 'Other', ede: 'Mkra' },
+    fertilizer: { vi: 'Phân bón', en: 'Fertilizer', ede: 'Mdung' },
+    pesticide: { vi: 'Thuốc BVTV', en: 'Pesticide', ede: 'Aseh' },
+    labor: { vi: 'Nhân công', en: 'Labor', ede: 'Mnuih' },
+    fuel: { vi: 'Nhiên liệu', en: 'Fuel', ede: 'Pui' },
+    electricity: { vi: 'Điện', en: 'Electricity', ede: 'Klet' },
+    water_irrigation: { vi: 'Tưới nước', en: 'Irrigation', ede: 'Ea' },
+    harvest_equip: { vi: 'Dụng cụ thu hoạch', en: 'Harvest Equip.', ede: 'Mna' },
+    transport: { vi: 'Vận chuyển', en: 'Transport', ede: 'Djam' },
+    drying: { vi: 'Phơi cà phê', en: 'Drying', ede: 'Phui' },
+    milling: { vi: 'Xay cà phê', en: 'Milling', ede: 'Poh' },
+    ppe: { vi: 'Bảo hộ LĐ', en: 'PPE', ede: 'Ao brei' },
+    depreciation: { vi: 'Khấu hao', en: 'Depreciation', ede: 'Roh' },
+    loan_interest: { vi: 'Lãi vay', en: 'Loan Interest', ede: 'Kmlan' },
+    other: { vi: 'Khác', en: 'Other', ede: 'Mkra' },
 };
 
 const today = () => new Date().toISOString().split('T')[0];
 const firstOfYear = () => `${new Date().getFullYear()}-01-01`;
 
-const fmtDate = (d) => {
+// Month names for dd-mmm-yyyy format
+const MONTH_NAMES = {
+    vi: ['Th01', 'Th02', 'Th03', 'Th04', 'Th05', 'Th06', 'Th07', 'Th08', 'Th09', 'Th10', 'Th11', 'Th12'],
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    ede: ['Bl01', 'Bl02', 'Bl03', 'Bl04', 'Bl05', 'Bl06', 'Bl07', 'Bl08', 'Bl09', 'Bl10', 'Bl11', 'Bl12'],
+};
+
+const fmtDate = (d, lang = 'vi') => {
     if (!d) return '';
     const s = d.split('T')[0] || d.split(' ')[0];
     const [y, m, dd] = s.split('-');
-    return `${dd}/${m}/${y}`;
+    const months = MONTH_NAMES[lang] || MONTH_NAMES.vi;
+    return `${dd}-${months[parseInt(m, 10) - 1]}-${y}`;
 };
 
 const fmtNum = (n) => n != null ? Number(n).toLocaleString('vi-VN') : '';
@@ -74,71 +83,69 @@ const loadImage = (url) => new Promise((resolve) => {
         canvas.width = img.width;
         canvas.height = img.height;
         canvas.getContext('2d').drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
+        resolve({ data: canvas.toDataURL('image/png'), width: img.width, height: img.height });
     };
     img.onerror = () => resolve(null);
     img.src = url;
 });
 
-// PDF text labels in 3 languages (ASCII-safe for helvetica font)
+// PDF text labels in 3 languages (now with proper diacritics thanks to Roboto font)
 const PDF_LABELS = {
     vi: {
-        reportTitle: 'BAO CAO MO HINH',
-        reportSubtitle: 'TRINH DIEN CA PHE THICH UNG BIEN DOI KHI HAU',
-        sponsor: 'Tai tro boi Tchibo | Thuc hien boi NKG Viet Nam',
-        modelFarmer: 'Nong ho hinh mau: Neumann Kaffe Group',
-        modelCode: 'Ma mo hinh',
-        name: 'Ten',
-        farmer: 'Nong ho',
-        location: 'Vi tri',
-        area: 'Dien tich',
-        period: 'Thoi gian',
-        diaryTitle: 'NHAT KY CANH TAC',
-        inspectTitle: 'KIEM TRA DINH KY',
-        consumTitle: 'CHI PHI TIEU HAO',
-        costSummary: 'TONG HOP CHI PHI',
-        date: 'Ngay',
-        activity: 'Hoat dong',
-        description: 'Mo ta',
-        material: 'Vat tu',
+        reportTitle: 'BÁO CÁO MÔ HÌNH',
+        reportSubtitle: 'TRÌNH DIỄN CÀ PHÊ THÍCH ỨNG BIẾN ĐỔI KHÍ HẬU',
+        sponsor: 'Tài trợ bởi Tchibo | Thực hiện bởi NKG Việt Nam',
+        modelCode: 'Mã mô hình',
+        name: 'Tên',
+        farmer: 'Nông hộ',
+        location: 'Vị trí',
+        area: 'Diện tích',
+        period: 'Thời gian',
+        diaryTitle: 'NHẬT KÝ CANH TÁC',
+        inspectTitle: 'KIỂM TRA ĐỊNH KỲ',
+        consumTitle: 'CHI PHÍ TIÊU HAO',
+        costSummary: 'TỔNG HỢP CHI PHÍ',
+        date: 'Ngày',
+        activity: 'Hoạt động',
+        description: 'Mô tả',
+        material: 'Vật tư',
         qty: 'SL',
-        laborCost: 'CP nhan cong',
-        matCost: 'CP vat tu',
+        laborCost: 'CP nhân công',
+        matCost: 'CP vật tư',
         gcp: 'GCP',
-        type: 'Loai',
-        growth: 'Sinh truong',
-        pests: 'Sau benh',
-        soil: 'Dat',
-        water: 'Nuoc',
-        healthPct: 'SK cay %',
-        recomm: 'Khuyen nghi',
-        category: 'Danh muc',
-        item: 'Ten hang muc',
-        unit: 'DV',
-        price: 'Don gia',
-        total: 'Thanh tien',
-        notes: 'Ghi chu',
-        totalLabor: 'Tong CP nhan cong',
-        totalMat: 'Tong CP vat tu',
-        totalAll: 'Tong cong',
-        catCol: 'Hang muc',
-        amountCol: 'Thanh tien (VND)',
-        laborDiary: 'Nhan cong (nhat ky)',
-        matDiary: 'Vat tu (nhat ky)',
-        grandTotal: 'TONG CONG',
-        sigOwner: 'Chu mo hinh',
-        sigInspector: 'Can bo kiem tra',
-        sigApproval: 'Xac nhan du an',
-        sigNote: 'Ky, ghi ro ho ten',
-        footer: 'Bao cao duoc tao tu dong boi phan mem Tan Cao Nguyen',
-        noData: 'Khong co du lieu trong khoang thoi gian nay',
+        type: 'Loại',
+        growth: 'Sinh trưởng',
+        pests: 'Sâu bệnh',
+        soil: 'Đất',
+        water: 'Nước',
+        healthPct: 'SK cây %',
+        recomm: 'Khuyến nghị',
+        category: 'Danh mục',
+        item: 'Tên hạng mục',
+        unit: 'ĐV',
+        price: 'Đơn giá',
+        total: 'Thành tiền',
+        notes: 'Ghi chú',
+        totalLabor: 'Tổng CP nhân công',
+        totalMat: 'Tổng CP vật tư',
+        totalAll: 'Tổng cộng',
+        catCol: 'Hạng mục',
+        amountCol: 'Thành tiền (VND)',
+        laborDiary: 'Nhân công (nhật ký)',
+        matDiary: 'Vật tư (nhật ký)',
+        grandTotal: 'TỔNG CỘNG',
+        sigOwner: 'Chủ mô hình',
+        sigInspector: 'Cán bộ kiểm tra',
+        sigApproval: 'Xác nhận dự án',
+        sigNote: 'Ký, ghi rõ họ tên',
+        footer: 'Báo cáo được tạo tự động bởi phần mềm Tân Cao Nguyên',
+        noData: 'Không có dữ liệu trong khoảng thời gian này',
         ha: 'ha',
     },
     en: {
         reportTitle: 'MODEL REPORT',
         reportSubtitle: 'CLIMATE-ADAPTED COFFEE DEMONSTRATION',
         sponsor: 'Sponsored by Tchibo | Implemented by NKG Viet Nam',
-        modelFarmer: 'Model Farmer: Neumann Kaffe Group',
         modelCode: 'Model code',
         name: 'Name',
         farmer: 'Farmer',
@@ -187,54 +194,53 @@ const PDF_LABELS = {
         ha: 'ha',
     },
     ede: {
-        reportTitle: 'HDRUO KLEI HRA',
-        reportSubtitle: 'HDRUOM KAPHEH MLAN YANG',
-        sponsor: 'Bi Tchibo dua | NKG Viet Nam ngă',
-        modelFarmer: 'Mnuih hma hdruo: Neumann Kaffe Group',
-        modelCode: 'Kud hdruo',
+        reportTitle: 'HDRŬO KLEI HRA',
+        reportSubtitle: 'HDRUÔM KAPHÊ MLĂN YANG',
+        sponsor: 'Bi Tchibo dua | NKG Việt Nam ngă',
+        modelCode: 'Kud hdrŭo',
         name: 'Anăn',
         farmer: 'Mnuih hma',
         location: 'Anôk',
-        area: 'Prong',
+        area: 'Prŏng',
         period: 'Mông',
         diaryTitle: 'HDRO HMA',
-        inspectTitle: 'DLANG HRUÊ',
-        consumTitle: 'PRAK MNGA',
-        costSummary: 'PRAK ABOH',
+        inspectTitle: 'DLĂNG HRUÊ',
+        consumTitle: 'PRĂK MNGA',
+        costSummary: 'PRĂK ABŎH',
         date: 'Hruê',
         activity: 'Bruă',
         description: 'Klei',
-        material: 'Mna',
+        material: 'Mnă',
         qty: 'SL',
         laborCost: 'CP mnuih',
-        matCost: 'CP mna',
+        matCost: 'CP mnă',
         gcp: 'GCP',
-        type: 'Mta',
+        type: 'Mtă',
         growth: 'Đuôn',
         pests: 'Hngah',
         soil: 'Lăn',
-        water: 'Ea',
+        water: 'Êa',
         healthPct: 'SK %',
         recomm: 'Kčah',
-        category: 'Mta',
+        category: 'Mtă',
         item: 'Anăn',
-        unit: 'DV',
-        price: 'Mlan',
-        total: 'Prak',
+        unit: 'ĐV',
+        price: 'Mlăn',
+        total: 'Prăk',
         notes: 'Klei',
-        totalLabor: 'Prak mnuih',
-        totalMat: 'Prak mna',
-        totalAll: 'Aboh',
-        catCol: 'Mta',
-        amountCol: 'Prak (VND)',
+        totalLabor: 'Prăk mnuih',
+        totalMat: 'Prăk mnă',
+        totalAll: 'Abŏh',
+        catCol: 'Mtă',
+        amountCol: 'Prăk (VND)',
         laborDiary: 'Mnuih (hdro)',
-        matDiary: 'Mna (hdro)',
-        grandTotal: 'ABOH PRAK',
-        sigOwner: 'Khua hdruo',
+        matDiary: 'Mnă (hdro)',
+        grandTotal: 'ABŎH PRĂK',
+        sigOwner: 'Khua hdrŭo',
         sigInspector: 'Pô dlăng',
         sigApproval: 'Pô bi sĭt',
         sigNote: 'Čih anăn',
-        footer: 'Hdruo mơ̆ng Tan Cao Nguyen',
+        footer: 'Hdrŭo mơ̆ng Tân Cao Nguyên',
         noData: 'Ka mâo klei hra',
         ha: 'ha',
     },
@@ -269,7 +275,7 @@ const DIALOG_LABELS = {
         generating: 'Generating...',
     },
     ede: {
-        title: 'Mă hdruo PDF',
+        title: 'Mă hdrŭo PDF',
         dateRange: 'Mông',
         from: 'Mơ̆ng',
         to: 'Truh',
@@ -282,6 +288,8 @@ const DIALOG_LABELS = {
         generating: 'Dôk ngă...',
     },
 };
+
+const LANG_SUFFIX = { vi: '_VN', en: '_EN', ede: '_ED' };
 
 const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [], consumables = [], appLang = 'vi' }) => {
     const [dateFrom, setDateFrom] = useState(firstOfYear());
@@ -307,54 +315,66 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
             const contentW = pageW - margin * 2;
             let y = margin;
 
-            doc.setFont('helvetica');
+            // Register Roboto font for Vietnamese diacritics
+            doc.addFileToVFS('Roboto-Regular.ttf', FontRegular);
+            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+            doc.addFileToVFS('Roboto-Bold.ttf', FontBold);
+            doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
+            doc.setFont('Roboto');
 
-            // --- HEADER: Logo + Title ---
-            let logoData = null;
+            // --- HEADER: Logo centered at top, 1/4 page width ---
+            let logoResult = null;
             try {
-                logoData = await loadImage(import.meta.env.BASE_URL + 'logo-report.png');
+                logoResult = await loadImage(import.meta.env.BASE_URL + 'logo-report.png');
             } catch { /* no logo */ }
 
-            if (logoData) {
-                doc.addImage(logoData, 'PNG', margin, y, 30, 30);
-                y += 2;
+            if (logoResult) {
+                const logoW = pageW / 4; // 1/4 page width
+                const aspectRatio = logoResult.height / logoResult.width;
+                const logoH = logoW * aspectRatio;
+                const logoX = (pageW - logoW) / 2; // centered
+                doc.addImage(logoResult.data, 'PNG', logoX, y, logoW, logoH);
+                y += logoH + 4;
             }
 
-            const titleX = logoData ? margin + 35 : margin;
+            // Title - centered below logo
             doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text(P.reportTitle, titleX, y + 8);
+            doc.setFont('Roboto', 'bold');
+            doc.text(P.reportTitle, pageW / 2, y, { align: 'center' });
+            y += 6;
             doc.setFontSize(10);
-            doc.text(P.reportSubtitle, titleX, y + 15);
+            doc.text(P.reportSubtitle, pageW / 2, y, { align: 'center' });
+            y += 5;
 
             // Sponsor line
             doc.setFontSize(8);
-            doc.setFont('helvetica', 'italic');
-            doc.text(P.sponsor, titleX, y + 21);
+            doc.setFont('Roboto', 'normal');
+            doc.text(P.sponsor, pageW / 2, y, { align: 'center' });
+            y += 8;
 
+            // Model info - left aligned
             doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
-            let infoY = y + 28;
-            doc.text(`${P.modelCode}: ${model.model_code || ''}`, titleX, infoY);
-            infoY += 5;
-            doc.text(`${P.name}: ${model.name || model.model_name || ''}`, titleX, infoY);
-            infoY += 5;
-            doc.text(`${P.farmer}: ${farmer?.full_name || '---'}`, titleX, infoY);
-            infoY += 5;
+            doc.setFont('Roboto', 'normal');
+            const infoPairs = [
+                [P.modelCode, model.model_code || ''],
+                [P.name, model.name || model.model_name || ''],
+                [P.farmer, farmer?.full_name || '---'],
+            ];
             const location = [model.village, model.commune, model.district, model.province].filter(Boolean).join(', ')
                 || [farmer?.village, farmer?.commune, farmer?.province].filter(Boolean).join(', ');
-            if (location) {
-                doc.text(`${P.location}: ${location}`, titleX, infoY);
-                infoY += 5;
-            }
-            if (model.target_area) {
-                doc.text(`${P.area}: ${model.target_area} ${P.ha}`, titleX, infoY);
-                infoY += 5;
-            }
-            doc.text(`${P.period}: ${fmtDate(dateFrom)} - ${fmtDate(dateTo)}`, titleX, infoY);
-            infoY += 3;
+            if (location) infoPairs.push([P.location, location]);
+            if (model.target_area) infoPairs.push([P.area, `${model.target_area} ${P.ha}`]);
+            infoPairs.push([P.period, `${fmtDate(dateFrom, lang)} - ${fmtDate(dateTo, lang)}`]);
 
-            y = Math.max(y + (logoData ? 35 : 0), infoY + 2);
+            infoPairs.forEach(([label, val]) => {
+                doc.setFont('Roboto', 'bold');
+                doc.text(`${label}: `, margin, y);
+                const labelW = doc.getTextWidth(`${label}: `);
+                doc.setFont('Roboto', 'normal');
+                doc.text(val, margin + labelW, y);
+                y += 5;
+            });
+            y += 2;
 
             // Divider
             doc.setDrawColor(120, 120, 120);
@@ -381,24 +401,24 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                 sectionNum++;
                 ensureSpace(20);
                 doc.setFontSize(11);
-                doc.setFont('helvetica', 'bold');
+                doc.setFont('Roboto', 'bold');
                 doc.text(`${sectionNum}. ${P.diaryTitle} (${diaryData.length})`, margin, y);
                 y += 3;
 
                 if (diaryData.length === 0) {
                     doc.setFontSize(9);
-                    doc.setFont('helvetica', 'italic');
+                    doc.setFont('Roboto', 'normal');
                     doc.text(P.noData, margin + 5, y + 5);
                     y += 10;
                 } else {
                     autoTable(doc, {
                         startY: y,
                         margin: { left: margin, right: margin },
-                        styles: { fontSize: 7, cellPadding: 2, font: 'helvetica' },
+                        styles: { fontSize: 7, cellPadding: 2, font: 'Roboto' },
                         headStyles: { fillColor: [93, 64, 55], textColor: 255, fontStyle: 'bold' },
                         head: [[P.date, P.activity, P.description, P.material, P.qty, P.laborCost, P.matCost, P.gcp]],
                         body: diaryData.map(d => [
-                            fmtDate(d.diary_date),
+                            fmtDate(d.diary_date, lang),
                             labelFor(ACTIVITY_LABELS, d.activity_type, lang),
                             (d.description || '').substring(0, 50),
                             d.material_name || '',
@@ -408,10 +428,10 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                             d.gcp_compliant ? 'V' : '',
                         ]),
                         columnStyles: {
-                            0: { cellWidth: 18 },
+                            0: { cellWidth: 22 },
                             1: { cellWidth: 20 },
                             2: { cellWidth: 'auto' },
-                            3: { cellWidth: 20 },
+                            3: { cellWidth: 18 },
                             4: { cellWidth: 16 },
                             5: { cellWidth: 20, halign: 'right' },
                             6: { cellWidth: 20, halign: 'right' },
@@ -423,7 +443,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                     const diaryLaborTotal = diaryData.reduce((s, d) => s + (d.labor_cost || 0), 0);
                     const diaryMatTotal = diaryData.reduce((s, d) => s + (d.material_cost || 0), 0);
                     doc.setFontSize(8);
-                    doc.setFont('helvetica', 'bold');
+                    doc.setFont('Roboto', 'bold');
                     doc.text(`${P.totalLabor}: ${fmtNum(diaryLaborTotal)} | ${P.totalMat}: ${fmtNum(diaryMatTotal)} | ${P.totalAll}: ${fmtNum(diaryLaborTotal + diaryMatTotal)} VND`, margin + 5, y);
                     y += 8;
                 }
@@ -434,24 +454,24 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                 sectionNum++;
                 ensureSpace(20);
                 doc.setFontSize(11);
-                doc.setFont('helvetica', 'bold');
+                doc.setFont('Roboto', 'bold');
                 doc.text(`${sectionNum}. ${P.inspectTitle} (${inspectData.length})`, margin, y);
                 y += 3;
 
                 if (inspectData.length === 0) {
                     doc.setFontSize(9);
-                    doc.setFont('helvetica', 'italic');
+                    doc.setFont('Roboto', 'normal');
                     doc.text(P.noData, margin + 5, y + 5);
                     y += 10;
                 } else {
                     autoTable(doc, {
                         startY: y,
                         margin: { left: margin, right: margin },
-                        styles: { fontSize: 7, cellPadding: 2, font: 'helvetica' },
+                        styles: { fontSize: 7, cellPadding: 2, font: 'Roboto' },
                         headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
                         head: [[P.date, P.type, P.growth, P.pests, P.soil, P.water, P.healthPct, P.recomm]],
                         body: inspectData.map(i => [
-                            fmtDate(i.inspection_date),
+                            fmtDate(i.inspection_date, lang),
                             labelFor(INSPECT_TYPE_LABELS, i.inspection_type, lang),
                             labelFor(QUALITY_LABELS, i.growth_quality, lang),
                             labelFor(PEST_LABELS, i.pest_status, lang),
@@ -461,7 +481,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                             (i.recommendations || '').substring(0, 60),
                         ]),
                         columnStyles: {
-                            0: { cellWidth: 18 },
+                            0: { cellWidth: 22 },
                             1: { cellWidth: 18 },
                             7: { cellWidth: 'auto' },
                         },
@@ -475,24 +495,24 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                 sectionNum++;
                 ensureSpace(20);
                 doc.setFontSize(11);
-                doc.setFont('helvetica', 'bold');
+                doc.setFont('Roboto', 'bold');
                 doc.text(`${sectionNum}. ${P.consumTitle} (${consumData.length})`, margin, y);
                 y += 3;
 
                 if (consumData.length === 0) {
                     doc.setFontSize(9);
-                    doc.setFont('helvetica', 'italic');
+                    doc.setFont('Roboto', 'normal');
                     doc.text(P.noData, margin + 5, y + 5);
                     y += 10;
                 } else {
                     autoTable(doc, {
                         startY: y,
                         margin: { left: margin, right: margin },
-                        styles: { fontSize: 7, cellPadding: 2, font: 'helvetica' },
+                        styles: { fontSize: 7, cellPadding: 2, font: 'Roboto' },
                         headStyles: { fillColor: [133, 77, 14], textColor: 255, fontStyle: 'bold' },
                         head: [[P.date, P.category, P.item, P.qty, P.unit, P.price, P.total, P.notes]],
                         body: consumData.map(c => [
-                            fmtDate(c.record_date),
+                            fmtDate(c.record_date, lang),
                             labelFor(CATEGORY_LABELS, c.category, lang),
                             c.item_name || '',
                             fmtNum(c.quantity),
@@ -502,7 +522,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                             (c.notes || '').substring(0, 40),
                         ]),
                         columnStyles: {
-                            0: { cellWidth: 18 },
+                            0: { cellWidth: 22 },
                             1: { cellWidth: 22 },
                             5: { cellWidth: 18, halign: 'right' },
                             6: { cellWidth: 20, halign: 'right' },
@@ -524,7 +544,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
 
                     ensureSpace(40);
                     doc.setFontSize(11);
-                    doc.setFont('helvetica', 'bold');
+                    doc.setFont('Roboto', 'bold');
                     doc.text(P.costSummary, margin, y + 6);
                     y += 9;
 
@@ -540,7 +560,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                     autoTable(doc, {
                         startY: y,
                         margin: { left: margin + 20, right: margin + 20 },
-                        styles: { fontSize: 9, cellPadding: 3, font: 'helvetica' },
+                        styles: { fontSize: 9, cellPadding: 3, font: 'Roboto' },
                         headStyles: { fillColor: [46, 125, 50], textColor: 255 },
                         head: [[P.catCol, P.amountCol]],
                         body: summaryRows,
@@ -568,7 +588,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
             const colW = contentW / 3;
             const sigCols = [
                 { title: P.sigOwner, name: farmer?.full_name || '' },
-                { title: P.sigInspector, name: '' },
+                { title: P.sigInspector, name: model.inspector_name || '' },
                 { title: P.sigApproval, name: '' },
             ];
 
@@ -577,18 +597,18 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
                 const centerX = x + colW / 2;
 
                 doc.setFontSize(9);
-                doc.setFont('helvetica', 'bold');
+                doc.setFont('Roboto', 'bold');
                 doc.text(col.title, centerX, y, { align: 'center' });
 
                 doc.setFontSize(8);
-                doc.setFont('helvetica', 'italic');
+                doc.setFont('Roboto', 'normal');
                 doc.text(`(${P.sigNote})`, centerX, y + 5, { align: 'center' });
 
                 doc.setLineWidth(0.2);
                 doc.line(x + 10, y + 22, x + colW - 10, y + 22);
 
                 if (col.name) {
-                    doc.setFont('helvetica', 'normal');
+                    doc.setFont('Roboto', 'normal');
                     doc.setFontSize(8);
                     doc.text(col.name, centerX, y + 27, { align: 'center' });
                 }
@@ -596,15 +616,16 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
 
             // Footer
             doc.setFontSize(7);
-            doc.setFont('helvetica', 'italic');
+            doc.setFont('Roboto', 'normal');
             doc.setTextColor(150, 150, 150);
             doc.text(P.footer, pageW / 2, pageH - 8, { align: 'center' });
             doc.setTextColor(0, 0, 0);
 
-            // --- SAVE ---
+            // --- SAVE with language suffix ---
             const fromStr = dateFrom.replace(/-/g, '');
             const toStr = dateTo.replace(/-/g, '');
-            doc.save(`BaoCao_${model.model_code || 'model'}_${fromStr}_${toStr}.pdf`);
+            const suffix = LANG_SUFFIX[lang] || '_VN';
+            doc.save(`BaoCao_${model.model_code || 'model'}_${fromStr}_${toStr}${suffix}.pdf`);
 
         } catch (err) {
             console.error('PDF generation error:', err);

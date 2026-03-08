@@ -540,6 +540,27 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 <InfoRow label={appLang === 'vi' ? 'Loại cà phê' : 'Coffee type'} value={model.coffee_type} icon="fa-mug-hot" />
                 <InfoRow label={appLang === 'vi' ? 'Trạng thái' : 'Status'} value={model.status?.toUpperCase()} icon="fa-flag" />
                 <InfoRow label={appLang === 'vi' ? 'Dữ liệu' : 'Data'} value={model.data_status} icon="fa-database" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', borderTop: '1px solid #f1f5f9' }}>
+                    <i className="fas fa-user-tie" style={{ width: '20px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}></i>
+                    <span style={{ fontSize: '12px', color: '#64748b', minWidth: '100px' }}>{appLang === 'vi' ? 'Cán bộ kiểm tra' : appLang === 'en' ? 'Inspector' : 'Pô dlăng'}</span>
+                    {canEdit ? (
+                        <input
+                            type="text"
+                            value={model.inspector_name || ''}
+                            onChange={async (e) => {
+                                const val = e.target.value;
+                                model.inspector_name = val;
+                                try { await pb.collection('demo_models').update(model.id, { inspector_name: val }); } catch {}
+                            }}
+                            placeholder={appLang === 'vi' ? 'Nhập tên cán bộ...' : 'Enter inspector name...'}
+                            style={{ flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#1e293b', background: '#f8fafc' }}
+                        />
+                    ) : (
+                        <span style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: model.inspector_name ? '#1e293b' : '#cbd5e1' }}>
+                            {model.inspector_name || '---'}
+                        </span>
+                    )}
+                </div>
             </SectionCard>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
