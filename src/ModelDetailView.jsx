@@ -79,7 +79,7 @@ const inputStyle = {
 
 const selectStyle = { ...inputStyle, appearance: 'auto' };
 
-const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
+const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit = true }) => {
     const t = translations[appLang] || translations.vi;
     const [activeTab, setActiveTab] = useState('overview');
     const [farmer, setFarmer] = useState(null);
@@ -551,11 +551,11 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
             <SectionCard
                 title={`${appLang === 'vi' ? 'Nhat ky canh tac' : 'Farm Diary'} (${diary.length})`}
                 icon="fa-book"
-                action={<AddButton onClick={() => { setDiaryForm(emptyDiary); setEditingItem(null); setShowDiaryForm(true); }} />}
+                action={canEdit ? <AddButton onClick={() => { setDiaryForm(emptyDiary); setEditingItem(null); setShowDiaryForm(true); }} /> : null}
             >
                 {diary.length === 0 ? (
                     <p style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>
-                        {appLang === 'vi' ? 'Chua co nhat ky nao. Bam "Them" de bat dau ghi chep.' : 'No diary entries yet. Click "Add" to start.'}
+                        {appLang === 'vi' ? 'Chua co nhat ky nao.' : 'No diary entries yet.'}{canEdit ? (appLang === 'vi' ? ' Bam "Them" de bat dau ghi chep.' : ' Click "Add" to start.') : ''}
                     </p>
                 ) : (
                     diary.map(d => (
@@ -570,12 +570,12 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
                                         padding: '2px 8px', borderRadius: '8px', fontSize: '10px', fontWeight: 700,
                                         background: '#f0fdf4', color: '#166534'
                                     }}>{ACTIVITY_TYPES.find(a => a.value === d.activity_type)?.[appLang] || d.activity_type}</span>
-                                    <button onClick={() => openEditDiary(d)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}>
+                                    {canEdit && <button onClick={() => openEditDiary(d)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}>
                                         <i className="fas fa-edit" style={{ fontSize: '12px' }}></i>
-                                    </button>
-                                    <button onClick={() => handleDeleteRecord('model_diary', d.id, refreshDiary)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
+                                    </button>}
+                                    {canEdit && <button onClick={() => handleDeleteRecord('model_diary', d.id, refreshDiary)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
                                         <i className="fas fa-trash" style={{ fontSize: '12px' }}></i>
-                                    </button>
+                                    </button>}
                                 </div>
                             </div>
                             <p style={{ fontSize: '13px', margin: '6px 0', color: '#475569' }}>{d.description}</p>
@@ -659,11 +659,11 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
             <SectionCard
                 title={`${appLang === 'vi' ? 'Kiem tra dinh ky' : 'Inspections'} (${inspections.length})`}
                 icon="fa-clipboard-check"
-                action={<AddButton onClick={() => { setInspectForm(emptyInspect); setEditingItem(null); setShowInspectForm(true); }} />}
+                action={canEdit ? <AddButton onClick={() => { setInspectForm(emptyInspect); setEditingItem(null); setShowInspectForm(true); }} /> : null}
             >
                 {inspections.length === 0 ? (
                     <p style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>
-                        {appLang === 'vi' ? 'Chua co kiem tra nao. Bam "Them" de them.' : 'No inspections yet. Click "Add" to start.'}
+                        {appLang === 'vi' ? 'Chua co kiem tra nao.' : 'No inspections yet.'}{canEdit ? (appLang === 'vi' ? ' Bam "Them" de them.' : ' Click "Add" to start.') : ''}
                     </p>
                 ) : (
                     inspections.map(ins => (
@@ -680,12 +680,12 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
                                     }}>
                                         {INSPECTION_TYPES.find(t => t.value === ins.inspection_type)?.[appLang] || ins.inspection_type}
                                     </span>
-                                    <button onClick={() => openEditInspect(ins)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}>
+                                    {canEdit && <button onClick={() => openEditInspect(ins)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}>
                                         <i className="fas fa-edit" style={{ fontSize: '12px' }}></i>
-                                    </button>
-                                    <button onClick={() => handleDeleteRecord('model_inspections', ins.id, refreshInspections)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
+                                    </button>}
+                                    {canEdit && <button onClick={() => handleDeleteRecord('model_inspections', ins.id, refreshInspections)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
                                         <i className="fas fa-trash" style={{ fontSize: '12px' }}></i>
-                                    </button>
+                                    </button>}
                                 </div>
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '12px' }}>
@@ -814,11 +814,11 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
                 <SectionCard
                     title={`${appLang === 'vi' ? 'Chi tiet' : 'Details'} (${consumables.length})`}
                     icon="fa-receipt"
-                    action={<AddButton onClick={() => { setConsumForm(emptyConsum); setEditingItem(null); setShowConsumForm(true); }} />}
+                    action={canEdit ? <AddButton onClick={() => { setConsumForm(emptyConsum); setEditingItem(null); setShowConsumForm(true); }} /> : null}
                 >
                     {consumables.length === 0 ? (
                         <p style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>
-                            {appLang === 'vi' ? 'Chua co du lieu. Bam "Them" de them.' : 'No data yet. Click "Add" to start.'}
+                            {appLang === 'vi' ? 'Chua co du lieu.' : 'No data yet.'}{canEdit ? (appLang === 'vi' ? ' Bam "Them" de them.' : ' Click "Add" to start.') : ''}
                         </p>
                     ) : (
                         consumables.map(c => (
@@ -827,12 +827,12 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
                                     <span style={{ fontWeight: 600 }}>{c.item_name}</span>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span style={{ color: '#dc2626', fontWeight: 700 }}>{(c.total_cost || 0).toLocaleString()}</span>
-                                        <button onClick={() => openEditConsum(c)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}>
+                                        {canEdit && <button onClick={() => openEditConsum(c)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}>
                                             <i className="fas fa-edit" style={{ fontSize: '11px' }}></i>
-                                        </button>
-                                        <button onClick={() => handleDeleteRecord('model_consumables', c.id, refreshConsumables)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
+                                        </button>}
+                                        {canEdit && <button onClick={() => handleDeleteRecord('model_consumables', c.id, refreshConsumables)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}>
                                             <i className="fas fa-trash" style={{ fontSize: '11px' }}></i>
-                                        </button>
+                                        </button>}
                                     </div>
                                 </div>
                                 <div style={{ color: '#94a3b8', marginTop: '2px' }}>
@@ -946,6 +946,15 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser }) => {
                         <span style={{ color: 'var(--coffee-primary)', fontWeight: 800 }}>{model.model_code}</span> - {model.name || model.model_name}
                     </h2>
                 </div>
+                {!canEdit && (
+                    <span style={{
+                        padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700,
+                        background: '#fef3c7', color: '#92400e', whiteSpace: 'nowrap'
+                    }}>
+                        <i className="fas fa-eye" style={{ marginRight: '4px' }}></i>
+                        {appLang === 'vi' ? 'Chi xem' : 'View only'}
+                    </span>
+                )}
             </div>
 
             {/* Tab Bar */}

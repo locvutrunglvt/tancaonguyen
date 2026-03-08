@@ -94,16 +94,17 @@ body {
 /* ============= SIDEBAR ============= */
 .sidebar {
     width: 260px;
-    background: linear-gradient(180deg, var(--coffee-dark) 0%, #2C1810 100%);
+    background: linear-gradient(180deg, var(--cream) 0%, var(--coffee-light) 100%);
     display: flex;
     flex-direction: column;
     padding: 32px 24px;
     position: sticky;
     top: 0;
     height: 100vh;
-    color: white;
+    color: var(--coffee-dark);
     z-index: 1000;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    border-right: 1px solid var(--gray-200);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06);
     transition: width var(--transition-slow), transform var(--transition-slow);
 }
 
@@ -123,7 +124,7 @@ body {
     padding: 12px 14px;
     /* Reduced padding */
     border-radius: 12px;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--coffee-dark);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -141,13 +142,13 @@ body {
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: white;
+    background: rgba(166, 124, 82, 0.15);
+    color: var(--coffee-primary);
     transform: translateX(4px);
 }
 
 .nav-item.active {
-    background: linear-gradient(135deg, #FFB300 0%, #FFA000 100%);
+    background: linear-gradient(135deg, var(--coffee-primary) 0%, var(--coffee-medium) 100%);
     color: white;
     box-shadow: 0 4px 12px rgba(255, 179, 0, 0.4);
     font-weight: 700;
@@ -167,7 +168,7 @@ body {
 
 .sidebar-footer {
     padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--gray-200);
 }
 
 .logout-btn {
@@ -176,7 +177,7 @@ body {
     gap: 14px;
     padding: 14px 18px;
     border-radius: 12px;
-    color: #FFCDD2;
+    color: #b91c1c;
     cursor: pointer;
     font-weight: 600;
     font-size: 15px;
@@ -184,8 +185,8 @@ body {
 }
 
 .logout-btn:hover {
-    background: rgba(244, 67, 54, 0.15);
-    color: #FF5252;
+    background: rgba(244, 67, 54, 0.1);
+    color: #dc2626;
 }
 
 /* ============= MAIN CONTENT ============= */

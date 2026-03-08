@@ -376,6 +376,21 @@ const Dashboard = ({ onLogout }) => {
             try {
                 const profile = await pb.collection('users').getOne(user.id);
                 setCurrentUser(profile);
+                // Auto-navigate farmer to their model
+                if (profile.role === 'Farmer' && profile.farmer_id) {
+                    try {
+                        const models = await pb.collection('demo_models').getFullList({
+                            filter: `farmer_id='${profile.farmer_id}'`,
+                            expand: 'farmer_id',
+                        });
+                        if (models.length > 0) {
+                            setSelectedModel(models[0]);
+                            setView('model_detail');
+                        }
+                    } catch (e) {
+                        console.error('Auto-nav error:', e.message);
+                    }
+                }
             } catch (err) {
                 setCurrentUser(user);
             }
@@ -639,6 +654,10 @@ const Dashboard = ({ onLogout }) => {
                             onBack={() => { setView('home'); setSelectedModel(null); }}
                             appLang={appLang}
                             currentUser={currentUser}
+                            canEdit={
+                                currentUser?.organization === 'tcn' ||
+                                (currentUser?.role === 'Farmer' && currentUser?.farmer_id === selectedModel?.farmer_id)
+                            }
                         />
                     )}
                     {view === 'growth' && (

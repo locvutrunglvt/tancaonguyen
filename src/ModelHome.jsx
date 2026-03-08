@@ -88,6 +88,9 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
         );
     }
 
+    const isFarmer = currentUser?.role === 'Farmer';
+    const myFarmerId = currentUser?.farmer_id;
+
     const displayModels = models.length > 0 ? models : Array.from({ length: 8 }, (_, i) => ({
         id: `placeholder-${i}`, model_code: `GL${String(i + 1).padStart(2, '0')}-XP`,
         model_name: `Mo hinh GL${String(i + 1).padStart(2, '0')}`, status: 'planning', _placeholder: true
@@ -122,6 +125,8 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                     const area = model.area || model.target_area;
                     const village = model.village || farmer?.village;
                     const commune = model.commune || farmer?.commune;
+                    const isMyModel = isFarmer && model.farmer_id === myFarmerId;
+                    const isOtherFarmerModel = isFarmer && !isMyModel && !model._placeholder;
 
                     return (
                         <div
@@ -135,7 +140,8 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                 borderRadius: '20px',
                                 overflow: 'hidden',
                                 cursor: model._placeholder ? 'default' : 'pointer',
-                                opacity: model._placeholder ? 0.45 : 1,
+                                opacity: model._placeholder ? 0.45 : isOtherFarmerModel ? 0.6 : 1,
+                                border: isMyModel ? '3px solid #f59e0b' : 'none',
                                 transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
                                 transform: isPressed
                                     ? 'translateY(-6px) rotateX(2deg) scale(1.03)'
@@ -171,14 +177,36 @@ const ModelHome = ({ onSelectModel, onNavigate, appLang = 'vi', currentUser }) =
                                             {model.name || model.model_name || '---'}
                                         </div>
                                     </div>
-                                    <div style={{
-                                        padding: '4px 10px', borderRadius: '20px',
-                                        background: 'rgba(255,255,255,0.2)',
-                                        backdropFilter: 'blur(4px)',
-                                        fontSize: '10px', fontWeight: 700
-                                    }}>
-                                        <i className={`fas ${sc.icon}`} style={{ marginRight: '4px' }}></i>
-                                        {model.status?.toUpperCase()}
+                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                        {isMyModel && (
+                                            <div style={{
+                                                padding: '4px 8px', borderRadius: '20px',
+                                                background: '#f59e0b', color: '#fff',
+                                                fontSize: '9px', fontWeight: 800
+                                            }}>
+                                                <i className="fas fa-star" style={{ marginRight: '3px' }}></i>
+                                                {appLang === 'vi' ? 'CUA BAN' : 'YOURS'}
+                                            </div>
+                                        )}
+                                        {isOtherFarmerModel && (
+                                            <div style={{
+                                                padding: '4px 8px', borderRadius: '20px',
+                                                background: 'rgba(255,255,255,0.3)',
+                                                fontSize: '9px', fontWeight: 600
+                                            }}>
+                                                <i className="fas fa-eye" style={{ marginRight: '3px' }}></i>
+                                                {appLang === 'vi' ? 'XEM' : 'VIEW'}
+                                            </div>
+                                        )}
+                                        <div style={{
+                                            padding: '4px 10px', borderRadius: '20px',
+                                            background: 'rgba(255,255,255,0.2)',
+                                            backdropFilter: 'blur(4px)',
+                                            fontSize: '10px', fontWeight: 700
+                                        }}>
+                                            <i className={`fas ${sc.icon}`} style={{ marginRight: '4px' }}></i>
+                                            {model.status?.toUpperCase()}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

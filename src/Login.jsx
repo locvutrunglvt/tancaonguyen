@@ -208,7 +208,7 @@ const Login = () => {
                                     ) : (
                                         <select className="input-pro" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}>
                                             <option value="">{isFetchingUsers ? 'LOADING...' : (users.length === 0 ? (lang === 'vi' ? 'CHƯA CÓ NHÂN VIÊN' : 'NO USERS') : t.select_user)}</option>
-                                            {users.map((u, i) => <option key={i} value={u.email}>{u.full_name}</option>)}
+                                            {users.map((u, i) => <option key={i} value={u.email}>{u.full_name}{u.employee_code ? ` (${u.employee_code})` : ''}</option>)}
                                         </select>
                                     )}
                                 </div>
