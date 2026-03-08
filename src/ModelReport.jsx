@@ -77,8 +77,9 @@ const MONTH_NAMES = {
 
 const fmtDate = (d) => {
     if (!d) return '';
-    const s = d.split('T')[0] || d.split(' ')[0];
+    const s = String(d).replace(/[T ].*/g, '');
     const [y, m, dd] = s.split('-');
+    if (!y || !m || !dd) return d;
     return `${dd}/${m}/${y}`;
 };
 
@@ -86,7 +87,7 @@ const fmtNum = (n) => n != null ? Number(n).toLocaleString('vi-VN') : '';
 
 const filterByDate = (records, dateField, from, to) => {
     return records.filter(r => {
-        const d = r[dateField]?.split('T')[0] || r[dateField]?.split(' ')[0];
+        const d = r[dateField] ? String(r[dateField]).replace(/[T ].*/g, '') : null;
         return d && d >= from && d <= to;
     });
 };
