@@ -10,6 +10,8 @@ import TrainingCenter from './TrainingCenter';
 import FarmProfiles from './FarmProfiles';
 import SeasonalPlanning from './SeasonalPlanning';
 import BackupRestore from './BackupRestore';
+import ModelHome from './ModelHome';
+import ModelDetailView from './ModelDetailView';
 import useSwipeBack from './useSwipeBack';
 
 // Components Moved Outside for React Component Stability (Fixes Input Focus Bug)
@@ -336,6 +338,7 @@ const getPermissions = (role) => {
 
 const Dashboard = ({ onLogout }) => {
     const [view, setView] = useState('home');
+    const [selectedModel, setSelectedModel] = useState(null);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
@@ -347,9 +350,14 @@ const Dashboard = ({ onLogout }) => {
     const [appLang, setAppLang] = useState(localStorage.getItem('app_lang') || 'vi');
     const t = translations[appLang];
 
-    // Swipe right from left edge → go back to home
+    // Swipe right from left edge → go back
     const handleSwipeBack = useCallback(() => {
-        if (view !== 'home') setView('home');
+        if (view === 'model_detail') {
+            setView('home');
+            setSelectedModel(null);
+        } else if (view !== 'home') {
+            setView('home');
+        }
     }, [view]);
     useSwipeBack(handleSwipeBack, view !== 'home');
 
@@ -530,11 +538,8 @@ const Dashboard = ({ onLogout }) => {
         <div className={`dashboard-layout lang-${appLang}`}>
             <aside className="sidebar">
                 <nav className="nav-menu">
-                    <a className={`nav-item ${view === 'home' ? 'active' : ''}`} onClick={() => setView('home')}>
-                        <i className="fas fa-home"></i> <span>{t.home}</span>
-                    </a>
-                    <a className={`nav-item ${view === 'growth' ? 'active' : ''}`} onClick={() => setView('growth')}>
-                        <i className="fas fa-chart-line"></i> <span>{t.growth || 'Tăng trưởng'}</span>
+                    <a className={`nav-item ${view === 'home' || view === 'model_detail' ? 'active' : ''}`} onClick={() => { setView('home'); setSelectedModel(null); }}>
+                        <i className="fas fa-home"></i> <span>{appLang === 'vi' ? 'Mo hinh' : appLang === 'en' ? 'Models' : 'Hdruom'}</span>
                     </a>
                     <a className={`nav-item ${view === 'farmers' ? 'active' : ''}`} onClick={() => setView('farmers')}>
                         <i className="fas fa-id-card"></i> <span>{t.farmers}</span>
@@ -542,14 +547,14 @@ const Dashboard = ({ onLogout }) => {
                     <a className={`nav-item ${view === 'farms' ? 'active' : ''}`} onClick={() => setView('farms')}>
                         <i className="fas fa-map-marked-alt"></i> <span>{t.farms}</span>
                     </a>
+                    <a className={`nav-item ${view === 'training' ? 'active' : ''}`} onClick={() => setView('training')}>
+                        <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
+                    </a>
                     <a className={`nav-item ${view === 'activities' ? 'active' : ''}`} onClick={() => setView('activities')}>
                         <i className="fas fa-calendar-check"></i> <span>{t.activities}</span>
                     </a>
                     <a className={`nav-item ${view === 'planning' ? 'active' : ''}`} onClick={() => setView('planning')}>
                         <i className="fas fa-clipboard-list"></i> <span>{t.planning}</span>
-                    </a>
-                    <a className={`nav-item ${view === 'training' ? 'active' : ''}`} onClick={() => setView('training')}>
-                        <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
                     </a>
                     <a className={`nav-item ${view === 'model' ? 'active' : ''}`} onClick={() => setView('model')}>
                         <i className="fas fa-seedling"></i> <span>{t.model}</span>
@@ -620,7 +625,22 @@ const Dashboard = ({ onLogout }) => {
                 </header>
 
                 <div className="view-scroll-container">
-                    {view === 'home' && <HomeView menuItems={menuItems} t={t} />}
+                    {view === 'home' && (
+                        <ModelHome
+                            onSelectModel={(model) => { setSelectedModel(model); setView('model_detail'); }}
+                            onNavigate={setView}
+                            appLang={appLang}
+                            currentUser={currentUser}
+                        />
+                    )}
+                    {view === 'model_detail' && selectedModel && (
+                        <ModelDetailView
+                            model={selectedModel}
+                            onBack={() => { setView('home'); setSelectedModel(null); }}
+                            appLang={appLang}
+                            currentUser={currentUser}
+                        />
+                    )}
                     {view === 'growth' && (
                         <div className="view-container" style={{ textAlign: 'center', padding: '100px 20px', background: 'white', borderRadius: '24px' }}>
                             <div style={{ fontSize: '64px', color: 'var(--coffee-primary)', marginBottom: '20px' }}><i className="fas fa-chart-line"></i></div>
