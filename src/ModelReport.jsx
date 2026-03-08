@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { FontRegular, FontBold } from './fonts/roboto-base64'; // Tinos (Times New Roman compatible)
+import pb from './pbClient';
 
 // Label maps with 3 languages: vi, en, ede
 const ACTIVITY_LABELS = {
@@ -588,7 +589,7 @@ const ModelReport = ({ show, onClose, model, farmer, diary = [], inspections = [
             const colW = contentW / 3;
             const sigCols = [
                 { title: P.sigOwner, name: farmer?.full_name || '' },
-                { title: P.sigInspector, name: model.inspector_name || '' },
+                { title: P.sigInspector, name: model.inspector_name || pb.authStore.model?.full_name || '' },
                 { title: P.sigApproval, name: '' },
             ];
 

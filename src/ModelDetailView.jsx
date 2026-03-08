@@ -552,7 +552,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                                 model.inspector_name = val;
                                 try { await pb.collection('demo_models').update(model.id, { inspector_name: val }); } catch {}
                             }}
-                            placeholder={appLang === 'vi' ? 'Nhập tên cán bộ...' : 'Enter inspector name...'}
+                            placeholder={pb.authStore.model?.full_name || (appLang === 'vi' ? 'Nhập tên cán bộ...' : 'Enter inspector name...')}
                             style={{ flex: 1, padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#1e293b', background: '#f8fafc' }}
                         />
                     ) : (
