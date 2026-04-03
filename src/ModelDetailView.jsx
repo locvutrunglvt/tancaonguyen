@@ -1863,19 +1863,10 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 {TABS.map(tab => (
                     <button
                         key={tab.id}
-                        className="mdv-tab-btn"
+                        className={`mdv-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
                         onClick={() => setActiveTab(tab.id)}
-                        style={{
-                            flex: 'none', padding: '8px 14px', border: 'none', borderRadius: '10px',
-                            background: activeTab === tab.id ? 'white' : 'transparent',
-                            color: activeTab === tab.id ? 'var(--coffee-dark)' : '#64748b',
-                            fontWeight: activeTab === tab.id ? 700 : 500,
-                            fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap',
-                            boxShadow: activeTab === tab.id ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-                            transition: 'all 0.2s'
-                        }}
                     >
-                        <i className={`fas ${tab.icon}`} style={{ marginRight: '5px' }}></i>
+                        <i className={`fas ${tab.icon} mdv-tab-icon`}></i>
                         <span className="mdv-tab-label">{tab[appLang] || tab.vi}</span>
                     </button>
                 ))}
