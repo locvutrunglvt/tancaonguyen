@@ -125,18 +125,10 @@ const Settings = ({
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        style={{
-                            flex: 1, padding: '10px 16px', borderRadius: '10px',
-                            border: 'none', cursor: 'pointer',
-                            fontSize: '13px', fontWeight: activeTab === tab.id ? 700 : 500,
-                            background: activeTab === tab.id ? 'var(--white, #fff)' : 'transparent',
-                            color: activeTab === tab.id ? 'var(--coffee-dark)' : 'var(--gray-700)',
-                            boxShadow: activeTab === tab.id ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-                            transition: 'all 0.2s ease',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                        }}
+                        className={`mdv-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                        style={{ flex: 1, justifyContent: 'center' }}
                     >
-                        <i className={tab.icon} style={{ fontSize: '14px' }}></i>
+                        <i className={`${tab.icon} mdv-tab-icon`}></i>
                         {tab.label}
                     </button>
                 ))}
@@ -468,28 +460,16 @@ const Settings = ({
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                         <button
                             onClick={() => setAdminTab('users')}
-                            style={{
-                                padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                                fontSize: '12px', fontWeight: adminTab === 'users' ? 700 : 500,
-                                background: adminTab === 'users' ? 'var(--coffee-primary)' : 'var(--cream)',
-                                color: adminTab === 'users' ? '#fff' : 'var(--coffee-dark)',
-                                transition: 'all 0.2s ease',
-                            }}
+                            className={`mdv-tab-btn ${adminTab === 'users' ? 'active' : ''}`}
                         >
-                            <i className="fas fa-users" style={{ marginRight: '6px' }}></i>
+                            <i className="fas fa-users mdv-tab-icon"></i>
                             {t.settings_users || 'Người dùng'}
                         </button>
                         <button
                             onClick={() => setAdminTab('backup')}
-                            style={{
-                                padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                                fontSize: '12px', fontWeight: adminTab === 'backup' ? 700 : 500,
-                                background: adminTab === 'backup' ? 'var(--coffee-primary)' : 'var(--cream)',
-                                color: adminTab === 'backup' ? '#fff' : 'var(--coffee-dark)',
-                                transition: 'all 0.2s ease',
-                            }}
+                            className={`mdv-tab-btn ${adminTab === 'backup' ? 'active' : ''}`}
                         >
-                            <i className="fas fa-database" style={{ marginRight: '6px' }}></i>
+                            <i className="fas fa-database mdv-tab-icon"></i>
                             {t.settings_backup || 'Sao lưu'}
                         </button>
                     </div>

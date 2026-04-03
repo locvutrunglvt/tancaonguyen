@@ -22,6 +22,8 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
         gender: 'Nam',
         date_of_birth: '',
         id_card: '',
+        id_card_issue_date: '',
+        id_card_issue_place: '',
         phone: '',
         email: '',
         village: '',
@@ -30,6 +32,10 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
         province: 'Đắk Lắk',
         household_members: 1,
         household_head: true,
+        marital_status: '',
+        women_decision_role: '',
+        access_to_credit: false,
+        credit_source: '',
         status: 'active',
         notes: '',
         photo_preview: ''
@@ -78,6 +84,8 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
             gender: farmer.gender || 'Nam',
             date_of_birth: farmer.date_of_birth || '',
             id_card: farmer.id_card || '',
+            id_card_issue_date: farmer.id_card_issue_date || '',
+            id_card_issue_place: farmer.id_card_issue_place || '',
             phone: farmer.phone || '',
             email: farmer.email || '',
             village: farmer.village || '',
@@ -86,6 +94,10 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
             province: farmer.province || 'Đắk Lắk',
             household_members: farmer.household_members || 1,
             household_head: farmer.household_head !== undefined ? farmer.household_head : true,
+            marital_status: farmer.marital_status || '',
+            women_decision_role: farmer.women_decision_role || '',
+            access_to_credit: farmer.access_to_credit || false,
+            credit_source: farmer.credit_source || '',
             status: farmer.status || 'active',
             notes: farmer.notes || '',
             photo_preview: getFileUrl(farmer, farmer.photo) || ''
@@ -124,6 +136,8 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
                 gender: formData.gender,
                 date_of_birth: formData.date_of_birth || null,
                 id_card: formData.id_card,
+                id_card_issue_date: formData.id_card_issue_date || null,
+                id_card_issue_place: formData.id_card_issue_place || null,
                 phone: formData.phone,
                 email: formData.email,
                 village: formData.village,
@@ -132,6 +146,10 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
                 province: formData.province,
                 household_members: parseInt(formData.household_members) || 1,
                 household_head: formData.household_head,
+                marital_status: formData.marital_status || null,
+                women_decision_role: formData.women_decision_role || null,
+                access_to_credit: formData.access_to_credit || false,
+                credit_source: formData.credit_source || null,
                 status: formData.status,
                 notes: formData.notes
             };
@@ -173,6 +191,8 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
             gender: 'Nam',
             date_of_birth: '',
             id_card: '',
+            id_card_issue_date: '',
+            id_card_issue_place: '',
             phone: '',
             email: '',
             village: '',
@@ -181,6 +201,10 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
             province: 'Đắk Lắk',
             household_members: 1,
             household_head: true,
+            marital_status: '',
+            women_decision_role: '',
+            access_to_credit: false,
+            credit_source: '',
             status: 'active',
             notes: '',
             photo_preview: ''
@@ -338,6 +362,26 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
                                         <label>{t.farmer_id_card}</label>
                                         <input className="input-pro" value={formData.id_card} onChange={e => setFormData({ ...formData, id_card: e.target.value })} placeholder="001234567890" />
                                     </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                        <div className="form-group">
+                                            <label>{t.farmer_id_issue_date}</label>
+                                            <input className="input-pro" type="date" value={formData.id_card_issue_date} onChange={e => setFormData({ ...formData, id_card_issue_date: e.target.value })} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>{t.farmer_marital_status}</label>
+                                            <select className="input-pro" value={formData.marital_status} onChange={e => setFormData({ ...formData, marital_status: e.target.value })}>
+                                                <option value="">--</option>
+                                                <option value="Độc thân">{t.farmer_marital_single}</option>
+                                                <option value="Đã kết hôn">{t.farmer_marital_married}</option>
+                                                <option value="Ly hôn">{t.farmer_marital_divorced}</option>
+                                                <option value="Goá">{t.farmer_marital_widowed}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>{t.farmer_id_issue_place}</label>
+                                        <input className="input-pro" value={formData.id_card_issue_place} onChange={e => setFormData({ ...formData, id_card_issue_place: e.target.value })} placeholder={appLang === 'vi' ? 'Công an tỉnh Đắk Lắk' : 'Issuing authority'} />
+                                    </div>
 
                                     <div className="form-group">
                                         <label>{t.farmer_phone} *</label>
@@ -395,6 +439,37 @@ const FarmerManagement = ({ onBack, appLang = 'vi', currentUser }) => {
                                             {t.household_head}
                                         </label>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Layer 9: Socio-economic */}
+                            <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                                <h4 style={{ color: 'var(--coffee-dark)', fontSize: '13px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <i className="fas fa-venus-mars" style={{ color: '#8b5cf6' }}></i>
+                                    {t.layer_socioeconomic || (appLang === 'vi' ? 'Kinh tế - Xã hội' : appLang === 'en' ? 'Socio-economic' : 'Klei sĭt êmuh')}
+                                </h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                    <div className="form-group">
+                                        <label>{t.women_decision_role}</label>
+                                        <select className="input-pro" value={formData.women_decision_role} onChange={e => setFormData({ ...formData, women_decision_role: e.target.value })}>
+                                            <option value="">--</option>
+                                            <option value="Chủ yếu">{t.women_decision_primary}</option>
+                                            <option value="Cùng quyết định">{t.women_decision_joint}</option>
+                                            <option value="Không tham gia">{t.women_decision_none}</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: '2px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input type="checkbox" checked={formData.access_to_credit} onChange={e => setFormData({ ...formData, access_to_credit: e.target.checked })} />
+                                            {t.access_to_credit}
+                                        </label>
+                                    </div>
+                                    {formData.access_to_credit && (
+                                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                                            <label>{t.credit_source}</label>
+                                            <input className="input-pro" value={formData.credit_source} onChange={e => setFormData({ ...formData, credit_source: e.target.value })} placeholder={appLang === 'vi' ? 'Ngân hàng NN, NHCSXH...' : 'Bank, credit union...'} />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

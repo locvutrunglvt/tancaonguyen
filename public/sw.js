@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tcn-v1';
+const CACHE_NAME = 'tcn-v2';
 const PRECACHE_URLS = [
   '/',
   '/manifest.json'
