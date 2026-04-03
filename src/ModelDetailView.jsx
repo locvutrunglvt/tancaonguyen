@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import pb from './pbClient';
 import { translations } from './translations';
 import ModelReport from './ModelReport';
+import ModelEconomics from './ModelEconomics';
 import { getDisplayCurrency, getCachedRates, formatCompact } from './currencyUtils';
 import { formatDate } from './dateUtils';
 import MediaUpload from './MediaUpload';
@@ -14,7 +15,8 @@ const TABS = [
     { id: 'diary', icon: 'fa-book', vi: 'Nhật ký', en: 'Diary', ede: 'Hdro' },
     { id: 'inspect', icon: 'fa-clipboard-check', vi: 'Kiểm tra', en: 'Inspect', ede: 'Dlang' },
     { id: 'consumable', icon: 'fa-receipt', vi: 'Tiêu hao', en: 'Costs', ede: 'Prak' },
-    { id: 'invest', icon: 'fa-chart-pie', vi: 'Đầu tư', en: 'Invest', ede: 'Mnga' }
+    { id: 'invest', icon: 'fa-chart-pie', vi: 'Đầu tư', en: 'Invest', ede: 'Mnga' },
+    { id: 'economics', icon: 'fa-coins', vi: 'Kinh tế', en: 'Economics', ede: 'Prăk' }
 ];
 
 const ACTIVITY_TYPES = [
@@ -120,7 +122,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
 
     // Form data
     const emptyDiary = { diary_date: today(), activity_type: 'fertilize', description: '', material_name: '', material_amount: '', material_unit: 'kg', labor_hours: '', labor_cost: '', material_cost: '', gcp_compliant: false, weather: '', notes: '' };
-    const emptyInspect = { inspection_date: today(), inspection_type: 'quarterly', growth_quality: '', pest_status: '', pest_details: '', soil_condition: '', water_status: '', tree_health_pct: '', fruit_quality: '', recommendations: '', follow_up_actions: '', notes: '' };
+    const emptyInspect = { inspection_date: today(), inspection_type: 'quarterly', growth_quality: '', pest_status: '', pest_details: '', soil_condition: '', water_status: '', tree_health_pct: '', fruit_quality: '', recommendations: '', follow_up_actions: '', notes: '', soil_ph_sample: '', irrigation_adequacy: '', eudr_check_passed: false, female_participation_pct: '' };
     const emptyConsum = { record_date: today(), category: 'fertilizer', item_name: '', quantity: '', unit: 'kg', unit_price: '', total_cost: '', notes: '' };
 
     const [diaryForm, setDiaryForm] = useState(emptyDiary);
@@ -159,10 +161,16 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     setIncome(i[0] || null);
                 }
             }
+            // Read farm from land_plots (primary) or farm_baselines (fallback)
+            let farmData = null;
             if (model.farm_id) {
-                const fm = await pb.collection('farm_baselines').getOne(model.farm_id).catch(() => null);
-                setFarm(fm);
+                farmData = await pb.collection('farm_baselines').getOne(model.farm_id).catch(() => null);
             }
+            if (!farmData && model.farmer_id) {
+                const plots = await pb.collection('land_plots').getFullList({ filter: `farmer_id='${model.farmer_id}'` }).catch(() => []);
+                farmData = plots[0] || null;
+            }
+            setFarm(farmData);
             const [d, ins, con] = await Promise.all([
                 pb.collection('model_diary').getFullList({ filter: `model_id='${model.id}'`, sort: '-diary_date' }).catch(() => []),
                 pb.collection('model_inspections').getFullList({ filter: `model_id='${model.id}'`, sort: '-inspection_date' }).catch(() => []),
@@ -186,7 +194,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
         try {
             const data = {
                 model_id: model.id,
-                diary_date: diaryForm.diary_date + ' 12:00:00',
+                diary_date: diaryForm.diary_date,
                 activity_type: diaryForm.activity_type,
                 description: diaryForm.description,
                 material_name: diaryForm.material_name || null,
@@ -222,7 +230,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
         try {
             const data = {
                 model_id: model.id,
-                inspection_date: inspectForm.inspection_date + ' 12:00:00',
+                inspection_date: inspectForm.inspection_date,
                 inspection_type: inspectForm.inspection_type,
                 growth_quality: inspectForm.growth_quality || null,
                 pest_status: inspectForm.pest_status || null,
@@ -235,6 +243,10 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 follow_up_actions: inspectForm.follow_up_actions || null,
                 notes: inspectForm.notes || null,
                 inspector_id: currentUser?.id || null,
+                soil_ph_sample: inspectForm.soil_ph_sample ? Number(inspectForm.soil_ph_sample) : null,
+                irrigation_adequacy: inspectForm.irrigation_adequacy || null,
+                eudr_check_passed: inspectForm.eudr_check_passed || false,
+                female_participation_pct: inspectForm.female_participation_pct ? Number(inspectForm.female_participation_pct) : null,
             };
             if (editingItem) {
                 await pb.collection('model_inspections').update(editingItem.id, data);
@@ -262,7 +274,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
             const total = consumForm.total_cost ? Number(consumForm.total_cost) : (qty && price ? qty * price : null);
             const data = {
                 model_id: model.id,
-                record_date: consumForm.record_date + ' 12:00:00',
+                record_date: consumForm.record_date,
                 category: consumForm.category,
                 item_name: consumForm.item_name,
                 quantity: qty,
@@ -317,6 +329,12 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 household_members: farmerForm.household_members ? Number(farmerForm.household_members) : null,
                 id_card: farmerForm.id_card || null,
                 notes: farmerForm.notes || null,
+                id_card_issue_date: farmerForm.id_card_issue_date || null,
+                id_card_issue_place: farmerForm.id_card_issue_place || null,
+                marital_status: farmerForm.marital_status || null,
+                women_decision_role: farmerForm.women_decision_role || null,
+                access_to_credit: farmerForm.access_to_credit || false,
+                credit_source: farmerForm.credit_source || null,
             };
             await pb.collection('farmers').update(farmer.id, data);
             const updated = await pb.collection('farmers').getOne(farmer.id);
@@ -333,7 +351,8 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
         setSaving(true);
         try {
             const data = {
-                farm_name: farmForm.farm_name || null,
+                plot_name: farmForm.farm_name || null,
+                area_ha: farmForm.total_area ? Number(farmForm.total_area) : null,
                 total_area: farmForm.total_area ? Number(farmForm.total_area) : null,
                 coffee_area: farmForm.coffee_area ? Number(farmForm.coffee_area) : null,
                 intercrop_area: farmForm.intercrop_area ? Number(farmForm.intercrop_area) : null,
@@ -349,10 +368,61 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 grass_cover: farmForm.grass_cover || null,
                 shade_trees: farmForm.shade_trees ? Number(farmForm.shade_trees) : null,
                 notes: farmForm.notes || null,
+                // Layer 2
+                lurc_status: farmForm.lurc_status || null,
+                lurc_number: farmForm.lurc_number || null,
+                lurc_issue_date: farmForm.lurc_issue_date || null,
+                lurc_area_ha: farmForm.lurc_area_ha ? Number(farmForm.lurc_area_ha) : null,
+                ownership_status: farmForm.ownership_status || null,
+                // Layer 3
+                coffee_variety: farmForm.coffee_variety || null,
+                planting_density: farmForm.planting_density ? Number(farmForm.planting_density) : null,
+                row_spacing_m: farmForm.row_spacing_m ? Number(farmForm.row_spacing_m) : null,
+                tree_spacing_m: farmForm.tree_spacing_m ? Number(farmForm.tree_spacing_m) : null,
+                tree_age_avg: farmForm.tree_age_avg ? Number(farmForm.tree_age_avg) : null,
+                // Layer 4
+                soil_type_plot: farmForm.soil_type_plot || null,
+                soil_ph_plot: farmForm.soil_ph_plot ? Number(farmForm.soil_ph_plot) : null,
+                main_fertilizer_types: farmForm.main_fertilizer_types || null,
+                fertilization_frequency: farmForm.fertilization_frequency || null,
+                organic_input_pct: farmForm.organic_input_pct ? Number(farmForm.organic_input_pct) : null,
+                // Layer 5
+                water_source_plot: farmForm.water_source_plot || null,
+                irrigation_method: farmForm.irrigation_method || null,
+                irrigation_frequency: farmForm.irrigation_frequency || null,
+                water_storage: farmForm.water_storage || false,
+                // Layer 6
+                main_pests: farmForm.main_pests || null,
+                main_diseases: farmForm.main_diseases || null,
+                ipm_practiced: farmForm.ipm_practiced || false,
+                pesticide_certified: farmForm.pesticide_certified || false,
+                // Layer 7
+                harvest_method: farmForm.harvest_method || null,
+                processing_method: farmForm.processing_method || null,
+                // Layer 8
+                eudr_status: farmForm.eudr_status || null,
+                deforestation_risk: farmForm.deforestation_risk || null,
+                traceability_code: farmForm.traceability_code || null,
+                farm_map_verified: farmForm.farm_map_verified || false,
             };
-            await pb.collection('farm_baselines').update(farm.id, data);
-            const updated = await pb.collection('farm_baselines').getOne(farm.id);
-            setFarm(updated);
+            if (farm?.expand?.farmer_id || farm?.farmer_id) {
+                // Save to land_plots
+                const fid = farm.expand?.farmer_id || farm.farmer_id;
+                const plots = await pb.collection('land_plots').getFullList({ filter: `farmer_id='${fid}'` }).catch(() => []);
+                if (plots.length > 0) {
+                    await pb.collection('land_plots').update(plots[0].id, data);
+                    const updated = await pb.collection('land_plots').getOne(plots[0].id);
+                    setFarm(updated);
+                } else {
+                    const created = await pb.collection('land_plots').create({ farmer_id: fid, ...data });
+                    setFarm(created);
+                }
+            } else {
+                // Save to farm_baselines
+                await pb.collection('farm_baselines').update(farm.id, data);
+                const updated = await pb.collection('farm_baselines').getOne(farm.id);
+                setFarm(updated);
+            }
             setShowFarmForm(false);
         } catch (err) {
             alert('Error: ' + err.message);
@@ -378,19 +448,25 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
             household_members: farmer?.household_members || '',
             id_card: farmer?.id_card || '',
             notes: farmer?.notes || '',
+            id_card_issue_date: farmer?.id_card_issue_date || '',
+            id_card_issue_place: farmer?.id_card_issue_place || '',
+            marital_status: farmer?.marital_status || '',
+            women_decision_role: farmer?.women_decision_role || '',
+            access_to_credit: farmer?.access_to_credit || false,
+            credit_source: farmer?.credit_source || '',
         });
         setShowFarmerForm(true);
     };
 
     const openEditFarm = () => {
         setFarmForm({
-            farm_name: farm?.farm_name || '',
-            total_area: farm?.total_area || '',
+            farm_name: farm?.plot_name || farm?.farm_name || '',
+            total_area: farm?.area_ha || farm?.total_area || '',
             coffee_area: farm?.coffee_area || '',
             intercrop_area: farm?.intercrop_area || '',
-            intercrop_details: farm?.intercrop_details || '',
+            intercrop_details: farm?.intercrop_species || farm?.intercrop_details || '',
             soil_type: farm?.soil_type || '',
-            soil_ph: farm?.soil_ph || '',
+            soil_ph: farm?.soil_ph_plot || farm?.soil_ph || '',
             slope: farm?.slope || '',
             water_source: farm?.water_source || '',
             irrigation_system: farm?.irrigation_system || '',
@@ -400,6 +476,43 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
             grass_cover: farm?.grass_cover || '',
             shade_trees: farm?.shade_trees || '',
             notes: farm?.notes || '',
+            // Layer 2
+            lurc_status: farm?.lurc_status || '',
+            lurc_number: farm?.lurc_number || '',
+            lurc_issue_date: farm?.lurc_issue_date?.split('T')[0] || '',
+            lurc_area_ha: farm?.lurc_area_ha || '',
+            ownership_status: farm?.ownership_status || '',
+            satellite_verified: farm?.satellite_verified || false,
+            // Layer 3
+            coffee_variety: farm?.coffee_variety || '',
+            planting_density: farm?.planting_density || '',
+            row_spacing_m: farm?.row_spacing_m || '',
+            tree_spacing_m: farm?.tree_spacing_m || '',
+            tree_age_avg: farm?.tree_age_avg || '',
+            // Layer 4
+            soil_type_plot: farm?.soil_type_plot || '',
+            soil_ph_plot: farm?.soil_ph_plot || '',
+            main_fertilizer_types: farm?.main_fertilizer_types || '',
+            fertilization_frequency: farm?.fertilization_frequency || '',
+            organic_input_pct: farm?.organic_input_pct || '',
+            // Layer 5
+            water_source_plot: farm?.water_source_plot || '',
+            irrigation_method: farm?.irrigation_method || '',
+            irrigation_frequency: farm?.irrigation_frequency || '',
+            water_storage: farm?.water_storage || false,
+            // Layer 6
+            main_pests: farm?.main_pests || '',
+            main_diseases: farm?.main_diseases || '',
+            ipm_practiced: farm?.ipm_practiced || false,
+            pesticide_certified: farm?.pesticide_certified || false,
+            // Layer 7
+            harvest_method: farm?.harvest_method || '',
+            processing_method: farm?.processing_method || '',
+            // Layer 8
+            eudr_status: farm?.eudr_status || '',
+            deforestation_risk: farm?.deforestation_risk || '',
+            traceability_code: farm?.traceability_code || '',
+            farm_map_verified: farm?.farm_map_verified || false,
         });
         setShowFarmForm(true);
     };
@@ -450,6 +563,10 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
             recommendations: item.recommendations || '',
             follow_up_actions: item.follow_up_actions || '',
             notes: item.notes || '',
+            soil_ph_sample: item.soil_ph_sample || '',
+            irrigation_adequacy: item.irrigation_adequacy || '',
+            eudr_check_passed: item.eudr_check_passed || false,
+            female_participation_pct: item.female_participation_pct || '',
         });
         setEditingItem(item);
         setShowInspectForm(true);
@@ -606,7 +723,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 </div>
             </SectionCard>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            <div className="mdv-overview-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                 {[
                     { label: appLang === 'vi' ? 'Nhật ký' : 'Diary', count: diary.length, color: '#166534', bg: '#dcfce7', icon: 'fa-book' },
                     { label: appLang === 'vi' ? 'Kiểm tra' : 'Inspections', count: inspections.length, color: '#1e40af', bg: '#dbeafe', icon: 'fa-clipboard-check' },
@@ -777,54 +894,176 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
 
     const renderFarm = () => (
         <>
-            {farm ? (
-                <SectionCard title={appLang === 'vi' ? 'Trang trại tham gia mô hình' : 'Farm in Model'} icon="fa-map-marked-alt"
-                    action={canEdit ? <AddButton onClick={openEditFarm} label={appLang === 'vi' ? 'Sửa' : 'Edit'} /> : null}>
-                    <InfoRow label={appLang === 'vi' ? 'Tên' : 'Name'} value={farm.farm_name} icon="fa-tag" />
-                    <InfoRow label={appLang === 'vi' ? 'Tổng DT' : 'Total area'} value={farm.total_area ? `${farm.total_area} ha` : null} icon="fa-ruler" />
-                    <InfoRow label={appLang === 'vi' ? 'DT cà phê' : 'Coffee area'} value={farm.coffee_area ? `${farm.coffee_area} ha` : null} icon="fa-leaf" />
-                    <InfoRow label={appLang === 'vi' ? 'DT xen canh' : 'Intercrop area'} value={farm.intercrop_area ? `${farm.intercrop_area} ha` : null} icon="fa-tree" />
-                    <InfoRow label={appLang === 'vi' ? 'Cây xen' : 'Intercrop'} value={farm.intercrop_details} icon="fa-seedling" />
-                    <InfoRow label="pH" value={farm.soil_ph} icon="fa-flask" />
-                    <InfoRow label={appLang === 'vi' ? 'Loại đất' : 'Soil type'} value={farm.soil_type} icon="fa-mountain" />
-                    <InfoRow label={appLang === 'vi' ? 'Độ dốc' : 'Slope'} value={farm.slope} icon="fa-signal" />
-                    <InfoRow label={appLang === 'vi' ? 'Nguồn nước' : 'Water source'} value={farm.water_source} icon="fa-tint" />
-                    <InfoRow label={appLang === 'vi' ? 'Tưới tiêu' : 'Irrigation'} value={farm.irrigation_system} icon="fa-shower" />
-                    <InfoRow label={appLang === 'vi' ? 'Độ cao' : 'Elevation'} value={farm.elevation ? `${farm.elevation}m` : null} icon="fa-arrow-up" />
-                    <InfoRow label="GPS" value={farm.gps_lat && farm.gps_long ? `${farm.gps_lat}, ${farm.gps_long}` : null} icon="fa-map-pin" />
-                    <InfoRow label={appLang === 'vi' ? 'Cỏ phủ' : 'Grass cover'} value={farm.grass_cover} icon="fa-leaf" />
-                    <InfoRow label={appLang === 'vi' ? 'Cây bóng mát' : 'Shade trees'} value={farm.shade_trees} icon="fa-tree" />
+            {/* ── LAYER 2: Land & Legal ── */}
+            {farm && (
+                <SectionCard
+                    title={appLang === 'vi' ? 'Lớp 2: Đất đai & Pháp lý' : 'Layer 2: Land & Legal'}
+                    icon="fa-file-signature"
+                    action={canEdit ? <AddButton onClick={openEditFarm} label={appLang === 'vi' ? 'Sửa' : 'Edit'} /> : null}
+                >
+                    <InfoRow label={appLang === 'vi' ? 'Tên mảnh đất' : 'Plot Name'} value={farm.plot_name || farm.farm_name} icon="fa-tag" />
+                    <InfoRow label={appLang === 'vi' ? 'Tổng diện tích' : 'Total Area'} value={farm.total_area ? `${farm.total_area} ha` : null} icon="fa-ruler" />
+                    <InfoRow label={appLang === 'vi' ? 'Sổ đỏ / GCNQSDĐ' : 'LURC Status'} value={farm.lurc_status} icon="fa-certificate" />
+                    <InfoRow label={appLang === 'vi' ? 'Số sổ đỏ' : 'LURC Number'} value={farm.lurc_number} icon="fa-id-badge" />
+                    <InfoRow label={appLang === 'vi' ? 'Ngày cấp sổ' : 'LURC Issue Date'} value={farm.lurc_issue_date?.split('T')[0]} icon="fa-calendar" />
+                    <InfoRow label={appLang === 'vi' ? 'DT theo sổ (ha)' : 'LURC Area (ha)'} value={farm.lurc_area_ha ? `${farm.lurc_area_ha} ha` : null} icon="fa-ruler-combined" />
+                    <InfoRow label={appLang === 'vi' ? 'Hình thức sở hữu' : 'Ownership Status'} value={farm.ownership_status} icon="fa-handshake" />
+                    <InfoRow label={appLang === 'vi' ? 'GPS Lat' : 'GPS Lat'} value={farm.gps_lat} icon="fa-map-pin" />
+                    <InfoRow label={appLang === 'vi' ? 'GPS Long' : 'GPS Long'} value={farm.gps_long} icon="fa-map-pin" />
+                    <InfoRow label={appLang === 'vi' ? 'Xác minh vệ tinh' : 'Satellite Verified'}
+                        value={farm.satellite_verified ? (appLang === 'vi' ? 'Có' : 'Yes') : (appLang === 'vi' ? 'Chưa' : 'No')} icon="fa-satellite" />
                 </SectionCard>
-            ) : (
+            )}
+
+            {/* ── LAYER 3: Farm Structure ── */}
+            {farm && (
+                <SectionCard
+                    title={appLang === 'vi' ? 'Lớp 3: Cơ cấu trang trại' : 'Layer 3: Farm Structure'}
+                    icon="fa-sitemap"
+                >
+                    <InfoRow label={appLang === 'vi' ? 'Diện tích cà phê (ha)' : 'Coffee Area (ha)'} value={farm.coffee_area ? `${farm.coffee_area} ha` : null} icon="fa-leaf" />
+                    <InfoRow label={appLang === 'vi' ? 'Diện tích xen canh (ha)' : 'Intercrop Area (ha)'} value={farm.intercrop_area ? `${farm.intercrop_area} ha` : null} icon="fa-tree" />
+                    <InfoRow label={appLang === 'vi' ? 'Cây xen canh' : 'Intercrop Details'} value={farm.intercrop_details} icon="fa-seedling" />
+                    <InfoRow label={appLang === 'vi' ? 'Giống cà phê' : 'Coffee Variety'} value={farm.coffee_variety} icon="fa-leaf" />
+                    <InfoRow label={appLang === 'vi' ? 'Mật độ trồng (cây/ha)' : 'Planting Density (trees/ha)'} value={farm.planting_density ? `${farm.planting_density}` : null} icon="fa-th" />
+                    <InfoRow label={appLang === 'vi' ? 'Khoảng cách hàng (m)' : 'Row Spacing (m)'} value={farm.row_spacing_m ? `${farm.row_spacing_m} m` : null} icon="fa-arrows-alt-h" />
+                    <InfoRow label={appLang === 'vi' ? 'Khoảng cách cây (m)' : 'Tree Spacing (m)'} value={farm.tree_spacing_m ? `${farm.tree_spacing_m} m` : null} icon="fa-arrows-alt-v" />
+                    <InfoRow label={appLang === 'vi' ? 'Tuổi cây TB (năm)' : 'Avg Tree Age (yr)'} value={farm.tree_age_avg ? `${farm.tree_age_avg} ${appLang === 'vi' ? 'năm' : 'yrs'}` : null} icon="fa-hourglass-half" />
+                    <InfoRow label={appLang === 'vi' ? 'Cây bóng mát' : 'Shade Trees'} value={farm.shade_trees} icon="fa-tree" />
+                    <InfoRow label={appLang === 'vi' ? 'Cỏ phủ' : 'Grass Cover'} value={farm.grass_cover} icon="fa-leaf" />
+                    <InfoRow label={appLang === 'vi' ? 'Độ cao (m)' : 'Elevation (m)'} value={farm.elevation ? `${farm.elevation} m` : null} icon="fa-arrow-up" />
+                    <InfoRow label={appLang === 'vi' ? 'Độ dốc' : 'Slope'} value={farm.slope} icon="fa-signal" />
+                </SectionCard>
+            )}
+
+            {/* ── LAYER 4: Soil & Fertility ── */}
+            {farm && (
+                <SectionCard
+                    title={appLang === 'vi' ? 'Lớp 4: Đất & Phì nhiêu' : 'Layer 4: Soil & Fertility'}
+                    icon="fa-flask"
+                >
+                    <InfoRow label={appLang === 'vi' ? 'Loại đất' : 'Soil Type'} value={farm.soil_type_plot} icon="fa-mountain" />
+                    <InfoRow label="pH" value={farm.soil_ph_plot} icon="fa-flask" />
+                    <InfoRow label={appLang === 'vi' ? 'Phân bón chính' : 'Main Fertilizer Types'} value={farm.main_fertilizer_types} icon="fa-vial" />
+                    <InfoRow label={appLang === 'vi' ? 'Tần suất bón phân' : 'Fertilization Frequency'} value={farm.fertilization_frequency} icon="fa-calendar-alt" />
+                    <InfoRow label={appLang === 'vi' ? 'Tỷ lệ hữu cơ (%)' : 'Organic Input (%)'} value={farm.organic_input_pct ? `${farm.organic_input_pct}%` : null} icon="fa-recycle" />
+                </SectionCard>
+            )}
+
+            {/* ── LAYER 5: Water & Irrigation ── */}
+            {farm && (
+                <SectionCard
+                    title={appLang === 'vi' ? 'Lớp 5: Nước & Tưới tiêu' : 'Layer 5: Water & Irrigation'}
+                    icon="fa-tint"
+                >
+                    <InfoRow label={appLang === 'vi' ? 'Nguồn nước' : 'Water Source'} value={farm.water_source_plot} icon="fa-water" />
+                    <InfoRow label={appLang === 'vi' ? 'Phương pháp tưới' : 'Irrigation Method'} value={farm.irrigation_method} icon="fa-shower" />
+                    <InfoRow label={appLang === 'vi' ? 'Tần suất tưới' : 'Irrigation Frequency'} value={farm.irrigation_frequency} icon="fa-clock" />
+                    <InfoRow label={appLang === 'vi' ? 'Có bể chứa nước' : 'Water Storage'}
+                        value={farm.water_storage ? (appLang === 'vi' ? 'Có' : 'Yes') : (appLang === 'vi' ? 'Không' : 'No')} icon="fa-box" />
+                </SectionCard>
+            )}
+
+            {/* ── LAYER 6: Crop Protection ── */}
+            {farm && (
+                <SectionCard
+                    title={appLang === 'vi' ? 'Lớp 6: Bảo vệ cây trồng' : 'Layer 6: Crop Protection'}
+                    icon="fa-bug"
+                >
+                    <InfoRow label={appLang === 'vi' ? 'Sâu hại chính' : 'Main Pests'} value={farm.main_pests} icon="fa-bug" />
+                    <InfoRow label={appLang === 'vi' ? 'Bệnh chính' : 'Main Diseases'} value={farm.main_diseases} icon="fa-virus" />
+                    <InfoRow label={appLang === 'vi' ? 'Áp dụng IPM' : 'IPM Practiced'}
+                        value={farm.ipm_practiced ? (appLang === 'vi' ? 'Có' : 'Yes') : (appLang === 'vi' ? 'Không' : 'No')} icon="fa-shield-alt" />
+                    <InfoRow label={appLang === 'vi' ? 'Thuốc trong danh mục' : 'Pesticide Certified'}
+                        value={farm.pesticide_certified ? (appLang === 'vi' ? 'Có' : 'Yes') : (appLang === 'vi' ? 'Không' : 'No')} icon="fa-check-circle" />
+                </SectionCard>
+            )}
+
+            {/* ── LAYER 7: Production & Yield ── */}
+            {farm && (
+                <SectionCard
+                    title={appLang === 'vi' ? 'Lớp 7: Sản xuất & Năng suất' : 'Layer 7: Production & Yield'}
+                    icon="fa-box"
+                >
+                    <InfoRow label={appLang === 'vi' ? 'Phương pháp thu hoạch' : 'Harvest Method'} value={farm.harvest_method} icon="fa-hand-holding" />
+                    <InfoRow label={appLang === 'vi' ? 'Phương pháp chế biến' : 'Processing Method'} value={farm.processing_method} icon="fa-industry" />
+                </SectionCard>
+            )}
+
+            {/* ── LAYER 8: Compliance & Traceability ── */}
+            {farm && (
+                <SectionCard
+                    title={appLang === 'vi' ? 'Lớp 8: Tuân thủ & Truy xuất' : 'Layer 8: Compliance & Traceability'}
+                    icon="fa-clipboard-list"
+                >
+                    <InfoRow label={appLang === 'vi' ? 'Trạng thái EUDR' : 'EUDR Status'} value={farm.eudr_status} icon="fa-shield-alt" />
+                    <InfoRow label={appLang === 'vi' ? 'Rủi ro phá rừng' : 'Deforestation Risk'} value={farm.deforestation_risk} icon="fa-tree" />
+                    <InfoRow label={appLang === 'vi' ? 'Mã truy xuất' : 'Traceability Code'} value={farm.traceability_code} icon="fa-qrcode" />
+                    <InfoRow label={appLang === 'vi' ? 'Bản đồ đã xác minh' : 'Farm Map Verified'}
+                        value={farm.farm_map_verified ? (appLang === 'vi' ? 'Có' : 'Yes') : (appLang === 'vi' ? 'Chưa' : 'No')} icon="fa-map-marked-alt" />
+                </SectionCard>
+            )}
+
+            {!farm && (
                 <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
                     <i className="fas fa-map" style={{ fontSize: '40px', marginBottom: '15px' }}></i>
                     <p>{appLang === 'vi' ? 'Chưa gán trang trại' : 'No farm assigned yet'}</p>
                 </div>
             )}
 
-            {plots.length > 0 && (
-                <SectionCard title={`${appLang === 'vi' ? 'Các mảnh đất của hộ' : 'Land Plots'} (${plots.length})`} icon="fa-th-large">
-                    {plots.map(p => (
-                        <div key={p.id} style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--coffee-dark)' }}>{p.plot_name || (appLang === 'vi' ? 'Mảnh đất' : 'Plot')}</div>
-                            <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-                                <span>{p.area_ha} ha</span>
-                                {p.tree_count && <span>{p.tree_count} {appLang === 'vi' ? 'gốc' : 'trees'}</span>}
-                                {p.yield_current && <span>{appLang === 'vi' ? 'SL' : 'Yield'}: {p.yield_current}</span>}
-                                {p.intercrop && <span>{appLang === 'vi' ? 'Xen canh' : 'Intercrop'}: {p.intercrop_species}</span>}
-                            </div>
-                        </div>
-                    ))}
+            {/* ── Land Plots (all Layer 2-8 data per plot) ── */}
+            {plots.length > 0 && plots.map(p => (
+                <SectionCard key={p.id}
+                    title={`${appLang === 'vi' ? 'Mảnh đất' : 'Plot'}: ${p.plot_name || (appLang === 'vi' ? 'Mảnh đất' : 'Plot')} (${p.area_ha || 0} ha)`}
+                    icon="fa-th-large"
+                >
+                    {/* Layer 2 */}
+                    <InfoRow label={appLang === 'vi' ? 'Sổ đỏ' : 'LURC'} value={p.lurc_status || p.lurc_status_} icon="fa-certificate" />
+                    <InfoRow label={appLang === 'vi' ? 'Diện tích (ha)' : 'Area (ha)'} value={p.area_ha ? `${p.area_ha} ha` : null} icon="fa-ruler" />
+                    <InfoRow label={appLang === 'vi' ? 'GPS' : 'GPS'} value={p.gps_lat && p.gps_long ? `${p.gps_lat}, ${p.gps_long}` : null} icon="fa-map-pin" />
+                    <InfoRow label={appLang === 'vi' ? 'Sở hữu' : 'Ownership'} value={p.ownership_status} icon="fa-handshake" />
+                    {/* Layer 3 */}
+                    <InfoRow label={appLang === 'vi' ? 'Giống cà phê' : 'Coffee Variety'} value={p.coffee_variety} icon="fa-leaf" />
+                    <InfoRow label={appLang === 'vi' ? 'Mật độ (cây/ha)' : 'Density (trees/ha)'} value={p.planting_density} icon="fa-th" />
+                    <InfoRow label={appLang === 'vi' ? 'Tuổi cây TB' : 'Avg Tree Age'} value={p.tree_age_avg ? `${p.tree_age_avg} ${appLang === 'vi' ? 'năm' : 'yrs'}` : null} icon="fa-hourglass" />
+                    {/* Layer 4 */}
+                    <InfoRow label={appLang === 'vi' ? 'Loại đất' : 'Soil Type'} value={p.soil_type_plot || p.soil_type} icon="fa-mountain" />
+                    <InfoRow label="pH" value={p.soil_ph_plot || p.soil_ph} icon="fa-flask" />
+                    <InfoRow label={appLang === 'vi' ? 'Phân bón' : 'Fertilizer'} value={p.main_fertilizer_types} icon="fa-vial" />
+                    {/* Layer 5 */}
+                    <InfoRow label={appLang === 'vi' ? 'Nguồn nước' : 'Water Source'} value={p.water_source_plot || p.water_source} icon="fa-tint" />
+                    <InfoRow label={appLang === 'vi' ? 'Tưới' : 'Irrigation'} value={p.irrigation_method || p.irrigation_system} icon="fa-shower" />
+                    {/* Layer 6 */}
+                    <InfoRow label={appLang === 'vi' ? 'Sâu hại' : 'Pests'} value={p.main_pests} icon="fa-bug" />
+                    <InfoRow label={appLang === 'vi' ? 'IPM' : 'IPM'} value={p.ipm_practiced ? (appLang === 'vi' ? 'Có' : 'Yes') : null} icon="fa-shield" />
+                    {/* Layer 7 */}
+                    <InfoRow label={appLang === 'vi' ? 'Thu hoạch' : 'Harvest'} value={p.harvest_method} icon="fa-hand-holding" />
+                    <InfoRow label={appLang === 'vi' ? 'Chế biến' : 'Processing'} value={p.processing_method} icon="fa-industry" />
+                    {/* Layer 8 */}
+                    <InfoRow label={appLang === 'vi' ? 'EUDR' : 'EUDR'} value={p.eudr_status} icon="fa-shield-alt" />
+                    <InfoRow label={appLang === 'vi' ? 'Rủi ro phá rừng' : 'Deforestation'} value={p.deforestation_risk} icon="fa-tree" />
+                    <InfoRow label={appLang === 'vi' ? 'Mã truy xuất' : 'Trace Code'} value={p.traceability_code} icon="fa-qrcode" />
+                    {/* Summary */}
+                    <InfoRow label={appLang === 'vi' ? 'Số cây' : 'Tree Count'} value={p.tree_count} icon="fa-tree" />
+                    <InfoRow label={appLang === 'vi' ? 'Năng suất hiện tại' : 'Current Yield'} value={p.yield_current} icon="fa-chart-bar" />
+                    <InfoRow label={appLang === 'vi' ? 'Cây xen canh' : 'Intercrop'} value={p.intercrop_species} icon="fa-seedling" />
                 </SectionCard>
-            )}
+            ))}
 
-            {/* Farm Edit Modal */}
+            {/* ── Farm Edit Modal ── */}
             <ModalOverlay
                 show={showFarmForm}
                 title={appLang === 'vi' ? 'Cập nhật thông tin trang trại' : 'Update Farm Info'}
                 onClose={() => setShowFarmForm(false)}
                 onSave={handleSaveFarm}
             >
+                {/* LAYER 2 */}
+                <div style={{ paddingBottom: '12px', borderBottom: '2px solid #e2e8f0', marginBottom: '16px' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', margin: '0 0 8px 0' }}>
+                        <i className="fas fa-file-signature" style={{ marginRight: '6px' }}></i>
+                        {appLang === 'vi' ? 'Lớp 2: Đất đai & Pháp lý' : 'Layer 2: Land & Legal'}
+                    </h4>
+                </div>
                 <FormField label={appLang === 'vi' ? 'Tên trang trại' : 'Farm Name'}>
                     <input value={farmForm.farm_name || ''} onChange={e => setFarmForm({ ...farmForm, farm_name: e.target.value })} style={inputStyle} />
                 </FormField>
@@ -832,23 +1071,103 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                     <FormField label={appLang === 'vi' ? 'Tổng DT (ha)' : 'Total Area (ha)'}>
                         <input type="number" step="0.01" value={farmForm.total_area || ''} onChange={e => setFarmForm({ ...farmForm, total_area: e.target.value })} style={inputStyle} />
                     </FormField>
+                    <FormField label={appLang === 'vi' ? 'Sổ đỏ / GCN' : 'LURC Status'}>
+                        <select value={farmForm.lurc_status || ''} onChange={e => setFarmForm({ ...farmForm, lurc_status: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Có sổ đỏ">{appLang === 'vi' ? 'Có sổ đỏ' : 'Has LURC'}</option>
+                            <option value="Đang làm sổ">{appLang === 'vi' ? 'Đang làm sổ' : 'Processing'}</option>
+                            <option value="Chưa có sổ">{appLang === 'vi' ? 'Chưa có sổ' : 'No LURC'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Số sổ đỏ' : 'LURC Number'}>
+                        <input value={farmForm.lurc_number || ''} onChange={e => setFarmForm({ ...farmForm, lurc_number: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Ngày cấp sổ' : 'LURC Issue Date'}>
+                        <input type="date" value={farmForm.lurc_issue_date || ''} onChange={e => setFarmForm({ ...farmForm, lurc_issue_date: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'DT theo sổ (ha)' : 'LURC Area (ha)'}>
+                        <input type="number" step="0.01" value={farmForm.lurc_area_ha || ''} onChange={e => setFarmForm({ ...farmForm, lurc_area_ha: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Sở hữu' : 'Ownership'}>
+                        <select value={farmForm.ownership_status || ''} onChange={e => setFarmForm({ ...farmForm, ownership_status: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Sở hữu riêng">{appLang === 'vi' ? 'Sở hữu riêng' : 'Private'}</option>
+                            <option value="Thuê mướn">{appLang === 'vi' ? 'Thuê mướn' : 'Rented'}</option>
+                            <option value="Mượn">{appLang === 'vi' ? 'Mượn' : 'Borrowed'}</option>
+                        </select>
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label="GPS Lat">
+                        <input type="number" step="0.0001" value={farmForm.gps_lat || ''} onChange={e => setFarmForm({ ...farmForm, gps_lat: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label="GPS Long">
+                        <input type="number" step="0.0001" value={farmForm.gps_long || ''} onChange={e => setFarmForm({ ...farmForm, gps_long: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <FormField label={appLang === 'vi' ? 'Xác minh vệ tinh' : 'Satellite Verified'}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={farmForm.satellite_verified || false} onChange={e => setFarmForm({ ...farmForm, satellite_verified: e.target.checked })} />
+                        <span style={{ fontSize: '13px' }}>{appLang === 'vi' ? 'Đã xác minh qua ảnh vệ tinh' : 'Verified via satellite imagery'}</span>
+                    </label>
+                </FormField>
+
+                {/* LAYER 3 */}
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', margin: '0 0 12px 0' }}>
+                        <i className="fas fa-sitemap" style={{ marginRight: '6px' }}></i>
+                        {appLang === 'vi' ? 'Lớp 3: Cơ cấu trang trại' : 'Layer 3: Farm Structure'}
+                    </h4>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                     <FormField label={appLang === 'vi' ? 'DT cà phê (ha)' : 'Coffee Area (ha)'}>
                         <input type="number" step="0.01" value={farmForm.coffee_area || ''} onChange={e => setFarmForm({ ...farmForm, coffee_area: e.target.value })} style={inputStyle} />
                     </FormField>
                     <FormField label={appLang === 'vi' ? 'DT xen canh (ha)' : 'Intercrop Area (ha)'}>
                         <input type="number" step="0.01" value={farmForm.intercrop_area || ''} onChange={e => setFarmForm({ ...farmForm, intercrop_area: e.target.value })} style={inputStyle} />
                     </FormField>
+                    <FormField label={appLang === 'vi' ? 'Giống cà phê' : 'Coffee Variety'}>
+                        <input value={farmForm.coffee_variety || ''} onChange={e => setFarmForm({ ...farmForm, coffee_variety: e.target.value })} style={inputStyle} placeholder="Robusta, Arabica..." />
+                    </FormField>
                 </div>
-                <FormField label={appLang === 'vi' ? 'Chi tiết xen canh' : 'Intercrop Details'}>
-                    <input value={farmForm.intercrop_details || ''} onChange={e => setFarmForm({ ...farmForm, intercrop_details: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Bơ, sầu riêng, tiêu...' : 'Avocado, durian, pepper...'} />
-                </FormField>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                    <FormField label={appLang === 'vi' ? 'Loại đất' : 'Soil Type'}>
-                        <input value={farmForm.soil_type || ''} onChange={e => setFarmForm({ ...farmForm, soil_type: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Bazan, phù sa...' : 'Basalt, alluvial...'} />
+                    <FormField label={appLang === 'vi' ? 'Mật độ (cây/ha)' : 'Density (trees/ha)'}>
+                        <input type="number" value={farmForm.planting_density || ''} onChange={e => setFarmForm({ ...farmForm, planting_density: e.target.value })} style={inputStyle} />
                     </FormField>
-                    <FormField label="pH">
-                        <input type="number" step="0.1" value={farmForm.soil_ph || ''} onChange={e => setFarmForm({ ...farmForm, soil_ph: e.target.value })} style={inputStyle} />
+                    <FormField label={appLang === 'vi' ? 'Khoảng cách hàng (m)' : 'Row Spacing (m)'}>
+                        <input type="number" step="0.1" value={farmForm.row_spacing_m || ''} onChange={e => setFarmForm({ ...farmForm, row_spacing_m: e.target.value })} style={inputStyle} />
                     </FormField>
+                    <FormField label={appLang === 'vi' ? 'Khoảng cách cây (m)' : 'Tree Spacing (m)'}>
+                        <input type="number" step="0.1" value={farmForm.tree_spacing_m || ''} onChange={e => setFarmForm({ ...farmForm, tree_spacing_m: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Tuổi cây TB' : 'Avg Tree Age (yr)'}>
+                        <input type="number" value={farmForm.tree_age_avg || ''} onChange={e => setFarmForm({ ...farmForm, tree_age_avg: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Số cây bóng mát' : 'Shade Trees'}>
+                        <input type="number" value={farmForm.shade_trees || ''} onChange={e => setFarmForm({ ...farmForm, shade_trees: e.target.value })} style={inputStyle} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Cỏ phủ' : 'Grass Cover'}>
+                        <select value={farmForm.grass_cover || ''} onChange={e => setFarmForm({ ...farmForm, grass_cover: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Low">{appLang === 'vi' ? 'Thấp' : 'Low'}</option>
+                            <option value="Medium">{appLang === 'vi' ? 'Trung bình' : 'Medium'}</option>
+                            <option value="High">{appLang === 'vi' ? 'Cao' : 'High'}</option>
+                        </select>
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Chi tiết xen canh' : 'Intercrop Details'}>
+                        <input value={farmForm.intercrop_details || ''} onChange={e => setFarmForm({ ...farmForm, intercrop_details: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Bơ, sầu riêng, tiêu...' : 'Avocado, durian, pepper...'} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Độ cao (m)' : 'Elevation (m)'}>
+                        <input type="number" value={farmForm.elevation || ''} onChange={e => setFarmForm({ ...farmForm, elevation: e.target.value })} style={inputStyle} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <FormField label={appLang === 'vi' ? 'Độ dốc' : 'Slope'}>
                         <select value={farmForm.slope || ''} onChange={e => setFarmForm({ ...farmForm, slope: e.target.value })} style={selectStyle}>
                             <option value="">--</option>
@@ -859,41 +1178,182 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                         </select>
                     </FormField>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <FormField label={appLang === 'vi' ? 'Nguồn nước' : 'Water Source'}>
-                        <input value={farmForm.water_source || ''} onChange={e => setFarmForm({ ...farmForm, water_source: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Giếng, suối, hồ...' : 'Well, stream, pond...'} />
-                    </FormField>
-                    <FormField label={appLang === 'vi' ? 'Hệ thống tưới' : 'Irrigation'}>
-                        <input value={farmForm.irrigation_system || ''} onChange={e => setFarmForm({ ...farmForm, irrigation_system: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Nhỏ giọt, phun mưa...' : 'Drip, sprinkler...'} />
-                    </FormField>
+
+                {/* LAYER 4 */}
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', margin: '0 0 12px 0' }}>
+                        <i className="fas fa-flask" style={{ marginRight: '6px' }}></i>
+                        {appLang === 'vi' ? 'Lớp 4: Đất & Phì nhiêu' : 'Layer 4: Soil & Fertility'}
+                    </h4>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                    <FormField label={appLang === 'vi' ? 'Độ cao (m)' : 'Elevation (m)'}>
-                        <input type="number" value={farmForm.elevation || ''} onChange={e => setFarmForm({ ...farmForm, elevation: e.target.value })} style={inputStyle} />
+                    <FormField label={appLang === 'vi' ? 'Loại đất' : 'Soil Type'}>
+                        <select value={farmForm.soil_type_plot || ''} onChange={e => setFarmForm({ ...farmForm, soil_type_plot: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Đất đỏ bazan">{appLang === 'vi' ? 'Đất đỏ bazan' : 'Bazalt red soil'}</option>
+                            <option value="Đất xám">{appLang === 'vi' ? 'Đất xám' : 'Grey soil'}</option>
+                            <option value="Đất thịt">{appLang === 'vi' ? 'Đất thịt' : 'Loam'}</option>
+                            <option value="Đất cát">{appLang === 'vi' ? 'Đất cát' : 'Sandy'}</option>
+                            <option value="Khác">{appLang === 'vi' ? 'Khác' : 'Other'}</option>
+                        </select>
                     </FormField>
-                    <FormField label="GPS Lat">
-                        <input type="number" step="0.0001" value={farmForm.gps_lat || ''} onChange={e => setFarmForm({ ...farmForm, gps_lat: e.target.value })} style={inputStyle} />
+                    <FormField label="pH">
+                        <input type="number" step="0.1" min="0" max="14" value={farmForm.soil_ph_plot || ''} onChange={e => setFarmForm({ ...farmForm, soil_ph_plot: e.target.value })} style={inputStyle} placeholder="5.5 - 6.5" />
                     </FormField>
-                    <FormField label="GPS Long">
-                        <input type="number" step="0.0001" value={farmForm.gps_long || ''} onChange={e => setFarmForm({ ...farmForm, gps_long: e.target.value })} style={inputStyle} />
+                    <FormField label={appLang === 'vi' ? 'Tỷ lệ hữu cơ (%)' : 'Organic (%)'}>
+                        <input type="number" min="0" max="100" value={farmForm.organic_input_pct || ''} onChange={e => setFarmForm({ ...farmForm, organic_input_pct: e.target.value })} style={inputStyle} />
                     </FormField>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <FormField label={appLang === 'vi' ? 'Cỏ phủ' : 'Grass Cover'}>
-                        <select value={farmForm.grass_cover || ''} onChange={e => setFarmForm({ ...farmForm, grass_cover: e.target.value })} style={selectStyle}>
+                    <FormField label={appLang === 'vi' ? 'Phân bón chính' : 'Main Fertilizers'}>
+                        <input value={farmForm.main_fertilizer_types || ''} onChange={e => setFarmForm({ ...farmForm, main_fertilizer_types: e.target.value })} style={inputStyle} placeholder="NPK, Urea, DAP..." />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Tần suất bón' : 'Fertilization Freq'}>
+                        <select value={farmForm.fertilization_frequency || ''} onChange={e => setFarmForm({ ...farmForm, fertilization_frequency: e.target.value })} style={selectStyle}>
                             <option value="">--</option>
-                            <option value="Low">{appLang === 'vi' ? 'Thấp' : 'Low'}</option>
-                            <option value="Medium">{appLang === 'vi' ? 'Trung bình' : 'Medium'}</option>
-                            <option value="High">{appLang === 'vi' ? 'Cao' : 'High'}</option>
+                            <option value="1 lần/năm">{appLang === 'vi' ? '1 lần/năm' : 'Once/yr'}</option>
+                            <option value="2 lần/năm">{appLang === 'vi' ? '2 lần/năm' : '2x/yr'}</option>
+                            <option value="3 lần/năm">{appLang === 'vi' ? '3 lần/năm' : '3x/yr'}</option>
+                            <option value="Hơn 3 lần/năm">{appLang === 'vi' ? 'Hơn 3 lần/năm' : '4+/yr'}</option>
                         </select>
                     </FormField>
-                    <FormField label={appLang === 'vi' ? 'Số cây bóng mát' : 'Shade Trees'}>
-                        <input type="number" value={farmForm.shade_trees || ''} onChange={e => setFarmForm({ ...farmForm, shade_trees: e.target.value })} style={inputStyle} />
+                </div>
+
+                {/* LAYER 5 */}
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', margin: '0 0 12px 0' }}>
+                        <i className="fas fa-tint" style={{ marginRight: '6px' }}></i>
+                        {appLang === 'vi' ? 'Lớp 5: Nước & Tưới tiêu' : 'Layer 5: Water & Irrigation'}
+                    </h4>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Nguồn nước' : 'Water Source'}>
+                        <select value={farmForm.water_source_plot || ''} onChange={e => setFarmForm({ ...farmForm, water_source_plot: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Giếng đào">{appLang === 'vi' ? 'Giếng đào' : 'Dug well'}</option>
+                            <option value="Giếng khoan">{appLang === 'vi' ? 'Giếng khoan' : 'Borehole'}</option>
+                            <option value="Hồ/Suối">{appLang === 'vi' ? 'Hồ/Suối' : 'Pond/Stream'}</option>
+                            <option value="Nước mưa">{appLang === 'vi' ? 'Nước mưa' : 'Rainwater'}</option>
+                            <option value="Khác">{appLang === 'vi' ? 'Khác' : 'Other'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Phương pháp tưới' : 'Irrigation Method'}>
+                        <select value={farmForm.irrigation_method || ''} onChange={e => setFarmForm({ ...farmForm, irrigation_method: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Phun mưa">{appLang === 'vi' ? 'Phun mưa' : 'Sprinkler'}</option>
+                            <option value="Nhỏ giọt">{appLang === 'vi' ? 'Nhỏ giọt' : 'Drip'}</option>
+                            <option value="Tưới gốc">{appLang === 'vi' ? 'Tưới gốc' : 'Manual'}</option>
+                            <option value="Không tưới">{appLang === 'vi' ? 'Không tưới' : 'No irrigation'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Tần suất tưới' : 'Irrigation Freq'}>
+                        <select value={farmForm.irrigation_frequency || ''} onChange={e => setFarmForm({ ...farmForm, irrigation_frequency: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Hàng tuần">{appLang === 'vi' ? 'Hàng tuần' : 'Weekly'}</option>
+                            <option value="2 tuần/lần">{appLang === 'vi' ? '2 tuần/lần' : '2 weeks'}</option>
+                            <option value="Hàng tháng">{appLang === 'vi' ? 'Hàng tháng' : 'Monthly'}</option>
+                            <option value="Theo nhu cầu">{appLang === 'vi' ? 'Theo nhu cầu' : 'As needed'}</option>
+                        </select>
                     </FormField>
                 </div>
-                <FormField label={appLang === 'vi' ? 'Ghi chú' : 'Notes'}>
-                    <textarea value={farmForm.notes || ''} onChange={e => setFarmForm({ ...farmForm, notes: e.target.value })}
-                        style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }} />
+                <FormField label={appLang === 'vi' ? 'Có bể chứa nước' : 'Water Storage'}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={farmForm.water_storage || false} onChange={e => setFarmForm({ ...farmForm, water_storage: e.target.checked })} />
+                        <span style={{ fontSize: '13px' }}>{appLang === 'vi' ? 'Có bể/hồ chứa nước' : 'Has water storage tank/pond'}</span>
+                    </label>
+                </FormField>
+
+                {/* LAYER 6 */}
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', margin: '0 0 12px 0' }}>
+                        <i className="fas fa-bug" style={{ marginRight: '6px' }}></i>
+                        {appLang === 'vi' ? 'Lớp 6: Bảo vệ cây trồng' : 'Layer 6: Crop Protection'}
+                    </h4>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Sâu hại chính' : 'Main Pests'}>
+                        <input value={farmForm.main_pests || ''} onChange={e => setFarmForm({ ...farmForm, main_pests: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Loại sâu hại...' : 'Pest types...'} />
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Bệnh chính' : 'Main Diseases'}>
+                        <input value={farmForm.main_diseases || ''} onChange={e => setFarmForm({ ...farmForm, main_diseases: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Loại bệnh...' : 'Disease types...'} />
+                    </FormField>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Áp dụng IPM' : 'IPM Practiced'}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', cursor: 'pointer' }}>
+                            <input type="checkbox" checked={farmForm.ipm_practiced || false} onChange={e => setFarmForm({ ...farmForm, ipm_practiced: e.target.checked })} />
+                            <span style={{ fontSize: '13px' }}>{appLang === 'vi' ? 'Có áp dụng IPM' : 'Yes, IPM applied'}</span>
+                        </label>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Thuốc được phép' : 'Pesticide Certified'}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', cursor: 'pointer' }}>
+                            <input type="checkbox" checked={farmForm.pesticide_certified || false} onChange={e => setFarmForm({ ...farmForm, pesticide_certified: e.target.checked })} />
+                            <span style={{ fontSize: '13px' }}>{appLang === 'vi' ? 'Chỉ dùng thuốc trong danh mục' : 'Only approved pesticides'}</span>
+                        </label>
+                    </FormField>
+                </div>
+
+                {/* LAYER 7 */}
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', margin: '0 0 12px 0' }}>
+                        <i className="fas fa-box" style={{ marginRight: '6px' }}></i>
+                        {appLang === 'vi' ? 'Lớp 7: Sản xuất & Năng suất' : 'Layer 7: Production & Yield'}
+                    </h4>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Thu hoạch' : 'Harvest Method'}>
+                        <select value={farmForm.harvest_method || ''} onChange={e => setFarmForm({ ...farmForm, harvest_method: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Thủ công">{appLang === 'vi' ? 'Thủ công' : 'Manual'}</option>
+                            <option value="Cơ giới">{appLang === 'vi' ? 'Cơ giới' : 'Mechanical'}</option>
+                            <option value="Kết hợp">{appLang === 'vi' ? 'Kết hợp' : 'Combined'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Chế biến' : 'Processing Method'}>
+                        <select value={farmForm.processing_method || ''} onChange={e => setFarmForm({ ...farmForm, processing_method: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Chế biến ướt">{appLang === 'vi' ? 'Chế biến ướt' : 'Wet processing'}</option>
+                            <option value="Chế biến khô">{appLang === 'vi' ? 'Chế biến khô' : 'Dry processing'}</option>
+                            <option value="Honey">{appLang === 'vi' ? 'Honey' : 'Honey'}</option>
+                            <option value="Bán sản phẩm tươi">{appLang === 'vi' ? 'Bán tươi' : 'Sell fresh'}</option>
+                        </select>
+                    </FormField>
+                </div>
+
+                {/* LAYER 8 */}
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', margin: '0 0 12px 0' }}>
+                        <i className="fas fa-clipboard-list" style={{ marginRight: '6px' }}></i>
+                        {appLang === 'vi' ? 'Lớp 8: Tuân thủ & Truy xuất' : 'Layer 8: Compliance & Traceability'}
+                    </h4>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <FormField label={appLang === 'vi' ? 'Trạng thái EUDR' : 'EUDR Status'}>
+                        <select value={farmForm.eudr_status || ''} onChange={e => setFarmForm({ ...farmForm, eudr_status: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Tuân thủ">{appLang === 'vi' ? 'Tuân thủ' : 'Compliant'}</option>
+                            <option value="Không tuân thủ">{appLang === 'vi' ? 'Không tuân thủ' : 'Non-compliant'}</option>
+                            <option value="Đang xem xét">{appLang === 'vi' ? 'Đang xem xét' : 'Under review'}</option>
+                            <option value="Chưa đánh giá">{appLang === 'vi' ? 'Chưa đánh giá' : 'Not assessed'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Rủi ro phá rừng' : 'Deforestation Risk'}>
+                        <select value={farmForm.deforestation_risk || ''} onChange={e => setFarmForm({ ...farmForm, deforestation_risk: e.target.value })} style={selectStyle}>
+                            <option value="">--</option>
+                            <option value="Thấp">{appLang === 'vi' ? 'Thấp' : 'Low'}</option>
+                            <option value="Trung bình">{appLang === 'vi' ? 'Trung bình' : 'Medium'}</option>
+                            <option value="Cao">{appLang === 'vi' ? 'Cao' : 'High'}</option>
+                        </select>
+                    </FormField>
+                    <FormField label={appLang === 'vi' ? 'Mã truy xuất' : 'Traceability Code'}>
+                        <input value={farmForm.traceability_code || ''} onChange={e => setFarmForm({ ...farmForm, traceability_code: e.target.value })} style={inputStyle} placeholder="TCN-XXXX" />
+                    </FormField>
+                </div>
+                <FormField label={appLang === 'vi' ? 'Bản đồ đã xác minh' : 'Farm Map Verified'}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={farmForm.farm_map_verified || false} onChange={e => setFarmForm({ ...farmForm, farm_map_verified: e.target.checked })} />
+                        <span style={{ fontSize: '13px' }}>{appLang === 'vi' ? 'Bản đồ trang trại đã được xác minh' : 'Farm map has been verified'}</span>
+                    </label>
                 </FormField>
             </ModalOverlay>
         </>
@@ -1126,6 +1586,43 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                         <input value={inspectForm.pest_details} onChange={e => setInspectForm({ ...inspectForm, pest_details: e.target.value })} style={inputStyle} placeholder={appLang === 'vi' ? 'Loại sâu, mức độ...' : 'Pest type, severity...'} />
                     </FormField>
                 )}
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', marginBottom: '12px' }}>
+                        <i className='fas fa-flask' style={{ marginRight: '6px' }}></i>{appLang === 'vi' ? 'Lớp 4: Kiểm tra đất & nước' : 'Layer 4: Soil & Water Check'}
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <FormField label={appLang === 'vi' ? 'pH đất mẫu' : 'Soil pH Sample'}>
+                            <input type='number' step='0.1' value={inspectForm.soil_ph_sample} onChange={e => setInspectForm({ ...inspectForm, soil_ph_sample: e.target.value })} style={inputStyle} placeholder='5.5 - 6.5' />
+                        </FormField>
+                        <FormField label={appLang === 'vi' ? 'Tình trạng tưới' : 'Irrigation Adequacy'}>
+                            <select value={inspectForm.irrigation_adequacy} onChange={e => setInspectForm({ ...inspectForm, irrigation_adequacy: e.target.value })} style={selectStyle}>
+                                <option value=''>--</option>
+                                <option value='Đủ nước'>{appLang === 'vi' ? 'Đủ nước' : 'Adequate'}</option>
+                                <option value='Thiếu nước'>{appLang === 'vi' ? 'Thiếu nước' : 'Inadequate'}</option>
+                                <option value='Dư nước'>{appLang === 'vi' ? 'Dư nước' : 'Excess'}</option>
+                            </select>
+                        </FormField>
+                    </div>
+                </div>
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', marginBottom: '12px' }}>
+                        <i className='fas fa-shield-alt' style={{ marginRight: '6px' }}></i>{appLang === 'vi' ? 'Lớp 8: Tuân thủ EUDR' : 'Layer 8: EUDR Compliance'}
+                    </h4>
+                    <FormField label={appLang === 'vi' ? 'Kiểm tra EUDR đạt' : 'EUDR Check Passed'}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 0', cursor: 'pointer' }}>
+                            <input type='checkbox' checked={inspectForm.eudr_check_passed || false} onChange={e => setInspectForm({ ...inspectForm, eudr_check_passed: e.target.checked })} />
+                            <span style={{ fontSize: '13px' }}>{appLang === 'vi' ? 'Đạt yêu cầu' : 'Passed'}</span>
+                        </label>
+                    </FormField>
+                </div>
+                <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '2px dashed #f1f5f9' }}>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--coffee-dark)', marginBottom: '12px' }}>
+                        <i className='fas fa-female' style={{ marginRight: '6px' }}></i>{appLang === 'vi' ? 'Lớp 9: Lao động nữ' : 'Layer 9: Women Labour'}
+                    </h4>
+                    <FormField label={appLang === 'vi' ? 'Tỷ lệ lao động nữ (%)' : 'Female Participation (%)'}>
+                        <input type='number' min='0' max='100' value={inspectForm.female_participation_pct} onChange={e => setInspectForm({ ...inspectForm, female_participation_pct: e.target.value })} style={inputStyle} placeholder='0 - 100' />
+                    </FormField>
+                </div>
                 <FormField label={appLang === 'vi' ? 'Khuyến nghị' : 'Recommendations'}>
                     <textarea value={inspectForm.recommendations} onChange={e => setInspectForm({ ...inspectForm, recommendations: e.target.value })}
                         style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }} placeholder={appLang === 'vi' ? 'Đề xuất hành động...' : 'Suggested actions...'} />
@@ -1317,22 +1814,24 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
         diary: renderDiary,
         inspect: renderInspections,
         consumable: renderConsumables,
-        invest: renderInvest
+        invest: renderInvest,
+        economics: () => <ModelEconomics model={model} appLang={appLang} canEdit={canEdit} />
     };
 
     return (
         <div className="view-container animate-in">
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+            <div className="mdv-header" style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
                 <button onClick={onBack} className="btn-back">
                     <i className="fas fa-arrow-left"></i> {t.back}
                 </button>
-                <div style={{ flex: 1 }}>
-                    <h2 style={{ margin: 0, fontSize: '18px', color: 'var(--coffee-dark)' }}>
+                <div className="mdv-header-title-container" style={{ flex: 1 }}>
+                    <h2 className="mdv-title" style={{ margin: 0, fontSize: '18px', color: 'var(--coffee-dark)' }}>
                         <span style={{ color: 'var(--coffee-primary)', fontWeight: 800 }}>{model.model_code}</span> - {model.name || model.model_name}
                     </h2>
                 </div>
                 <button
+                    className="mdv-pdf-btn"
                     onClick={() => setShowReport(true)}
                     style={{
                         padding: '8px 14px', borderRadius: '12px', border: 'none', cursor: 'pointer',
@@ -1356,7 +1855,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
             </div>
 
             {/* Tab Bar */}
-            <div style={{
+            <div className="mdv-tab-bar" style={{
                 display: 'flex', gap: '4px', overflowX: 'auto', marginBottom: '20px',
                 padding: '4px', background: '#f1f5f9', borderRadius: '14px',
                 WebkitOverflowScrolling: 'touch'
@@ -1364,6 +1863,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                 {TABS.map(tab => (
                     <button
                         key={tab.id}
+                        className="mdv-tab-btn"
                         onClick={() => setActiveTab(tab.id)}
                         style={{
                             flex: 'none', padding: '8px 14px', border: 'none', borderRadius: '10px',
@@ -1376,7 +1876,7 @@ const ModelDetailView = ({ model, onBack, appLang = 'vi', currentUser, canEdit =
                         }}
                     >
                         <i className={`fas ${tab.icon}`} style={{ marginRight: '5px' }}></i>
-                        {tab[appLang] || tab.vi}
+                        <span className="mdv-tab-label">{tab[appLang] || tab.vi}</span>
                     </button>
                 ))}
             </div>

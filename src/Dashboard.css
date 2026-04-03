@@ -1386,6 +1386,369 @@ h3 {
     border-color: var(--gray-200);
 }
 
+/* ============= MODEL DETAIL VIEW MOBILE ============= */
+
+/* Header */
+@media (max-width: 768px) {
+    .mdv-header {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .mdv-header h2 {
+        font-size: 14px !important;
+        line-height: 1.3 !important;
+        word-break: break-word;
+    }
+}
+
+/* Tab bar */
+.mdv-tab-bar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.mdv-tab-bar::-webkit-scrollbar {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mdv-tab-bar {
+        margin-bottom: 12px !important;
+        padding: 3px !important;
+        gap: 2px !important;
+        border-radius: 10px !important;
+    }
+
+    .mdv-tab-btn {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+        border-radius: 8px !important;
+    }
+
+    .mdv-tab-btn i {
+        margin-right: 3px !important;
+        font-size: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .mdv-tab-btn {
+        padding: 7px 8px !important;
+        font-size: 12px !important;
+    }
+
+    .mdv-tab-label {
+        display: none;
+    }
+
+    .mdv-tab-btn i {
+        margin-right: 0 !important;
+        font-size: 14px !important;
+    }
+}
+
+/* Overview stats */
+@media (max-width: 480px) {
+    .mdv-overview-stats {
+        gap: 8px !important;
+    }
+
+    .mdv-overview-stats > div {
+        padding: 10px 6px !important;
+        border-radius: 12px !important;
+    }
+}
+
+/* ============= ENHANCED MOBILE/TABLET RESPONSIVE ============= */
+
+/* --- ModelDetailView: Header bar mobile --- */
+@media (max-width: 768px) {
+    .view-container > div:first-child {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .view-container > div:first-child h2 {
+        font-size: 14px !important;
+        line-height: 1.3 !important;
+    }
+
+    .view-container > div:first-child button {
+        font-size: 10px !important;
+        padding: 6px 10px !important;
+    }
+}
+
+/* --- ModelDetailView: Tab bar horizontal scroll on mobile --- */
+@media (max-width: 768px) {
+    .view-container > div[style*="overflowX"] {
+        margin-bottom: 12px !important;
+        padding: 3px !important;
+        gap: 2px !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .view-container > div[style*="overflowX"]::-webkit-scrollbar {
+        display: none;
+    }
+
+    .view-container > div[style*="overflowX"] button {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+        border-radius: 8px !important;
+    }
+
+    .view-container > div[style*="overflowX"] button i {
+        margin-right: 3px !important;
+        font-size: 11px !important;
+    }
+}
+
+/* --- ALL inline grids → single column on mobile --- */
+@media (max-width: 768px) {
+    div[style*="gridTemplateColumns: 'repeat(3"],
+    div[style*="gridTemplateColumns: '1fr 1fr 1fr"],
+    div[style*="grid-template-columns: repeat(3"],
+    div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    div[style*="gridTemplateColumns: 'repeat(4"],
+    div[style*="grid-template-columns: repeat(4"],
+    div[style*="grid-template-columns: repeat(5"] {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+    div[style*="gridTemplateColumns: '1fr 1fr"],
+    div[style*="grid-template-columns: 1fr 1fr"],
+    div[style*="gridTemplateColumns: 'repeat(2"],
+    div[style*="grid-template-columns: repeat(2"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    div[style*="gridTemplateColumns: 'repeat(3"],
+    div[style*="grid-template-columns: repeat(3"],
+    div[style*="gridTemplateColumns: '1fr 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* --- InfoRow and SectionCard on mobile --- */
+@media (max-width: 768px) {
+    .view-container div[style*="borderRadius: '16px'"],
+    .view-container div[style*="border-radius: 16px"] {
+        padding: 14px !important;
+        margin-bottom: 10px !important;
+        border-radius: 12px !important;
+    }
+
+    .view-container div[style*="padding: '8px 0'"] span {
+        font-size: 12px !important;
+    }
+}
+
+/* --- Overview stat cards on mobile --- */
+@media (max-width: 480px) {
+    .view-container > div[style*="gridTemplateColumns: 'repeat(3, 1fr)"] {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .view-container > div[style*="gridTemplateColumns: 'repeat(3, 1fr)"] > div {
+        padding: 10px 6px !important;
+        border-radius: 12px !important;
+    }
+
+    .view-container > div[style*="gridTemplateColumns: 'repeat(3, 1fr)"] > div > div:first-of-type {
+        font-size: 22px !important;
+    }
+}
+
+/* --- Tables inside ModelDetailView on mobile --- */
+@media (max-width: 768px) {
+    .view-container table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+
+    .view-container table thead,
+    .view-container table tbody,
+    .view-container table tr {
+        display: table;
+        width: 100%;
+        table-layout: auto;
+    }
+
+    .view-container table th,
+    .view-container table td {
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+    }
+
+    .view-container table th {
+        font-size: 10px !important;
+    }
+}
+
+/* --- Modal overlay on mobile: bottom sheet style --- */
+@media (max-width: 768px) {
+    div[style*="position: 'fixed'"][style*="alignItems: 'flex-end'"] > div,
+    .view-container div[style*="position: 'fixed'"] > div {
+        max-height: 90vh !important;
+        padding: 16px !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+}
+
+/* --- Ensure content doesn't hide behind bottom nav --- */
+@media (max-width: 768px) {
+    .view-scroll-container {
+        padding-bottom: 80px !important;
+    }
+
+    .view-container {
+        padding-bottom: 20px !important;
+    }
+}
+
+/* --- Card actions (buttons) on mobile --- */
+@media (max-width: 768px) {
+    .view-container button[style*="fontSize: '12px'"] {
+        font-size: 11px !important;
+        padding: 5px 10px !important;
+    }
+}
+
+/* --- Form fields on mobile --- */
+@media (max-width: 768px) {
+    .view-container input[style*="padding: '10px 12px'"],
+    .view-container select[style*="padding: '10px 12px'"],
+    .view-container textarea[style*="padding: '10px 12px'"] {
+        padding: 8px 10px !important;
+        font-size: 13px !important;
+    }
+
+    .view-container label[style*="fontSize: '12px'"] {
+        font-size: 11px !important;
+    }
+}
+
+/* --- FarmerManagement / ModelManagement card layout mobile --- */
+@media (max-width: 768px) {
+    .data-table-container {
+        border-radius: 12px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .table-header {
+        padding: 12px 14px !important;
+    }
+
+    .pro-table tbody td,
+    .data-table tbody td {
+        padding: 8px 10px !important;
+        font-size: 11px !important;
+    }
+
+    .pro-table thead th,
+    .data-table thead th {
+        padding: 8px 10px !important;
+        font-size: 10px !important;
+    }
+}
+
+/* --- Tablet: improved layouts --- */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .view-container div[style*="gridTemplateColumns: 'repeat(3, 1fr)"] {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    .menu-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 14px !important;
+    }
+
+    .model-card-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* --- Home page hero adjustments mobile --- */
+@media (max-width: 768px) {
+    .home-hero-section {
+        padding: 2px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .hero-logo {
+        height: 40px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .hero-title {
+        font-size: 16px !important;
+    }
+
+    .home-logo-bar {
+        gap: 12px !important;
+        padding: 6px 10px !important;
+    }
+
+    .home-logo-bar img {
+        height: 22px !important;
+    }
+
+    .project-main-title {
+        font-size: 18px !important;
+        margin-bottom: 6px !important;
+    }
+}
+
+/* --- Landscape phone optimization --- */
+@media (max-height: 500px) and (orientation: landscape) {
+    .main-content {
+        padding: 8px 12px !important;
+    }
+
+    .header-stack {
+        margin-bottom: 6px !important;
+        padding-bottom: 4px !important;
+    }
+
+    .mobile-bottom-nav {
+        height: 50px !important;
+    }
+
+    .main-content {
+        height: calc(100vh - 50px) !important;
+    }
+}
+
+/* --- Safe area for notched phones --- */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .mobile-bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+        height: calc(70px + env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            height: calc(100vh - 70px - env(safe-area-inset-bottom));
+        }
+
+        .view-scroll-container {
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+        }
+    }
+}
+
 /* ============= THEME TRANSITION SMOOTHNESS ============= */
 .dashboard-layout,
 .sidebar,
@@ -1398,3 +1761,37 @@ h3 {
 .btn-add-user {
     transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
+
+/* ============= MODEL DETAIL VIEW RESPONSIVE ============= */
+@media (max-width: 768px) {
+    .mdv-header {
+        flex-wrap: wrap;
+        gap: 10px !important;
+        justify-content: space-between;
+        margin-bottom: 15px !important;
+    }
+    
+    .mdv-header-title-container {
+        flex: 1 1 100% !important;
+        order: 3;
+        text-align: center;
+        margin-top: 2px;
+        margin-bottom: 5px;
+    }
+
+    .mdv-title {
+        font-size: 15px !important;
+        line-height: 1.4 !important;
+    }
+
+    .mdv-tab-bar {
+        gap: 2px !important;
+        padding: 4px !important;
+        justify-content: flex-start;
+    }
+
+    .mdv-tab-btn {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+    }
+}
