@@ -10,6 +10,7 @@ import useSwipeBack from './useSwipeBack';
 import Settings from './Settings';
 import FarmerManagement from './FarmerManagement';
 import SeasonalPlanning from './SeasonalPlanning';
+import ExportExcelDialog from './components/ExportExcelDialog';
 import { applyTheme, getStoredTheme } from './themes';
 
 // Components Moved Outside for React Component Stability (Fixes Input Focus Bug)
@@ -345,6 +346,7 @@ const Dashboard = ({ onLogout }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [showPwModal, setShowPwModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showExportDialog, setShowExportDialog] = useState(false);
     const [appLang, setAppLang] = useState(localStorage.getItem('app_lang') || 'vi');
     const t = translations[appLang];
 
@@ -543,6 +545,9 @@ const Dashboard = ({ onLogout }) => {
                     <a className={`nav-item ${view === 'training' ? 'active' : ''}`} onClick={() => setView('training')}>
                         <i className="fas fa-graduation-cap"></i> <span>{t.training}</span>
                     </a>
+                    <a className={`nav-item`} onClick={() => setShowExportDialog(true)} style={{ color: '#059669' }}>
+                        <i className="fas fa-file-excel"></i> <span>{appLang === 'vi' ? 'Báo cáo Excel' : appLang === 'en' ? 'Excel Reports' : 'Prớp Excel'}</span>
+                    </a>
                     <a className={`nav-item ${view === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}>
                         <i className="fas fa-cog"></i> <span>{t.settings || 'Cài đặt'}</span>
                     </a>
@@ -655,6 +660,7 @@ const Dashboard = ({ onLogout }) => {
 
             {showProfileModal && <UserProfileModal user={currentUser} t={t} appLang={appLang} onClose={() => setShowProfileModal(false)} onPasswordClick={() => { setShowProfileModal(false); setShowPwModal(true); }} />}
             {showPwModal && <PasswordModal t={t} onClose={() => setShowPwModal(false)} onSave={handleChangePassword} isLoading={loading} />}
+            <ExportExcelDialog show={showExportDialog} onClose={() => setShowExportDialog(false)} currentUser={currentUser} />
 
             <nav className="mobile-bottom-nav">
                 <button className={`nav-item-mobile ${view === 'home' || view === 'model_detail' ? 'active' : ''}`} onClick={() => { setView('home'); setSelectedModel(null); }}>

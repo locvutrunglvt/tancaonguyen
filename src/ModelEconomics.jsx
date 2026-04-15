@@ -87,6 +87,7 @@ const SUBTABS = [
     { id: 'coffee', vi: 'Chi phí cà phê', en: 'Coffee Costs', icon: 'fa-mug-hot' },
     { id: 'intercrop', vi: 'Chi phí xen canh', en: 'Intercrop Costs', icon: 'fa-leaf' },
     { id: 'revenue', vi: 'Doanh thu', en: 'Revenue', ede: 'Prăk mŭt', icon: 'fa-coins' },
+    { id: 'profit', vi: 'Lợi nhuận', en: 'Profit', ede: 'Lợi nhun', icon: 'fa-chart-line' },
 ];
 
 const INVEST_TYPES = ['Labour', 'Input'];
@@ -842,6 +843,170 @@ const ModelEconomics = ({ model, appLang = 'vi', canEdit = true }) => {
         );
     };
 
+    // ── TAB: Profit Summary ────────────────────────────────────────────────────
+    const renderProfit = () => {
+        const totalA = totalCost(ccList); // Coffee labor
+        const totalB = totalCost(icList); // Intercrop labor
+        const totalC = totalRev();        // All revenue
+        const totalExpenses = totalA + totalB;
+        const profit = totalC - totalExpenses;
+
+        // Subtotals for coffee vs intercrop
+        const coffeeLabor = ccList.filter(r => r.cost_type === 'Labour').reduce((s, r) => s + (Number(r.total_cost) || 0), 0);
+        const coffeeInputs = totalCost(ccList.filter(r => r.cost_type !== 'Labour'));
+        const coffeeRev = rvList.filter(r => r.revenue_source === 'Coffee').reduce((s, r) => s + (Number(r.total_revenue) || 0), 0);
+        const icLabor = icList.filter(r => r.cost_type === 'Labour').reduce((s, r) => s + (Number(r.total_cost) || 0), 0);
+        const icInputs = totalCost(icList.filter(r => r.cost_type !== 'Labour'));
+        const icRev = rvList.filter(r => r.revenue_source === 'Intercrop').reduce((s, r) => s + (Number(r.total_revenue) || 0), 0);
+
+        const isProfit = profit >= 0;
+
+        const Row = ({ label, amount, bg = 'white', color = '#1e293b', bold = false }) => (
+            <tr style={{ background: bg }}>
+                <td style={{ padding: '9px 14px', fontWeight: bold ? 700 : 500, color, fontSize: '13px' }}>{label}</td>
+                <td style={{ padding: '9px 14px', textAlign: 'right', fontWeight: bold ? 700 : 600, color, fontSize: '14px' }}>{fmt(amount)}</td>
+                <td style={{ padding: '9px 14px', textAlign: 'right', fontSize: '11px', color: '#94a3b8' }}>
+                    {amount > 0 ? ((amount / (totalExpenses || 1)) * 100).toFixed(1) + '%' : '—'}
+                </td>
+            </tr>
+        );
+
+        return (
+            <>
+                {/* Overall Banner */}
+                <div style={{
+                    background: isProfit
+                        ? 'linear-gradient(135deg, #059669, #10b981)'
+                        : 'linear-gradient(135deg, #dc2626, #ef4444)',
+                    borderRadius: '16px', padding: '20px', marginBottom: '16px', color: 'white',
+                    textAlign: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.12)'
+                }}>
+                    <div style={{ fontSize: '12px', opacity: 0.85, marginBottom: '4px' }}>
+                        {L('TỔNG LỢI NHUẬN NÔNG TRẠI', 'TOTAL FARM PROFIT')}
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '0.5px' }}>
+                        {fmt(profit)} <span style={{ fontSize: '16px' }}>VNĐ</span>
+                    </div>
+                    <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '4px' }}>
+                        {isProfit
+                            ? L('▲ Lãi', '▲ Profitable')
+                            : L('▼ Lỗ', '▼ Loss')} — {L('Tổng chi phí', 'Total expenses')}: {fmt(totalExpenses)} | {L('Tổng doanh thu', 'Total revenue')}: {fmt(totalC)}
+                    </div>
+                </div>
+
+                {/* Profit Breakdown Table */}
+                <SectionCard title={L('Bảng cân đối lợi nhuận', 'Profit Breakdown')} icon="fa-balance-scale">
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                        <thead>
+                            <tr style={{ background: '#f8fafc' }}>
+                                <th style={{ padding: '8px 14px', textAlign: 'left', color: '#64748b', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    {L('Hạng mục', 'Item')}
+                                </th>
+                                <th style={{ padding: '8px 14px', textAlign: 'right', color: '#64748b', fontSize: '11px', fontWeight: 700 }}>
+                                    {L('Số tiền (VNĐ)', 'Amount (VND)')}
+                                </th>
+                                <th style={{ padding: '8px 14px', textAlign: 'right', color: '#64748b', fontSize: '11px', fontWeight: 700 }}>
+                                    {L('% Chi phí', '% Cost')}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {/* REVENUE SECTION */}
+                            <tr>
+                                <td colSpan="3" style={{ padding: '8px 14px', fontSize: '11px', fontWeight: 800, color: '#059669', background: '#f0fdf4', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                                    {L('C. DOANH THU', 'C. REVENUE')}
+                                </td>
+                            </tr>
+                            <Row label={L('  ☕ Doanh thu cà phê', '  ☕ Coffee revenue')} amount={coffeeRev} />
+                            <Row label={L('  🌿 Doanh thu cây xen canh', '  🌿 Intercrop revenue')} amount={icRev} bg="#f0fdf4" color="#059669" />
+                            <Row label={L('  TỔNG DOANH THU (C)', '  TOTAL REVENUE (C)')} amount={totalC} bg="#dcfce7" color="#166534" bold />
+
+                            {/* EXPENSES SECTION */}
+                            <tr>
+                                <td colSpan="3" style={{ padding: '8px 14px', fontSize: '11px', fontWeight: 800, color: '#dc2626', letterSpacing: '0.5px', textTransform: 'uppercase', marginTop: '10px' }}>
+                                    {L('A+B. CHI PHÍ HOẠT ĐỘNG', 'A+B. OPERATING EXPENSES')}
+                                </td>
+                            </tr>
+                            <Row label={L('  ☕ Nhân công cà phê', '  ☕ Coffee labor')} amount={coffeeLabor} />
+                            <Row label={L('  ☕ Vật tư cà phê', '  ☕ Coffee inputs')} amount={coffeeInputs} />
+                            <Row label={L('  🌿 Nhân công xen canh', '  🌿 Intercrop labor')} amount={icLabor} />
+                            <Row label={L('  🌿 Vật tư xen canh', '  🌿 Intercrop inputs')} amount={icInputs} />
+                            <Row label={L('  TỔNG CHI PHÍ (A+B)', '  TOTAL EXPENSES (A+B)')} amount={totalExpenses} bg="#fef2f2" color="#991b1b" bold />
+
+                            {/* PROFIT ROW */}
+                            <tr>
+                                <td colSpan="3" style={{ padding: '10px 14px' }}>
+                                    <div style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        background: isProfit ? '#f0fdf4' : '#fef2f2',
+                                        border: `2px solid ${isProfit ? '#059669' : '#dc2626'}`,
+                                        borderRadius: '10px', padding: '12px 16px',
+                                    }}>
+                                        <span style={{ fontSize: '14px', fontWeight: 800, color: isProfit ? '#166534' : '#991b1b' }}>
+                                            {isProfit ? '✓ ' : '✗ '}{L('LỢI NHUẬN (C − A − B)', 'PROFIT (C − A − B)')}
+                                        </span>
+                                        <span style={{ fontSize: '18px', fontWeight: 900, color: isProfit ? '#059669' : '#dc2626' }}>
+                                            {fmt(profit)} VNĐ
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </SectionCard>
+
+                {/* Year-by-Year Cost vs Revenue Chart (simplified bar) */}
+                {bgList.length > 0 && (
+                    <SectionCard title={L('Chi phí vs Doanh thu theo năm', 'Costs vs Revenue by Year')} icon="fa-chart-bar">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {bgList.slice(0, 6).map(r => {
+                                const yrRev = rvList.filter(x => x.crop_year === r.year).reduce((s, x) => s + (Number(x.total_revenue) || 0), 0);
+                                const yrCC = ccList.filter(x => x.crop_year === r.year).reduce((s, x) => s + (Number(x.total_cost) || 0), 0);
+                                const yrIC = icList.filter(x => x.crop_year === r.year).reduce((s, x) => s + (Number(x.total_cost) || 0), 0);
+                                const yrCost = yrCC + yrIC;
+                                const maxV = Math.max(totalC, totalExpenses, 1);
+                                const revW = (yrRev / maxV) * 100;
+                                const costW = (yrCost / maxV) * 100;
+                                const yrProfit = yrRev - yrCost;
+                                return (
+                                    <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 1fr 80px', gap: '8px', alignItems: 'center' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>{r.year}</span>
+                                        <div style={{ background: '#f1f5f9', borderRadius: '6px', height: '20px', overflow: 'hidden' }}>
+                                            <div style={{ background: '#059669', height: '100%', width: `${revW}%`, borderRadius: '6px', transition: 'width 0.3s' }} title={`${L('Doanh thu', 'Revenue')}: ${fmt(yrRev)}`}></div>
+                                        </div>
+                                        <div style={{ background: '#f1f5f9', borderRadius: '6px', height: '20px', overflow: 'hidden' }}>
+                                            <div style={{ background: '#dc2626', height: '100%', width: `${costW}%`, borderRadius: '6px', transition: 'width 0.3s' }} title={`${L('Chi phí', 'Costs')}: ${fmt(yrCost)}`}></div>
+                                        </div>
+                                        <span style={{ fontSize: '11px', fontWeight: 700, color: yrProfit >= 0 ? '#059669' : '#dc2626', textAlign: 'right' }}>
+                                            {yrProfit >= 0 ? '+' : ''}{fmt(yrProfit)}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '10px', fontSize: '11px', color: '#64748b' }}>
+                            <span><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#059669', borderRadius: '3px', marginRight: '4px', verticalAlign: 'middle' }}></span>{L('Doanh thu', 'Revenue')}</span>
+                            <span><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#dc2626', borderRadius: '3px', marginRight: '4px', verticalAlign: 'middle' }}></span>{L('Chi phí', 'Costs')}</span>
+                        </div>
+                    </SectionCard>
+                )}
+
+                {/* Initial Investment Summary */}
+                {totalInitInvest() > 0 && (
+                    <SectionCard title={L('Đầu tư ban đầu (Năm 0)', 'Initial Investment (Year 0)')} icon="fa-hourglass-start">
+                        <div style={{ background: '#fef3c7', borderRadius: '10px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <div style={{ fontSize: '11px', color: '#92400e', fontWeight: 600 }}>{L('Tổng đầu tư ban đầu', 'Total initial investment')}</div>
+                                <div style={{ fontSize: '11px', color: '#92400e', opacity: 0.7 }}>{L('(Năm 0 - Chi phí vườn ban đầu)', '(Year 0 - Initial farm establishment cost)')}</div>
+                            </div>
+                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#92400e' }}>{fmt(totalInitInvest())} VNĐ</div>
+                        </div>
+                    </SectionCard>
+                )}
+            </>
+        );
+    };
+
     // ── Render ────────────────────────────────────────────────────────────────
     const tabRenderers = {
         background: renderBackground,
@@ -849,6 +1014,7 @@ const ModelEconomics = ({ model, appLang = 'vi', canEdit = true }) => {
         coffee: renderCoffeeCosts,
         intercrop: renderIntercropCosts,
         revenue: renderRevenue,
+        profit: renderProfit,
     };
 
     return (
